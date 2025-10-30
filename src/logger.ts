@@ -12,14 +12,16 @@ const inNode =
 	typeof process !== 'undefined' &&
 	process?.versions != null &&
 	process?.versions?.node != null;
+
 const inMainBrowser =
 	typeof window !== 'undefined' && typeof window.document !== 'undefined';
 const inWebWorker =
 	typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope;
+
 const inBrowser = inMainBrowser || inWebWorker;
 
 const providedConsole = console;
-let activeConsole = providedConsole;
+const activeConsole = providedConsole;
 
 let utilInspect: typeof inspect;
 if (inNode) {

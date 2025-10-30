@@ -1,0 +1,31 @@
+{
+  "name": "@lalex/console",
+  "version": "1.0.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "repository": "github:lalexdotcom/console",
+  "scripts": {
+    "build": "rslib build",
+    "check": "biome check --write",
+    "dev": "rslib build --watch",
+    "format": "biome format --write"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.2.3",
+    "@microsoft/api-extractor": "^7.53.3",
+    "@rslib/core": "^0.16.1",
+    "@types/node": "^22.18.12",
+    "@typescript/native-preview": "7.0.0-dev.20251030.1",
+    "typescript": "^5.9.3"
+  },
+  "private": true
+}

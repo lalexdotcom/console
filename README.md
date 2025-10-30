@@ -1,2 +1,23 @@
-# console
-Universal console logger, with colors et other fun stuff
+# Rslib project
+
+## Setup
+
+Install the dependencies:
+
+```bash
+pnpm install
+```
+
+## Get started
+
+Build the library:
+
+```bash
+pnpm build
+```
+
+Build the library in watch mode:
+
+```bash
+pnpm dev
+```

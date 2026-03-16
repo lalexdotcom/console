@@ -13,11 +13,11 @@ pnpm install
 Build the library:
 
 ```bash
-pnpm build
+pnpm run build
 ```
 
 Build the library in watch mode:
 
 ```bash
-pnpm dev
+pnpm run dev
 ```

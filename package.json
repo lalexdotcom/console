@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.7",
-    "@rslib/core": "^0.19.6",
+    "@rslib/core": "^0.20.0",
     "@types/node": "^24.10.13",
     "typescript": "^5.9.3"
   },

@@ -1,35 +1,35 @@
 {
-  "name": "@lalex/console",
-  "version": "1.0.0-beta.1",
-  "type": "module",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    }
-  },
-  "types": "./dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "build": "rslib build",
-    "check": "biome check --write",
-    "dev": "rslib build --watch",
-    "format": "biome format --write",
-    "play:node": "LLOGER_FORCE_CONSOLE=true tsx src/play-node.dev.ts",
-    "play:tty": "tsx src/play-node.dev.ts",
-    "play:browser": "rsbuild dev --config rsbuild.config.ts"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "2.4.7",
-    "@rsbuild/core": "^1.7.3",
-    "@rsbuild/plugin-node-polyfill": "^1.4.4",
-    "@rslib/core": "^0.20.0",
-    "@types/node": "^24.10.13",
-    "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
-  },
-  "packageManager": "pnpm@10.28.2",
-  "private": false
+	"name": "@lalex/console",
+	"version": "2.0.0-beta.1",
+	"type": "module",
+	"exports": {
+		".": {
+			"types": "./dist/index.d.ts",
+			"import": "./dist/index.js"
+		}
+	},
+	"types": "./dist/index.d.ts",
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"build": "rslib build",
+		"check": "biome check --write",
+		"dev": "rslib build --watch",
+		"format": "biome format --write",
+		"play:node": "LLOGER_FORCE_CONSOLE=true tsx src/play-node.dev.ts",
+		"play:tty": "tsx src/play-node.dev.ts",
+		"play:browser": "rsbuild dev --config rsbuild.config.ts"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.4.7",
+		"@rsbuild/core": "^1.7.3",
+		"@rsbuild/plugin-node-polyfill": "^1.4.4",
+		"@rslib/core": "^0.20.0",
+		"@types/node": "^24.10.13",
+		"tsx": "^4.21.0",
+		"typescript": "^5.9.3"
+	},
+	"packageManager": "pnpm@10.11.0",
+	"private": false
 }

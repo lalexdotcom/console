@@ -26,7 +26,7 @@
 		"@rsbuild/core": "^1.7.3",
 		"@rsbuild/plugin-node-polyfill": "^1.4.4",
 		"@rslib/core": "^0.20.0",
-		"@types/node": "^24.10.13",
+		"@types/node": "^25.5.0",
 		"tsx": "^4.21.0",
 		"typescript": "^5.9.3"
 	},

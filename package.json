@@ -16,12 +16,18 @@
     "build": "rslib build",
     "check": "biome check --write",
     "dev": "rslib build --watch",
-    "format": "biome format --write"
+    "format": "biome format --write",
+    "play:node": "LLOGER_FORCE_CONSOLE=true tsx src/play-node.dev.ts",
+    "play:tty": "tsx src/play-node.dev.ts",
+    "play:browser": "rsbuild dev --config rsbuild.config.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.7",
+    "@rsbuild/core": "^1.7.3",
+    "@rsbuild/plugin-node-polyfill": "^1.4.4",
     "@rslib/core": "^0.20.0",
     "@types/node": "^24.10.13",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   },
   "packageManager": "pnpm@10.28.2",

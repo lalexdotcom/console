@@ -1,138 +1,87 @@
 import os, { EOL } from 'node:os';
 import process, { env } from 'node:process';
 import type { WriteStream } from 'node:tty';
+import { type InspectOptions, stripVTControlCharacters } from 'node:util';
+import { colorize } from '../utils/color';
 import {
-  type InspectOptions,
-  type inspect,
-  stripVTControlCharacters,
-} from 'node:util';
-import { colorize } from './color';
+  CONSOLE_SPINNER_INTERVAL,
+  DEFAULT_BROWSER_FAIL_STYLE,
+  DEFAULT_BROWSER_RUNNING_STYLE,
+  DEFAULT_BROWSER_SUCCESS_STYLE,
+  DEFAULT_CONSOLE_FAIL_ICON,
+  DEFAULT_CONSOLE_RUNNING_ICON,
+  DEFAULT_CONSOLE_SUCCESS_ICON,
+  DEFAULT_LOGGER_OPTIONS,
+  DEFAULT_TTY_FAIL_ICON,
+  DEFAULT_TTY_SPINNER,
+  DEFAULT_TTY_SUCCESS_ICON,
+  SPINNER_REFRESH_INTERVAL,
+  TTY_REFRESH_INTERVAL,
+} from './const';
+import { inBrowser, inNode, systemConsole, utilInspect } from './env';
+import {
+  css,
+  DEFAULT_BROWSER_STYLE,
+  DEFAULT_INSPECT_OPTIONS,
+  LEVEL_METHODS,
+  type LogLevelStyle,
+  LogLevels,
+} from './levels';
+import { getDatePrefix, getDurationPrefix, getPrefix } from './prefix';
+import type {
+  GenericLogger,
+  Logger as ILogger,
+  LoggerOptions,
+  LoggerSpinner,
+  LogLevel,
+  LogMethod,
+  LogParameters,
+  RootLogger,
+  ScopeLogger,
+  SpinnerOptions,
+} from './types';
 
-const inNode =
-  typeof process !== 'undefined' &&
-  process?.versions != null &&
-  process?.versions?.node != null;
-const inBrowser =
-  typeof window !== 'undefined' && typeof window.document !== 'undefined';
+export { LogLevels } from './levels';
+export type {
+  LoggerOptions,
+  LoggerSpinner,
+  LogLevel,
+  LogMethod,
+  RootLogger,
+  ScopeLogger,
+  SpinnerOptions,
+} from './types';
 
-const providedConsole = console;
-let activeConsole = providedConsole;
+/**
+ * The console currently used for output.
+ * Can be temporarily swapped via `RootLogger.bypass()` / `.restore()`.
+ */
+let activeConsole = systemConsole;
 
-let utilInspect: typeof inspect;
-if (inNode) {
-  try {
-    utilInspect = require(`${'util'}`)?.inspect;
-  } catch (e) {}
-}
-
-type LogParameters = Parameters<typeof console.log>;
-
-// export enum LogLevel {
-// 	EMERGENCY = 0,
-// 	ALERT = 1,
-// 	CRITICAL = 2,
-// 	ERROR = 3,
-// 	WARNING = 4,
-// 	NOTICE = 5,
-// 	INFO = 6,
-// 	VERBOSE = 7,
-// 	DEBUG = 8,
-// 	WHO_CARES = 9,
-// }
-
-type LogMethod = {
-  (...args: LogParameters): void;
-  spin: (
-    message: string,
-    options?: Omit<SpinnerOptions & { console?: true }, 'text'>,
-  ) => LoggerSpinner;
-};
-
-const LEVEL_METHODS = {
-  emerg: 0,
-  alert: 1,
-  crit: 2,
-  error: 3,
-  warn: 4,
-  notice: 5,
-  info: 6,
-  verb: 7,
-  debug: 8,
-  wth: 9,
-} as const;
-
-export type LogLevel = keyof typeof LEVEL_METHODS;
-export const LogLevels = Object.keys(LEVEL_METHODS) as LogLevel[];
-
-type GenericLogger = {
-  [key in keyof typeof LEVEL_METHODS]: LogMethod;
-} & {
-  log: (level: LogLevel, ...args: LogParameters) => void;
-  getPrefix(level: LogLevel): string[];
-};
-
-type LoggerOptions = {
-  enabled: boolean;
-  stack: boolean;
-  date: boolean;
-  duration: boolean;
-  level: LogLevel | undefined;
-  pad: boolean;
-  color: boolean;
-  uid: boolean;
-
-  inspect: InspectOptions;
-};
-
-const DEFAULT_INSPECT_OPTIONS: InspectOptions = {
-  depth: 5,
-  colors: true,
-};
-
-export interface Logger extends GenericLogger, LoggerOptions {
-  exclusive: boolean;
-
-  once(key?: string): GenericLogger;
-  limit(count: number, key?: string): GenericLogger;
-  limit(key: string): GenericLogger;
-}
-
-export interface RootLogger extends Logger {
-  scope(scopeName: string, options?: Partial<LoggerOptions>): ScopeLogger;
-
-  patch(): void;
-  unpatch(): void;
-}
-
-export interface ScopeLogger extends Logger {
-  readonly scope: string;
-}
-
+/**
+ * Singleton container stored on `globalThis` under a fixed key so that the
+ * same registry is shared even when multiple copies of this module are loaded
+ * (e.g. duplicate packages in node_modules, CJS + ESM dual-load, etc.).
+ */
 type LoggerRegistry = {
   root: RootLoggerInstance;
   scopes: { [key: string]: ScopeLoggerInstance | undefined };
-  exclusive?: Logger;
+  /** The logger that currently holds the exclusive lock, if any. */
+  exclusive?: ILogger;
 };
 
-const DEFAULT_LOGGER_OPTIONS: LoggerOptions = {
-  enabled: true,
-  level: undefined,
-
-  stack: false,
-  date: false,
-  duration: false,
-  pad: inNode && !!process.stdout?.isTTY,
-  color: true,
-
-  uid: false,
-
-  inspect: DEFAULT_INSPECT_OPTIONS,
-};
-
-abstract class LoggerBase implements Logger {
+abstract class LoggerBase implements ILogger {
   options: LoggerOptions;
   lastLog?: number;
 
+  /**
+   * Builds the `LogMethod` for a given level.
+   * The returned function is both directly callable and carries a `.spin()`
+   * factory.  Spinner selection priority:
+   *   1. TTYSpinner  — when stdout is a real TTY and `console` option is not true.
+   *   2. NodeConsoleSpinner — Node, non-TTY (e.g. CI pipe).
+   *   3. BrowserConsoleSpinner — browser context.
+   */
   private static createLogMethod = (
     logger: LoggerBase,
     level: LogLevel,
@@ -170,8 +119,15 @@ abstract class LoggerBase implements Logger {
     return logFunction;
   };
 
+  /** Per-call-site limit proxies, keyed by the stack-derived call identifier. */
   #limits: { [key: string]: GenericLogger } = {};
 
+  /**
+   * Returns a Proxy that transparently forwards all logger calls but silently
+   * drops log-level methods once `count` calls have been made through it.
+   * NOTE: `proxyCount` is shared across all levels — every call to any level
+   * method increments the same counter.
+   */
   #limitedProxy(count: number): GenericLogger {
     let proxyCount = 0;
     return new Proxy(this, {
@@ -197,7 +153,9 @@ abstract class LoggerBase implements Logger {
   constructor(options: Partial<LoggerOptions> = {}) {
     this.options = { ...DEFAULT_LOGGER_OPTIONS, ...options };
     for (const [method, level] of Object.entries(LEVEL_METHODS)) {
-      // ! Bad LAlex ! You should never do that
+      // Dynamically assigns `this.info`, `this.warn`, etc. at construction time.
+      // TypeScript does not see this as satisfying the readonly declarations
+      // above, hence the cast.  A cleaner alternative would be a getter per level.
       this[method as LogLevel] = LoggerBase.createLogMethod(
         this,
         method as LogLevel,
@@ -214,18 +172,21 @@ abstract class LoggerBase implements Logger {
   limit(countOrKey: number | string, key?: string): GenericLogger {
     let callKey = key;
     if (typeof countOrKey === 'string') {
+      // String-only overload: retrieves an already-created limit proxy by key.
+      // ⚠️  Throws with an incomplete message if the key was never registered.
       if (!this.#limits[countOrKey]) {
         throw new Error('Limit ');
       }
       return this.#limits[countOrKey];
     }
+    // Derive a stable key from the call-site stack frame when none is provided.
     callKey ??= getCallerLimitKey();
     if (callKey === undefined) {
       throw new Error('Invalid key', callKey);
     }
-    // biome-ignore lint/suspicious/noAssignInExpressions: <explanation>
+    // Create the proxy lazily and cache it under the call-site key.
+    // biome-ignore lint/suspicious/noAssignInExpressions: intentional lazy-init idiom
     return (this.#limits[callKey] ??= this.#limitedProxy(countOrKey));
-    // throw new Error("Method not implemented.");
   }
 
   protected logAtLevel(level: LogLevel, ...args: LogParameters) {
@@ -233,9 +194,9 @@ abstract class LoggerBase implements Logger {
   }
 
   getPrefix(level: LogLevel) {
-    return inNode
-      ? [getNodePrefix(level, this)]
-      : getBrowserPrefix(level, this);
+    const options = computeOptions(this);
+    const scope = this instanceof ScopeLoggerInstance ? this.scope : undefined;
+    return getPrefix(level, options, scope);
   }
 
   log(level: LogLevel, ...args: LogParameters): void {
@@ -335,6 +296,13 @@ abstract class LoggerBase implements Logger {
 }
 
 class RootLoggerInstance extends LoggerBase implements RootLogger {
+  /**
+   * Snapshot of the original console methods taken at module load time.
+   * Used by `unpatch()` to restore the global console.
+   * ⚠️  `console.log` is captured here but is NOT in the patch() override map,
+   * so unpatch() restores it via the loop even though patch() only assigns
+   * console.log through the chained assignment (`console.log = console.info = …`).
+   */
   private static __originalMethods: Partial<
     Record<keyof typeof console, typeof console.log>
   > = {
@@ -345,8 +313,9 @@ class RootLoggerInstance extends LoggerBase implements RootLogger {
     warn: console.warn,
   };
 
-  private static __originalConsole: Console = providedConsole;
+  private static __originalConsole: Console = systemConsole;
 
+  /** Lazily creates and caches a `ScopeLoggerInstance` for `scopeName`. */
   scope(scopeName: string, options: Partial<LoggerOptions> = {}): ScopeLogger {
     let scopeLogger = registry.scopes[scopeName];
     scopeLogger ??= registry.scopes[scopeName] = new ScopeLoggerInstance(
@@ -357,14 +326,22 @@ class RootLoggerInstance extends LoggerBase implements RootLogger {
     return scopeLogger;
   }
 
+  /** Temporarily redirects output to an alternative console (e.g. for testing). */
   bypass(console: Console) {
     activeConsole = console;
   }
 
+  /** Reverts `bypass()` — restores the console captured at module load time. */
   restore() {
-    activeConsole = providedConsole;
+    activeConsole = systemConsole;
   }
 
+  /**
+   * Monkey-patches the global `console` to route through this logger.
+   * ⚠️  The chained assignment `console.log = console.info = …` is valid JS
+   * (both are set to the same bound function) but reads confusingly — the
+   * second `console.info = …` line is then redundant.
+   */
   patch() {
     console.log = console.info = this.info.bind(this);
     console.info = this.info.bind(this);
@@ -376,11 +353,10 @@ class RootLoggerInstance extends LoggerBase implements RootLogger {
   unpatch() {
     for (const k of Object.keys(RootLoggerInstance.__originalMethods)) {
       const method = k as keyof typeof console;
-      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      // biome-ignore lint/suspicious/noExplicitAny: console methods share the same shape but TS types diverge
       if (method)
         console[method] = RootLoggerInstance.__originalMethods[method] as any;
     }
-    // Object.keys(RootLoggerInstance.__originalMethods).forEach((k) => {});
   }
 }
 
@@ -399,139 +375,57 @@ class ScopeLoggerInstance extends LoggerBase implements ScopeLogger {
   }
 }
 
-type LogLevelStyle = {
-  'background-color'?: string;
-  color?: string;
-};
-
-const DEFAULT_BROWSER_STYLE = {
-  padding: '2px 4px',
-  'border-radius': '2px',
-};
-
-type LogLevelParam = {
-  label: string;
-  paddedLabel?: string;
-  methods: (typeof console.log)[];
-  style?: Partial<LogLevelStyle>;
-  css?: string;
-};
-
-const DEFAULT_LEVEL_STYLE: LogLevelStyle = {
-  'background-color': 'grey',
-  color: 'white',
-};
-
-const LEVEL_PARAMS: { [key in LogLevel]: LogLevelParam } = {
-  emerg: {
-    label: 'EMERGENCY',
-    methods: [
-      (...params) => activeConsole.error(...params),
-      (...params) => activeConsole.trace(...params),
-    ],
-    style: {
-      'background-color': 'red',
+const LEVEL_PARAMS: { [key in LogLevel]: { methods: (typeof console.log)[] } } =
+  {
+    emerg: {
+      methods: [
+        (...params) => activeConsole.error(...params),
+        (...params) => activeConsole.trace(...params),
+      ],
     },
-  },
-  alert: {
-    label: 'ALERT',
-    methods: [
-      (...params) => activeConsole.error(...params),
-      (...params) => activeConsole.trace(...params),
-    ],
-    style: {
-      'background-color': 'red',
+    alert: {
+      methods: [
+        (...params) => activeConsole.error(...params),
+        (...params) => activeConsole.trace(...params),
+      ],
     },
-  },
-  crit: {
-    label: 'CRITICAL',
-    methods: [
-      (...params) => activeConsole.error(...params),
-      (...params) => activeConsole.trace(...params),
-    ],
-    style: {
-      'background-color': 'red',
+    crit: {
+      methods: [
+        (...params) => activeConsole.error(...params),
+        (...params) => activeConsole.trace(...params),
+      ],
     },
-  },
-  error: {
-    label: 'ERROR',
-    methods: [(...params) => activeConsole.error(...params)],
-    style: {
-      'background-color': 'red',
+    error: {
+      methods: [(...params) => activeConsole.error(...params)],
     },
-  },
-  warn: {
-    label: 'WARNING',
-    methods: [(...params) => activeConsole.warn(...params)],
-    style: {
-      color: 'white',
-      'background-color': 'orange',
+    warn: {
+      methods: [(...params) => activeConsole.warn(...params)],
     },
-  },
-  notice: {
-    label: 'NOTICE',
-    methods: [(...params) => activeConsole.info(...params)],
-    style: {
-      'background-color': 'blue',
+    notice: {
+      methods: [(...params) => activeConsole.info(...params)],
     },
-  },
-  info: {
-    label: 'INFO',
-    methods: [(...params) => activeConsole.info(...params)],
-  },
-  verb: {
-    label: 'VERBOSE',
-    methods: [(...params) => activeConsole.debug(...params)],
-    style: {
-      'background-color': 'green',
+    info: {
+      methods: [(...params) => activeConsole.info(...params)],
     },
-  },
-  debug: {
-    label: 'DEBUG',
-    methods: [(...params) => activeConsole.debug(...params)],
-    style: {
-      'background-color': 'yellow',
-      color: 'black',
+    verb: {
+      methods: [(...params) => activeConsole.debug(...params)],
     },
-  },
-  wth: {
-    label: 'WHO CARES?',
-    methods: [(...params) => activeConsole.debug(...params)],
-    style: {
-      'background-color': 'lightgray',
-      color: 'black',
+    debug: {
+      methods: [(...params) => activeConsole.debug(...params)],
     },
-  },
-};
-
-if (inNode) {
-  const padSize = Math.max(
-    ...Object.values(LEVEL_PARAMS).map((info) => info.label.length),
-  );
-  for (const lvl of Object.values(LEVEL_PARAMS)) {
-    lvl.paddedLabel = lvl.label
-      .padEnd(lvl.label.length + (padSize - lvl.label.length) / 2, ' ')
-      .padStart(padSize, ' ');
-  }
-}
-for (const lvl of Object.values(LEVEL_PARAMS)) {
-  lvl.style = { ...DEFAULT_LEVEL_STYLE, ...lvl.style };
-  if (inBrowser) {
-    lvl.css = css(lvl.style);
-  }
-}
-
-function css(style: Partial<LogLevelStyle>) {
-  const cssObject: Record<string, unknown> = {
-    ...DEFAULT_BROWSER_STYLE,
-    ...style,
+    wth: {
+      methods: [(...params) => activeConsole.debug(...params)],
+    },
   };
 
-  return Object.entries(cssObject)
-    .map(([key, value]) => `${key}: ${value}`)
-    .join(';');
-}
-
+/**
+ * Merges a scope logger's own options with the root logger's options.
+ * Rules per option:
+ *  - `level`    → the stricter (lower numeric value) of root vs scope wins.
+ *  - boolean flags (`date`, `duration`, `pad`, `stack`) → root OR scope (root enables globally).
+ *  - `color`    → root AND scope (root can disable globally).
+ *  - `inspect`  → shallow-merge, scope overrides root.
+ */
 const computeOptions = (logger: LoggerBase) => {
   const computed = { ...logger.options };
   const root = registry.root;
@@ -564,37 +458,17 @@ const computeOptions = (logger: LoggerBase) => {
   return computed;
 };
 
-const getNodePrefix = (logLevel: LogLevel, logger: LoggerBase) => {
-  const { pad, color } = computeOptions(logger);
-  const levelParams = LEVEL_PARAMS[logLevel];
-  let levelPrefix = (pad && levelParams.paddedLabel) || levelParams.label;
-  const scope =
-    logger instanceof ScopeLoggerInstance ? logger.scope : undefined;
-  if (scope) levelPrefix += ` <${scope}>`;
-  if (inNode) {
-    if (color) {
-      return colorize(` ${levelPrefix} `, levelParams.style);
-    }
-    return `[${levelPrefix}]`;
-  }
-  return '';
-};
-
-const getBrowserPrefix = (logLevel: LogLevel, logger: LoggerBase) => {
-  const { color, pad } = computeOptions(logger);
-  const levelParams = LEVEL_PARAMS[logLevel];
-  let levelPrefix = (pad && levelParams.paddedLabel) || levelParams.label;
-  const scope =
-    logger instanceof ScopeLoggerInstance ? logger.scope : undefined;
-  if (scope) levelPrefix += ` <${scope}>`;
-  return color && levelParams.css
-    ? [`%c${levelPrefix}`, levelParams.css]
-    : [`[${levelPrefix}]`];
-};
-
 let CURRENT_UID = 0;
 const UID_MAP = new Map<unknown, typeof CURRENT_UID>();
 
+/**
+ * Core output function called by every log method and spinner display.
+ * Applies all enabled prefixes (level, date, duration, stack) then dispatches
+ * to the appropriate `console.*` method(s) defined for the level.
+ *
+ * When a TTY refresh loop is active (spinner running), output is buffered
+ * instead of being written directly so the in-place redraw stays consistent.
+ */
 const outputLog = (
   logLevel: LogLevel,
   args: LogParameters,
@@ -602,9 +476,10 @@ const outputLog = (
   override?: { prefix?: string | string[] },
 ) => {
   try {
-    // const scope = logger instanceof ScopeLoggerInstance ? logger.scope : undefined;
+    // Three distinct kill-switches: per-logger, global root, or environment variable.
     if (!logger.enabled || !root.enabled || env.LLOGGER_ENABLED === 'false')
       return;
+    // Exclusive mode: suppress every logger except the one holding the lock.
     if (registry.exclusive && registry.exclusive !== logger) return;
 
     const {
@@ -624,9 +499,7 @@ const outputLog = (
       ? Array.isArray(override?.prefix)
         ? override.prefix
         : [override.prefix]
-      : inNode
-        ? [getNodePrefix(logLevel, logger)]
-        : getBrowserPrefix(logLevel, logger);
+      : logger.getPrefix(logLevel);
 
     if (time || date) {
       if (time) logger.lastLog ??= new Date().valueOf();
@@ -655,11 +528,12 @@ const outputLog = (
 
     let callArgs = args;
     if (inNode && utilInspect) {
+      const _inspect = utilInspect;
       try {
         callArgs = args.map((a) =>
           typeof a === 'string'
             ? a
-            : utilInspect(a, inspect ?? DEFAULT_INSPECT_OPTIONS),
+            : _inspect(a, inspect ?? DEFAULT_INSPECT_OPTIONS),
         );
       } catch (e) {}
     }
@@ -691,23 +565,18 @@ const outputLog = (
   }
 };
 
-function getDatePrefix(date: Date) {
-  return `[${date.getFullYear()}-${`${date.getMonth() + 1}`.padStart(2, '0')}-${`${date.getDate()}`.padStart(2, '0')} ${`${date.getHours()}`.padStart(2, '0')}:${`${date.getMinutes()}`.padStart(2, '0')}:${`${date.getSeconds()}`.padStart(2, '0')}.${`${(date.getMilliseconds() / 1000).toFixed(3).slice(2, 5)}`.padStart(2, '0')}]`;
-}
-
-function getDurationPrefix(durationMs: number): string;
-function getDurationPrefix(since: Date, to?: Date): string;
-function getDurationPrefix(sinceOrDurationMs: Date | number, to?: Date) {
-  const duration =
-    typeof sinceOrDurationMs === 'number'
-      ? sinceOrDurationMs
-      : (to ?? new Date()).valueOf() - sinceOrDurationMs.valueOf();
-  return `[+${(duration / 1000).toFixed(3)}s]`;
-}
-
-('            ');
-
+/**
+ * Returns a unique string identifying the call site of the `limit()` / `once()`
+ * invocation. The magic number `4` is the stack depth from `getCallerStack` to
+ * the user's call frame — fragile if the call chain changes or bundlers inline.
+ */
 const getCallerLimitKey = () => getCallerStack(4);
+/**
+ * Parses the call-site info (file, line, column, function name) from the
+ * stack frame of the user's `logger.xxx()` call.
+ * Stack depth 6 accounts for: Error → getCallerStack → getLogCallerInfo →
+ * outputLog → logAtLevel → logFunction → user code.
+ */
 const getLogCallerInfo = ():
   | {
       functionName?: string;
@@ -739,6 +608,11 @@ const getCallerStack = (level: number): string | undefined => {
   return stack.slice(level)[0];
 };
 
+/**
+ * IIFE that initialises (or retrieves) the shared registry from `globalThis`.
+ * Storing it on `globalThis` ensures a single root logger even if this module
+ * is evaluated multiple times (CJS + ESM interop, duplicate installs, etc.).
+ */
 const registry = (() => {
   if (typeof globalThis === 'undefined') throw new Error('No globalThis found');
   const anyGlobal = globalThis as Record<string, unknown>;
@@ -759,29 +633,6 @@ export const Logger: RootLogger = root;
 export const L = Logger;
 
 // Spinner
-
-export interface LoggerSpinner {
-  start(): void;
-  update(text: string): void;
-  success(text?: string): void;
-  fail(text?: string): void;
-  stop(): void;
-}
-
-type SpinnerOptions = {
-  text: string;
-  prefix?: string;
-  runningIcon?: string;
-  successIcon?: string;
-  failIcon?: string;
-  date?: boolean;
-  duration?: boolean;
-};
-
-const CONSOLE_SPINNER_TIMEOUT = 10_000;
-const DEFAULT_CONSOLE_RUNNING_ICON = '-';
-const DEFAULT_CONSOLE_FAIL_ICON = '✖';
-const DEFAULT_CONSOLE_SUCCESS_ICON = '✔';
 
 abstract class AbstractConsoleSpinner<
   OptionsType extends SpinnerOptions = SpinnerOptions,
@@ -848,6 +699,16 @@ abstract class AbstractConsoleSpinner<
     this.tick();
   }
 
+  /**
+   * Always calls `display()` immediately, then schedules the next tick when
+   * the spinner is still running.
+   *
+   * ⚠️  Bug: `clearTimeout(this.nextTimeout)` is called AFTER the reference has
+   * been set to `undefined`, making it a no-op (`clearTimeout(undefined)`).
+   * The intent was probably to clear any leftover timeout before recursing, but
+   * since `this.nextTimeout` is already `undefined` at that point it has no
+   * effect.  The line should be removed.
+   */
   tick() {
     this.display();
     if (this.started && !this.stopped) {
@@ -855,9 +716,9 @@ abstract class AbstractConsoleSpinner<
         this.nextTimeout = setTimeout(() => {
           this.iteration++;
           this.nextTimeout = undefined;
-          clearTimeout(this.nextTimeout);
+          clearTimeout(this.nextTimeout); // ⚠️ no-op — see JSDoc above
           this.tick();
-        }, CONSOLE_SPINNER_TIMEOUT);
+        }, CONSOLE_SPINNER_INTERVAL);
       }
     }
   }
@@ -913,24 +774,19 @@ type BrowserConsoleSpinnerOptions = SpinnerOptions & {
   runningStyle?: string;
 };
 
-const DEFAULT_BROWSER_RUNNING_STYLE = {
-  'background-color': 'grey',
-  color: 'white',
-};
-const DEFAULT_BROWSER_FAIL_STYLE = {
-  'background-color': 'red',
-  color: 'white',
-};
-const DEFAULT_BROWSER_SUCCESS_STYLE = {
-  'background-color': 'green',
-  color: 'white',
-};
 class BrowserConsoleSpinner
   extends AbstractConsoleSpinner<BrowserConsoleSpinnerOptions>
   implements LoggerSpinner
 {
   private style: string;
 
+  /**
+   * ⚠️  Bug: `Object.keys()` returns `string[]`, so the destructured `[k, v]`
+   * pattern treats each key character as `k` and leaves `v` undefined.
+   * This should use `Object.entries()` instead.
+   * This method is also never called (the module-level `css()` function is used
+   * everywhere), making it dead code.
+   */
   static styleToCss = (style: object) => {
     return Object.keys({ ...DEFAULT_BROWSER_STYLE, ...style })
       .map(([k, v]) => `${k}: ${v}`)
@@ -975,13 +831,6 @@ class BrowserConsoleSpinner
     });
   }
 }
-
-const DEFAULT_TTY_SPINNER = '⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
-  .split('')
-  .map((s) => colorize(s, { color: 'cyan' }) ?? s)
-  .join('||');
-const DEFAULT_TTY_SUCCESS_ICON = colorize('✔', { color: 'green' }) ?? '✔';
-const DEFAULT_TTY_FAIL_ICON = colorize('✖', { color: 'red' }) ?? '✖';
 
 type TTYSpinnerOptions = SpinnerOptions;
 
@@ -1104,11 +953,22 @@ class TTYSpinner implements LoggerSpinner {
   }
 }
 
+/** All TTYSpinners currently in the `started` (not yet `stopped`) state. */
 const runningSpinners: Set<LoggerSpinner> = new Set();
+/**
+ * Controls the spinner animation tick (advances each spinner's frame index).
+ * Also drives TTY refresh indirectly — see `startRefresh()`.
+ */
 let spinnersRefreshInterval: ReturnType<typeof setInterval> | undefined =
   undefined;
+/**
+ * Secondary interval that triggers a TTY repaint independently of the spinner
+ * tick. Both intervals share the same period, making this effectively redundant.
+ * ⚠️  Could be consolidated into a single interval.
+ */
 let ttyRefreshInterval: ReturnType<typeof setInterval> | undefined = undefined;
 
+/** Cached reference to `process.stdout` for TTY operations. */
 const stdOut: WriteStream = process?.stdout;
 // const originalStdout = stdOut.write.bind(stdOut);
 
@@ -1148,9 +1008,15 @@ function addContentToBuffer(str: string) {
   newBuffered.push(tabbed);
 }
 
-const SPINNER_REFRESH_INTERVAL = 80;
-const TTY_REFRESH_INTERVAL = SPINNER_REFRESH_INTERVAL;
-
+/**
+ * Starts the TTY refresh loop:
+ *   1. Hides the cursor (`\u001B[?25l`) to avoid flicker.
+ *   2. Listens for terminal resize events.
+ *   3. Starts the spinner animation interval.
+ *   4. Starts a secondary repaint interval (currently same period — see note on
+ *      `ttyRefreshInterval`).
+ * No-op if already refreshing or stdout is not a TTY.
+ */
 function startRefresh() {
   if (!isRefreshing() && stdOut?.isTTY) {
     stdOut.write('\u001B[?25l');
@@ -1174,8 +1040,13 @@ function handleTerminalResize() {
   refreshTTY();
 }
 
+/**
+ * Erases the currently displayed spinner lines from the terminal.
+ * Moves the cursor up line-by-line and clears to end of line.
+ * `currentBufferHeight` tracks how many lines were written so we know
+ * how far to scroll back.
+ */
 function clearTTY() {
-  // Clear displayed buffer
   stdOut.cursorTo(0);
 
   for (let index = 0; index < currentBufferHeight; index++) {

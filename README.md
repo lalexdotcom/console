@@ -1,11 +1,13 @@
 # @lalex/console
 
+Because `console.log` deserves better than a lifetime of being ignored in production.
+
 An isomorphic TypeScript logger for Node.js and the browser.
 
-- **11 syslog-style severity levels** with configurable filtering
-- **Environment-aware rendering** — ANSI color in TTY, structured `json`/`logfmt` in CI/pipes, CSS-styled groups in browser devtools
-- **Animated spinners** — in-place rewrite on TTY, sequential ticks in console/browser, multiple concurrent spinners
-- **Progress bars** — ratio (`0–1`) or `done/total` pair, rendered inline in TTY spinners
+- 🎚️ **11 syslog-style severity levels** with configurable filtering
+- 🌍 **Environment-aware rendering** — ANSI color in TTY, structured `json`/`logfmt` in CI/pipes, CSS-styled groups in browser devtools
+- 🌀 **Animated spinners** — in-place rewrite on TTY, sequential ticks in console/browser, multiple concurrent spinners
+- 📊 **Progress bars** — ratio (`0–1`) or `done/total` pair, rendered inline in TTY spinners
 - **Scoped loggers** — inherit and override options per subsystem
 - **Rate limiting** — `.once()` / `.limit(n)` per call-site
 - **One-shot overrides** — `.options({})` for a single log call
@@ -188,19 +190,6 @@ L.unpatch() // restore originals
 ---
 
 ## Utilities
-
-### `exec`
-
-High-level async helper with an automatic spinner:
-
-```ts
-import { exec } from '@lalex/console'
-
-const data = await exec(
-  () => fetchSomething(),
-  'Fetching something',
-)
-```
 
 ### `colorize`
 

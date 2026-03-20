@@ -31,7 +31,7 @@
 		"play:tty:worker": "tsx --watch src/play-node.dev.ts --mode worker",
 		"play:browser": "rsbuild dev --config rsbuild.config.ts",
 		"play:browser:worker": "PLAY_MODE=worker rsbuild dev --config rsbuild.config.ts",
-		"version": "npx @lalex/version"
+		"version": "npx upversion@latest"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.4.7",

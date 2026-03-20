@@ -43,5 +43,10 @@
 		"typescript": "^5.9.3"
 	},
 	"packageManager": "pnpm@10.11.0",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/lalexdotcom/console"
+	},
+	"homepage": "https://github.com/lalexdotcom/console#readme",
 	"private": false
 }

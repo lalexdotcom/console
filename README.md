@@ -123,28 +123,7 @@ WL.warn('Low memory')
 
 `WL` has the exact same API as `L`: all 11 log levels, scopes, spinners, rate limiting, and option setters.
 
-### Options
-
-```ts
-WL.enabled = false     // silence all output
-WL.level   = 'info'   // filter threshold
-WL.color   = false    // disable ANSI / CSS colors
-WL.date    = true     // prepend timestamp
-WL.stack   = true     // append call-site (captured in the main process)
-WL.format  = 'json'   // non-TTY Node format
-```
-
-Setting `WL.stack = true` captures the call-site in the **main process** before the message is sent to the worker, so the displayed file and line number are always correct.
-
-### Scopes and spinners
-
-```ts
-const db = WL.scope('db')
-db.info('Connected')
-
-const spinner = WL.info.spin('Loading…')
-spinner.success('Done!')
-```
+One notable difference: `WL.stack = true` captures the call-site in the **main process** before the message is sent to the worker, so the displayed file and line number are always correct.
 
 ### Coexistence with `L` in Node TTY
 

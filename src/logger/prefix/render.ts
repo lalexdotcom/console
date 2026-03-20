@@ -39,7 +39,7 @@ export function renderBrowserPrefix(items: Prefix[], color: boolean): string[] {
     } else if (item.type === 'level') {
       const text = item.scope ? `${item.label} <${item.scope}>` : item.label;
       if (color && item.css) {
-        format += `${sep}%c[${text}]%c`;
+        format += `${sep}%c${text}%c`;
         cssArgs.push(item.css, '');
       } else {
         format += `${sep}[${text}]`;
@@ -52,9 +52,11 @@ export function renderBrowserPrefix(items: Prefix[], color: boolean): string[] {
         format += `${sep}[ ${item.text} ]`;
       }
     } else if (item.type === 'date') {
-      format += `${sep}${getDatePrefix(new Date())}`;
+      format += `${sep}${getDatePrefix(new Date(item.ts ?? Date.now()))}`;
     } else if (item.type === 'caller') {
-      format += `${sep}(${item.value})`;
+      // structuredOnly items are reserved for JSON/logfmt serialisation —
+      // they would be redundant in pretty mode where a full stack trace follows.
+      if (!item.structuredOnly) format += `${sep}(${item.value})`;
     }
   }
 
@@ -90,8 +92,10 @@ export function renderTTYPrefix(items: Prefix[], color: boolean): string {
             : item.text;
         return `[ ${text} ]`;
       }
-      if (item.type === 'date') return getDatePrefix(new Date());
-      if (item.type === 'caller') return `(${item.value})`;
+      if (item.type === 'date') return getDatePrefix(new Date(item.ts ?? Date.now()));
+      // structuredOnly items are reserved for JSON/logfmt serialisation —
+      // they would be redundant in pretty mode where a full stack trace follows.
+      if (item.type === 'caller') return item.structuredOnly ? null : `(${item.value})`;
       return null;
     })
     .filter((s): s is string => s !== null)
@@ -113,8 +117,10 @@ export function renderConsolePrefix(items: Prefix[]): string {
       }
       if (item.type === 'text') return item.badge ? `[${item.text}]` : item.text;
       if (item.type === 'icon') return `[ ${item.text} ]`;
-      if (item.type === 'date') return getDatePrefix(new Date());
-      if (item.type === 'caller') return `(${item.value})`;
+      if (item.type === 'date') return getDatePrefix(new Date(item.ts ?? Date.now()));
+      // structuredOnly items are reserved for JSON/logfmt serialisation —
+      // they would be redundant in pretty mode where a full stack trace follows.
+      if (item.type === 'caller') return item.structuredOnly ? null : `(${item.value})`;
       return null;
     })
     .filter((s): s is string => s !== null)

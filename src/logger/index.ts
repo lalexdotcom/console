@@ -1,7 +1,8 @@
+import { LEVEL_METHODS as LEVEL_SEVERITY, LogLevels, TRACE_LEVELS } from '../levels';
+import { env, isNode, isNodeTTY, utilInspect } from '../utils/env';
+import { getCallerStackTrace, getLogCallerInfo } from '../utils/stack';
 import { DEFAULT_LOGGER_OPTIONS } from './const';
 import type { DispatchFn } from './dispatch';
-import { env, isNode, isNodeTTY, systemConsole, utilInspect } from './env';
-import { LEVEL_METHODS, LogLevels } from './levels';
 import { createLimitMixin } from './mixins/limit';
 import { createOverrideMixin } from './mixins/override';
 import { createSpinnerMixin } from './mixins/spinner';
@@ -10,7 +11,6 @@ import type { Prefix } from './prefix';
 import { getPrefix } from './prefix';
 import { renderBrowserPrefix, renderConsolePrefix, renderTTYPrefix } from './prefix/render';
 import { serializeJSON, serializeLogfmt } from './prefix/serialize';
-import { getLogCallerInfo } from './stack';
 import type {
   LoggerOptions,
   LoggerState,
@@ -21,18 +21,7 @@ import type {
   ScopeLogger,
 } from './types';
 
-export { LogLevels } from './levels';
-export type {
-  ExecOptions,
-  LimitedLogger,
-  LoggerOptions,
-  LoggerSpinner,
-  LogLevel,
-  LogMethod,
-  RootLogger,
-  ScopeLogger,
-  SpinnerOptions,
-} from './types';
+export { LogLevels } from '../levels';
 
 // ── Registry ──────────────────────────────────────────────────────────────────
 
@@ -68,6 +57,9 @@ const registry = (() => {
 
 // ── Active console (bypass / restore) ─────────────────────────────────────────
 
+/** The real console captured at module load time — used by restore() and unpatch(). */
+const systemConsole = console;
+
 let activeConsole = systemConsole;
 
 // ── Original console methods (patch / unpatch) ────────────────────────────────
@@ -88,20 +80,20 @@ const UID_MAP = new Map<unknown, number>();
 // ── Level dispatch ────────────────────────────────────────────────────────────
 
 type ConsoleFn = typeof console.log;
-const LEVEL_PARAMS: {
-  [key in LogLevel]: { method: ConsoleFn; trace?: ConsoleFn };
+const LEVEL_METHODS: {
+  [key in LogLevel]: ConsoleFn;
 } = {
-  emerg: { method: console.error, trace: console.trace },
-  alert: { method: console.error, trace: console.trace },
-  crit: { method: console.error, trace: console.trace },
-  error: { method: console.error },
-  warn: { method: console.warn },
-  notice: { method: console.info },
-  success: { method: console.info },
-  info: { method: console.info },
-  verb: { method: console.debug },
-  debug: { method: console.debug },
-  wth: { method: console.debug },
+  emerg: console.error,
+  alert: console.error,
+  crit: console.error,
+  error: console.error,
+  warn: console.warn,
+  notice: console.info,
+  success: console.info,
+  info: console.info,
+  verb: console.debug,
+  debug: console.debug,
+  wth: console.debug,
 };
 
 // ── computeOptions ────────────────────────────────────────────────────────────
@@ -136,7 +128,7 @@ const computeOptions = (...layers: Partial<LoggerOptions>[]): LoggerOptions => {
     .map((l) => l.level)
     .filter((v): v is LogLevel => v !== undefined);
   computed.level = levelCandidates.reduce((a, b) =>
-    LEVEL_METHODS[a] <= LEVEL_METHODS[b] ? a : b,
+    LEVEL_SEVERITY[a] <= LEVEL_SEVERITY[b] ? a : b,
   );
 
   // Inspect: merge from right to left so the leftmost layer wins on key conflicts.
@@ -158,6 +150,28 @@ type EmitOptions = {
   stackOffset?: number | null;
   /** Extra prefix items injected by spinners (icon badge, progress bar, …). */
   extraPrefixItems?: Prefix[];
+  /**
+   * Pre-formatted call-site string captured in the main process (worker proxy path).
+   * When defined, bypasses worker-side stack introspection entirely:
+   * - non-empty string → used as-is.
+   * - empty string     → no caller prefix emitted.
+   * When undefined, falls back to the normal `stack` flag + getLogCallerInfo().
+   */
+  callerOverride?: string;
+  /**
+   * When true, the CallerPrefix built from `callerOverride` is flagged as
+   * structuredOnly so pretty renderers skip it. Used for TRACE_LEVELS without
+   * stack=true from the worker proxy: JSON/logfmt should record the call-site,
+   * but the pretty output already shows a full stack trace below the line.
+   */
+  callerStructuredOnly?: boolean;
+  /**
+   * Call-site string for trace-level display only (browser worker path).
+   * Never added to the prefix — displayed as a separate line after the log.
+   */
+  traceCallerOverride?: string;
+  /** Unix timestamp (ms) pre-captured in the main process. Forwarded to DatePrefix. */
+  ts?: number;
   /** TTY spinner signal: handled before regular line output. */
   ttySpinner?:
     | { action: 'register'; id: symbol; frames: string[]; color?: string; progress?: boolean }
@@ -170,8 +184,17 @@ type PreparedLog = {
   prefix: Prefix[];
   color: boolean;
   callArgs: LogParameters;
-  trace: ConsoleFn | undefined;
+  /** Whether to emit a stack trace after the log line. */
+  trace: boolean;
+  /** Whether this level normally carries a trace (for fallback display). */
+  hasTrace: boolean;
   method: ConsoleFn;
+  /**
+   * Browser worker path only: the caller string captured in the main process,
+   * to emit as a separate line for levels that normally carry a trace.
+   * Undefined in all other contexts.
+   */
+  traceCaller?: string;
 };
 
 /**
@@ -192,7 +215,7 @@ function prepareLog(
   )
     return null;
   if (registry.exclusive && registry.exclusive !== self) return null;
-  if (!LEVEL_PARAMS[logLevel]) return null;
+  if (!LEVEL_METHODS[logLevel]) return null;
 
   const resolved = options?.options
     ? computeOptions(options.options, state.options)
@@ -200,7 +223,7 @@ function prepareLog(
   const { date, level, stack, inspect, uid } = resolved;
   const color = resolved.color;
 
-  if (level && LEVEL_METHODS[level] < LEVEL_METHODS[logLevel]) return null;
+  if (level && LEVEL_SEVERITY[level] < LEVEL_SEVERITY[logLevel]) return null;
 
   const prefix: Prefix[] =
     options?.prefix === null
@@ -212,20 +235,27 @@ function prepareLog(
         : getPrefix(logLevel, {
             pad: resolved.pad,
             scope: state.scope,
-            channel: LEVEL_PARAMS[logLevel].method.name,
+            channel: LEVEL_METHODS[logLevel].name,
           });
 
-  if (date) prefix.push({ type: 'date' });
+  if (date) prefix.push({ type: 'date', ts: options?.ts });
 
-  if (stack && options?.stackOffset !== null) {
+  if (options?.callerOverride !== undefined) {
+    // Call-site was pre-captured in the main process (worker proxy).
+    // Use it directly, bypassing worker-side stack introspection.
+    if (options.callerOverride) {
+      prefix.push({ type: 'caller', value: options.callerOverride, structuredOnly: options.callerStructuredOnly });
+    }
+  } else if ((stack || TRACE_LEVELS.has(logLevel)) && options?.stackOffset !== null) {
     const caller = getLogCallerInfo(options?.stackOffset ?? 0);
-    if (caller) {
-      let stackDisplay =
-        caller.functionName ||
-        `${caller.fileName?.split('/').slice(-1)[0]}:${caller.lineNumber}:${caller.columnNumber}`;
-      if (caller.functionName && caller.fileName)
-        stackDisplay += ` @ ${caller.fileName}:${caller.lineNumber}:${caller.columnNumber}`;
-      if (stackDisplay) prefix.push({ type: 'caller', value: stackDisplay });
+    if (caller?.fileName) {
+      // Always structuredOnly: the caller is rendered as a separate stack trace
+      // line (or group in browser), so an inline prefix badge is always redundant.
+      prefix.push({
+        type: 'caller',
+        value: `${caller.fileName}:${caller.lineNumber}:${caller.columnNumber}`,
+        structuredOnly: true,
+      });
     }
   }
 
@@ -257,8 +287,15 @@ function prepareLog(
     });
   }
 
-  const { method, trace } = LEVEL_PARAMS[logLevel];
-  return { prefix, color, callArgs, method, trace };
+  const method = LEVEL_METHODS[logLevel];
+  const hasTrace = TRACE_LEVELS.has(logLevel);
+  // Emit a stack trace when the level is a trace-level (emerg/alert/crit) or
+  // when the user explicitly set stack=true. In worker path, suppress it:
+  // callerOverride means the call came via IPC and capturing here would only
+  // show IPC handler frames.
+  const trace = (hasTrace || stack) && options?.callerOverride === undefined;
+  const traceCaller = options?.traceCallerOverride ?? undefined;
+  return { prefix, color, callArgs, method, trace, hasTrace, traceCaller };
 }
 
 // ── emitTTY ───────────────────────────────────────────────────────────────────
@@ -301,9 +338,10 @@ function emitTTY(
   write(line);
 
   if (trace) {
-    // Capture a clean stack skipping internal logger frames.
-    const stack = new Error().stack?.split('\n').slice(6).join('\n');
+    const stack = getCallerStackTrace();
     if (stack) write(stack);
+  } else if (prepared.traceCaller) {
+    write(prepared.traceCaller);
   }
 }
 
@@ -315,7 +353,7 @@ function emitTTY(
  * `bypass()` continues to work correctly.
  */
 function emitConsole(prepared: PreparedLog): void {
-  const { prefix, color, callArgs, method, trace } = prepared;
+  const { prefix, color, callArgs, method, trace, hasTrace, traceCaller } = prepared;
   const format = registry.format;
 
   if (isNode && (format === 'json' || format === 'logfmt')) {
@@ -329,8 +367,36 @@ function emitConsole(prepared: PreparedLog): void {
   const prefixArgs = isNode
     ? (() => { const s = renderConsolePrefix(prefix); return s ? [s] : []; })()
     : renderBrowserPrefix(prefix, color);
-  method.apply(activeConsole, [...prefixArgs, ...callArgs]);
-  if (trace) trace.apply(activeConsole);
+
+  // In the browser, only console.debug (Verbose filter) is preserved as-is.
+  // All other levels use console.log so DevTools level filters stay meaningful.
+  const effectiveMethod = !isNode && method !== activeConsole.debug ? activeConsole.log : method;
+
+  if (!isNode) {
+    // In the browser, wrap trace-level logs in a collapsed group to avoid the
+    // native DevTools stacktrace (which points to internals, not the call-site).
+    const stackContent = trace
+      ? (getCallerStackTrace() ?? '(no stack available)')
+      : traceCaller ?? (hasTrace ? '(call-site unavailable)' : null);
+
+    if (stackContent !== null) {
+      activeConsole.groupCollapsed(...prefixArgs, ...callArgs);
+      activeConsole.log(stackContent);
+      activeConsole.groupEnd();
+    } else {
+      effectiveMethod.apply(activeConsole, [...prefixArgs, ...callArgs]);
+    }
+  } else {
+    // Node: emit normally, then write the stacktrace on stdout.
+    method.apply(activeConsole, [...prefixArgs, ...callArgs]);
+    if (trace) {
+      const stack = getCallerStackTrace();
+      activeConsole.log(stack ?? '(no stack available)');
+    } else if (traceCaller) {
+      // Worker: emit the call-site captured in the main process.
+      activeConsole.log(traceCaller);
+    }
+  }
 }
 
 // ── emit ──────────────────────────────────────────────────────────────────────
@@ -461,6 +527,13 @@ function createCoreLogger(state: LoggerState) {
   for (const level of LogLevels) {
     base[level] = createLogMethod(state, self, level);
   }
+
+  // Allows the worker script to dispatch a log line while bypassing the
+  // worker-side stack introspection in favour of a call-site string
+  // pre-captured in the main process.
+  base['__logFromMainProcess'] = (level: LogLevel, caller: string | undefined, args: unknown[], ts?: number, traceCaller?: string, callerStructuredOnly?: boolean) => {
+    emit(level, args as LogParameters, state, self, { callerOverride: caller ?? '', ts, traceCallerOverride: traceCaller, callerStructuredOnly });
+  };
 
   return base;
 }

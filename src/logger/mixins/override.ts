@@ -1,4 +1,4 @@
-import { LogLevels } from '../levels';
+import { LogLevels } from '../../levels';
 import type {
   GenericLogger,
   LoggerOptions,

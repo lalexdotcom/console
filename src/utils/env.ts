@@ -7,9 +7,18 @@ export const isNode =
   process?.versions != null &&
   process?.versions?.node != null;
 
-/** True when running inside a browser context. */
-export const isBrowser =
+/** True when running inside a browser main thread (has `window.document`). */
+export const isMainBrowser =
   typeof window !== 'undefined' && typeof window.document !== 'undefined';
+
+/** True when running inside a Web Worker (Dedicated, Shared, or Service Worker). */
+export const isWebWorker =
+  !isNode &&
+  typeof window === 'undefined' &&
+  typeof self !== 'undefined';
+
+/** True when running in any browser context: main thread or Web Worker. */
+export const isBrowser = isMainBrowser || isWebWorker;
 
 /**
  * `util.inspect` loaded lazily via a deliberately obfuscated `require()` so
@@ -25,12 +34,6 @@ export const utilInspect: typeof inspect | undefined = (() => {
     return undefined;
   }
 })();
-
-/**
- * The console object captured at module load time, before any patching.
- * Used by `RootLogger.unpatch()` to restore the original methods.
- */
-export const systemConsole = console;
 
 /**
  * Process environment variables. Empty object in browser contexts.

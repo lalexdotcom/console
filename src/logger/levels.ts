@@ -1,29 +1,9 @@
 import type { InspectOptions } from 'node:util';
-import { isBrowser, isNode } from './env';
+import type { LogLevel } from '../levels';
+import { LEVEL_METHODS, LogLevels } from '../levels';
+import { isBrowser, isNode } from '../utils/env';
 
-/**
- * Numeric severity for each level. Lower = more critical.
- * Used for level-filtering comparisons in computeOptions and outputLog.
- */
-export const LEVEL_METHODS = {
-  emerg: 0,
-  alert: 1,
-  crit: 2,
-  error: 3,
-  warn: 4,
-  notice: 5,
-  success: 6,
-  info: 7,
-  verb: 8,
-  debug: 9,
-  wth: 10,
-} as const;
-
-/** Derived from LEVEL_METHODS — adding a level here is the only change needed. */
-export type LogLevel = keyof typeof LEVEL_METHODS;
-
-/** All log levels as an array, ordered from most to least critical. */
-export const LogLevels = Object.keys(LEVEL_METHODS) as LogLevel[];
+export type { LogLevel } from '../levels';
 
 export const DEFAULT_INSPECT_OPTIONS: InspectOptions = {
   depth: 5,
@@ -40,8 +20,8 @@ export type LogLevelStyle = {
 
 /** Default padding + border-radius for browser console badges. */
 export const DEFAULT_BROWSER_STYLE = {
-  padding: '2px 4px',
-  'border-radius': '2px',
+  padding: '1px 4px',
+  'border-radius': '4px',
 };
 
 /** Fallback style applied when a level has no explicit style. */

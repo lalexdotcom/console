@@ -13,5 +13,5 @@
     "allowImportingTsExtensions": true
   },
   "include": ["src"],
-  "exclude": ["src/**/*.old.ts"]
+  "exclude": ["src/**/*.old.ts", "src/**/*.dev.ts"]
 }

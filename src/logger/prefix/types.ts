@@ -27,8 +27,12 @@ export type IconPrefix = {
   color?: string;
 };
 
-/** A timestamp element rendered at the moment of output. */
-export type DatePrefix = { type: 'date' };
+/**
+ * A timestamp element.
+ * When `ts` is defined, it is the Unix ms timestamp captured in the main
+ * process at call time; otherwise the render time is used.
+ */
+export type DatePrefix = { type: 'date'; ts?: number };
 
 /**
  * The log-level badge element.
@@ -50,10 +54,22 @@ export type LevelPrefix = {
   scope?: string;
 };
 
-/** A callsite info element — ignored in pretty renderers, serialized as a `caller` field in JSON/logfmt. */
+/**
+ * A callsite info element.
+ *
+ * When `structuredOnly` is false/absent, the value is rendered as a visible
+ * prefix bubble in pretty mode AND serialised as `caller` in JSON/logfmt.
+ *
+ * When `structuredOnly` is true, pretty renderers skip this item entirely.
+ * Only the JSON/logfmt serialiser picks it up. This is used for TRACE_LEVELS
+ * (emerg/alert/crit) without stack=true: the call-site belongs in structured
+ * logs, but pretty output already shows a full stack trace below the line,
+ * making a prefix badge redundant and visually noisy.
+ */
 export type CallerPrefix = {
   type: 'caller';
   value: string;
+  structuredOnly?: boolean;
 };
 
 /** Union of all prefix element types. */

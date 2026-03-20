@@ -1,1 +1,1 @@
-export * from './color';
+// Internal utilities — not part of the public API.

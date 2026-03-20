@@ -1,5 +1,5 @@
+import { LogLevels } from '../../levels';
 import type { DispatchFn } from '../dispatch';
-import { LogLevels } from '../levels';
 import type {
   LimitedLogger,
   LogLevel,

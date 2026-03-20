@@ -17,3 +17,5 @@ doc_build/
 
 # PNPM
 .pnpm-store
+skills-lock.json
+.claude/skills

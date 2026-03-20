@@ -1,5 +1,6 @@
-import { isNode } from './env';
-import { DEFAULT_INSPECT_OPTIONS, LEVEL_METHODS } from './levels';
+import { LEVEL_METHODS } from '../levels';
+import { isNode } from '../utils/env';
+import { DEFAULT_INSPECT_OPTIONS } from './levels';
 import type { LoggerOptions, LogLevel } from './types';
 
 // ── Logger defaults ───────────────────────────────────────────────────────────

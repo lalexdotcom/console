@@ -20,6 +20,7 @@ function extractFields(items: Prefix[], callArgs: LogParameters): ExtractedField
   let scope: string | undefined;
   let caller: string | undefined;
   let progress: number | { done: number; total: number } | undefined;
+  let ts: number | undefined;
 
   for (const item of items) {
     if (item.type === 'level') {
@@ -30,10 +31,12 @@ function extractFields(items: Prefix[], callArgs: LogParameters): ExtractedField
       caller = item.value;
     } else if (item.type === 'progress') {
       progress = item.value;
+    } else if (item.type === 'date') {
+      ts = item.ts;
     }
   }
 
-  const time = new Date().toISOString();
+  const time = new Date(ts ?? Date.now()).toISOString();
 
   const [first, ...rest] = callArgs;
   let msg: string;

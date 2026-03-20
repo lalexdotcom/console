@@ -1,6 +1,6 @@
+import { LogLevels } from '../../../levels';
+import { isNode, isNodeTTY } from '../../../utils/env';
 import type { DispatchFn } from '../../dispatch';
-import { isNode, isNodeTTY } from '../../env';
-import { LogLevels } from '../../levels';
 import type {
   ExecOptions,
   GenericLogger,

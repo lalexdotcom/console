@@ -1,11 +1,15 @@
 {
 	"name": "@lalex/console",
-	"version": "2.0.0-beta.1",
+	"version": "2.0.0-beta.2",
 	"type": "module",
 	"exports": {
 		".": {
 			"types": "./dist/index.d.ts",
 			"import": "./dist/index.js"
+		},
+		"./worker": {
+			"types": "./dist/worker/index.d.ts",
+			"import": "./dist/worker/index.js"
 		}
 	},
 	"types": "./dist/index.d.ts",
@@ -17,9 +21,17 @@
 		"check": "biome check --write",
 		"dev": "rslib build --watch",
 		"format": "biome format --write",
-		"play:node": "LLOGER_FORCE_CONSOLE=true tsx src/play-node.dev.ts",
-		"play:tty": "tsx src/play-node.dev.ts",
-		"play:browser": "rsbuild dev --config rsbuild.config.ts"
+		"play:node": "LLOGER_FORCE_CONSOLE=true tsx src/play-node.dev.ts --mode main",
+		"play:node:logfmt": "LLOGER_FORCE_CONSOLE=true tsx src/play-node.dev.ts --mode main --format logfmt",
+		"play:node:pretty": "LLOGER_FORCE_CONSOLE=true tsx src/play-node.dev.ts --mode main --format pretty",
+		"play:node:worker": "LLOGER_FORCE_CONSOLE=true tsx src/play-node.dev.ts --mode worker",
+		"play:node:worker:logfmt": "LLOGER_FORCE_CONSOLE=true tsx src/play-node.dev.ts --mode worker --format logfmt",
+		"play:node:worker:pretty": "LLOGER_FORCE_CONSOLE=true tsx src/play-node.dev.ts --mode worker --format pretty",
+		"play:tty": "tsx --watch src/play-node.dev.ts --mode main",
+		"play:tty:worker": "tsx --watch src/play-node.dev.ts --mode worker",
+		"play:browser": "rsbuild dev --config rsbuild.config.ts",
+		"play:browser:worker": "PLAY_MODE=worker rsbuild dev --config rsbuild.config.ts",
+		"version": "npx @lalex/version"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.4.7",

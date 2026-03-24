@@ -28,7 +28,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. Browser test project runs in Playwright and a smoke test passes
   3. Logger singleton state is fully isolated between tests (no cross-test leaks)
   4. `error` and `warn` levels produce call-site traces in browser mode
-**Plans**: TBD
+**Plans:** 1 plan
+
+Plans:
+- [ ] 01-01-PLAN.md — Install rstest, configure dual projects (node+browser), create test helpers (stdout capture, console spy, registry reset), add smoke tests, fix TRACE_LEVELS
 
 ### Phase 2: Core Logger Tests
 **Goal**: Core logging pipeline is fully validated through Node console capture — levels, formats, prefix, options, scopes, mixins, registry, and console patching all behave correctly

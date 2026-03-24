@@ -43,12 +43,12 @@ Plans:
   3. Prefix pipeline renders level badge, date, caller, and scope in the correct structure
   4. Scoped loggers inherit from root, cache by name, and mutate independently
   5. Rate limiting (once/limit), one-shot option override, console patch/unpatch, and singleton registry all behave as documented
-**Plans:** 1/5 plans executed
+**Plans:** 3/5 plans executed
 
 Plans:
 - [x] 02-01-PLAN.md — Create shared test helpers: captureAll() (stdout+stderr) and parseLogfmt()
 - [x] 02-02-PLAN.md — Write levels.test.ts (CORE-01, 02, 03) + formats.test.ts (CORE-04, 05, 06)
-- [ ] 02-03-PLAN.md — Write prefix.test.ts (PREFIX-01–04) + options.test.ts (OPT-01–04)
+- [x] 02-03-PLAN.md — Write prefix.test.ts (PREFIX-01–04) + options.test.ts (OPT-01–04)
 - [ ] 02-04-PLAN.md — Write scopes.test.ts (SCOPE-01–04) + mixins.test.ts (MIX-01–04)
 - [ ] 02-05-PLAN.md — Write registry.test.ts (REG-01–04) + console.test.ts (CONS-01–04)
 
@@ -82,7 +82,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Test Infrastructure & Code Adjustment | 0/0 | Complete    | 2026-03-24 |
-| 2. Core Logger Tests | 1/5 | In Progress|  |
+| 2. Core Logger Tests | 3/5 | In Progress|  |
 | 3. Browser, TTY & Spinner Tests | 0/0 | Not started | - |
 | 4. Worker Proxy & API Alignment | 0/0 | Not started | - |
 

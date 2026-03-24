@@ -33,17 +33,17 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Prefix Pipeline Tests
 
-- [ ] **PREFIX-01**: Level badge displays correct label text and ANSI color per level
-- [ ] **PREFIX-02**: Date prefix produces ISO 8601 timestamp when Logger.date = true
-- [ ] **PREFIX-03**: Caller prefix shows file:line:col when Logger.stack = true
-- [ ] **PREFIX-04**: Scope name appears in prefix for scoped loggers
+- [x] **PREFIX-01**: Level badge displays correct label text and ANSI color per level
+- [x] **PREFIX-02**: Date prefix produces ISO 8601 timestamp when Logger.date = true
+- [x] **PREFIX-03**: Caller prefix shows file:line:col when Logger.stack = true
+- [x] **PREFIX-04**: Scope name appears in prefix for scoped loggers
 
 ### Options & Configuration Tests
 
-- [ ] **OPT-01**: All option getters/setters (enabled, level, pad, color, date, stack, uid, inspect) read/write correctly
-- [ ] **OPT-02**: Option cascade applies priority: own options > root options > defaults
-- [ ] **OPT-03**: Level cascading picks the strictest (lowest numeric) between scope and root
-- [ ] **OPT-04**: util.inspect integration forwards inspect options correctly in Node mode
+- [x] **OPT-01**: All option getters/setters (enabled, level, pad, color, date, stack, uid, inspect) read/write correctly
+- [x] **OPT-02**: Option cascade applies priority: own options > root options > defaults
+- [x] **OPT-03**: Level cascading picks the strictest (lowest numeric) between scope and root
+- [x] **OPT-04**: util.inspect integration forwards inspect options correctly in Node mode
 
 ### Scoped Logger Tests
 
@@ -155,14 +155,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CORE-06 | Phase 2 | Complete |
 | CORE-07 | Phase 3 | Pending |
 | CORE-08 | Phase 3 | Pending |
-| PREFIX-01 | Phase 2 | Pending |
-| PREFIX-02 | Phase 2 | Pending |
-| PREFIX-03 | Phase 2 | Pending |
-| PREFIX-04 | Phase 2 | Pending |
-| OPT-01 | Phase 2 | Pending |
-| OPT-02 | Phase 2 | Pending |
-| OPT-03 | Phase 2 | Pending |
-| OPT-04 | Phase 2 | Pending |
+| PREFIX-01 | Phase 2 | Complete |
+| PREFIX-02 | Phase 2 | Complete |
+| PREFIX-03 | Phase 2 | Complete |
+| PREFIX-04 | Phase 2 | Complete |
+| OPT-01 | Phase 2 | Complete |
+| OPT-02 | Phase 2 | Complete |
+| OPT-03 | Phase 2 | Complete |
+| OPT-04 | Phase 2 | Complete |
 | SCOPE-01 | Phase 2 | Pending |
 | SCOPE-02 | Phase 2 | Pending |
 | SCOPE-03 | Phase 2 | Pending |

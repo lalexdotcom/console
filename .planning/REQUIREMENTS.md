@@ -47,17 +47,17 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Scoped Logger Tests
 
-- [ ] **SCOPE-01**: Logger.scope('name') returns a ScopeLogger with all level methods and scope property
-- [ ] **SCOPE-02**: Same scope name returns cached instance (identity equality)
-- [ ] **SCOPE-03**: Scope options inherit from root and can be overridden independently
-- [ ] **SCOPE-04**: Scope mutations do not leak to other scopes or root
+- [x] **SCOPE-01**: Logger.scope('name') returns a ScopeLogger with all level methods and scope property
+- [x] **SCOPE-02**: Same scope name returns cached instance (identity equality)
+- [x] **SCOPE-03**: Scope options inherit from root and can be overridden independently
+- [x] **SCOPE-04**: Scope mutations do not leak to other scopes or root
 
 ### Mixin Tests
 
-- [ ] **MIX-01**: Logger.once() emits exactly once per call-site regardless of repeat calls
-- [ ] **MIX-02**: Logger.limit(n) emits exactly n times per call-site
-- [ ] **MIX-03**: Logger.limit() with explicit key groups disparate call-sites under one counter
-- [ ] **MIX-04**: Logger.options({...}).level() applies overrides to one call only, then reverts
+- [x] **MIX-01**: Logger.once() emits exactly once per call-site regardless of repeat calls
+- [x] **MIX-02**: Logger.limit(n) emits exactly n times per call-site
+- [x] **MIX-03**: Logger.limit() with explicit key groups disparate call-sites under one counter
+- [x] **MIX-04**: Logger.options({...}).level() applies overrides to one call only, then reverts
 
 ### Singleton & Registry Tests
 
@@ -163,14 +163,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | OPT-02 | Phase 2 | Complete |
 | OPT-03 | Phase 2 | Complete |
 | OPT-04 | Phase 2 | Complete |
-| SCOPE-01 | Phase 2 | Pending |
-| SCOPE-02 | Phase 2 | Pending |
-| SCOPE-03 | Phase 2 | Pending |
-| SCOPE-04 | Phase 2 | Pending |
-| MIX-01 | Phase 2 | Pending |
-| MIX-02 | Phase 2 | Pending |
-| MIX-03 | Phase 2 | Pending |
-| MIX-04 | Phase 2 | Pending |
+| SCOPE-01 | Phase 2 | Complete |
+| SCOPE-02 | Phase 2 | Complete |
+| SCOPE-03 | Phase 2 | Complete |
+| SCOPE-04 | Phase 2 | Complete |
+| MIX-01 | Phase 2 | Complete |
+| MIX-02 | Phase 2 | Complete |
+| MIX-03 | Phase 2 | Complete |
+| MIX-04 | Phase 2 | Complete |
 | REG-01 | Phase 2 | Pending |
 | REG-02 | Phase 2 | Pending |
 | REG-03 | Phase 2 | Pending |

@@ -1,4 +1,8 @@
-import { LEVEL_METHODS as LEVEL_SEVERITY, LogLevels, TRACE_LEVELS } from '../levels';
+import {
+  LEVEL_METHODS as LEVEL_SEVERITY,
+  LogLevels,
+  TRACE_LEVELS,
+} from '../levels';
 import { env, isNode, isNodeTTY, utilInspect } from '../utils/env';
 import { getCallerStackTrace, getLogCallerInfo } from '../utils/stack';
 import { DEFAULT_LOGGER_OPTIONS } from './const';
@@ -9,7 +13,11 @@ import { createSpinnerMixin } from './mixins/spinner';
 import { ttyRenderer } from './mixins/spinner/tty/renderer';
 import type { Prefix } from './prefix';
 import { getPrefix } from './prefix';
-import { renderBrowserPrefix, renderConsolePrefix, renderTTYPrefix } from './prefix/render';
+import {
+  renderBrowserPrefix,
+  renderConsolePrefix,
+  renderTTYPrefix,
+} from './prefix/render';
 import { serializeJSON, serializeLogfmt } from './prefix/serialize';
 import type {
   LoggerOptions,
@@ -174,7 +182,13 @@ type EmitOptions = {
   ts?: number;
   /** TTY spinner signal: handled before regular line output. */
   ttySpinner?:
-    | { action: 'register'; id: symbol; frames: string[]; color?: string; progress?: boolean }
+    | {
+        action: 'register';
+        id: symbol;
+        frames: string[];
+        color?: string;
+        progress?: boolean;
+      }
     | { action: 'stop'; id: symbol };
 };
 
@@ -229,9 +243,10 @@ function prepareLog(
     options?.prefix === null
       ? []
       : options?.prefix
-        ? (Array.isArray(options.prefix) ? options.prefix : [options.prefix]).map(
-            (p): Prefix => ({ type: 'text', text: p }),
-          )
+        ? (Array.isArray(options.prefix)
+            ? options.prefix
+            : [options.prefix]
+          ).map((p): Prefix => ({ type: 'text', text: p }))
         : getPrefix(logLevel, {
             pad: resolved.pad,
             scope: state.scope,
@@ -244,9 +259,16 @@ function prepareLog(
     // Call-site was pre-captured in the main process (worker proxy).
     // Use it directly, bypassing worker-side stack introspection.
     if (options.callerOverride) {
-      prefix.push({ type: 'caller', value: options.callerOverride, structuredOnly: options.callerStructuredOnly });
+      prefix.push({
+        type: 'caller',
+        value: options.callerOverride,
+        structuredOnly: options.callerStructuredOnly,
+      });
     }
-  } else if ((stack || TRACE_LEVELS.has(logLevel)) && options?.stackOffset !== null) {
+  } else if (
+    (stack || TRACE_LEVELS.has(logLevel)) &&
+    options?.stackOffset !== null
+  ) {
     const caller = getLogCallerInfo(options?.stackOffset ?? 0);
     if (caller?.fileName) {
       // Always structuredOnly: the caller is rendered as a separate stack trace
@@ -348,36 +370,71 @@ function emitTTY(
 // ── emitConsole ───────────────────────────────────────────────────────────────
 
 /**
+ * Dispatches a log call to the correct console, honouring `bypass()`.
+ *
+ * Node's global console methods are bound at creation time; `.apply()` cannot
+ * redirect their `this` to a different console instance. When `bypass()` is
+ * active (`activeConsole !== systemConsole`) we therefore look up the method
+ * by name on `activeConsole` directly. When no bypass is active we call the
+ * captured method reference directly — this avoids routing through any
+ * `console.info = L.info` patches that `L.patch()` may have installed.
+ */
+function callOnActiveConsole(method: ConsoleFn, args: unknown[]): void {
+  if (activeConsole === systemConsole) {
+    // No bypass: invoke the captured (bound) method directly so `L.patch()`
+    // reassignments on console.info/warn/error do not create an infinite loop.
+    method(...(args as Parameters<typeof console.log>));
+  } else {
+    // Bypassed: route to the custom console by method name so its internal
+    // streams receive the output rather than the original bound streams.
+    const fn = (activeConsole as unknown as Record<string, unknown>)[
+      method.name
+    ];
+    if (typeof fn === 'function') {
+      (fn as (...a: unknown[]) => void).apply(activeConsole, args);
+    }
+  }
+}
+
+/**
  * Writes a prepared log line in non-TTY mode (browser devtools, pipe, CI).
- * Delegates to the native console method bound to `activeConsole` so that
- * `bypass()` continues to work correctly.
+ * Delegates to `activeConsole` via `callOnActiveConsole` so that `bypass()`
+ * correctly redirects output even when the captured console methods are bound.
  */
 function emitConsole(prepared: PreparedLog): void {
-  const { prefix, color, callArgs, method, trace, hasTrace, traceCaller } = prepared;
+  const { prefix, color, callArgs, method, trace, hasTrace, traceCaller } =
+    prepared;
   const format = registry.format;
 
   if (isNode && (format === 'json' || format === 'logfmt')) {
-    const line = format === 'json'
-      ? serializeJSON(prefix, callArgs)
-      : serializeLogfmt(prefix, callArgs);
-    method.apply(activeConsole, [line]);
+    const line =
+      format === 'json'
+        ? serializeJSON(prefix, callArgs)
+        : serializeLogfmt(prefix, callArgs);
+    // Use callOnActiveConsole so bypass() redirects correctly even though
+    // the captured console methods are bound to the global console instance.
+    callOnActiveConsole(method, [line]);
     return;
   }
 
   const prefixArgs = isNode
-    ? (() => { const s = renderConsolePrefix(prefix); return s ? [s] : []; })()
+    ? (() => {
+        const s = renderConsolePrefix(prefix);
+        return s ? [s] : [];
+      })()
     : renderBrowserPrefix(prefix, color);
 
   // In the browser, only console.debug (Verbose filter) is preserved as-is.
   // All other levels use console.log so DevTools level filters stay meaningful.
-  const effectiveMethod = !isNode && method !== activeConsole.debug ? activeConsole.log : method;
+  const effectiveMethod =
+    !isNode && method !== activeConsole.debug ? activeConsole.log : method;
 
   if (!isNode) {
     // In the browser, wrap trace-level logs in a collapsed group to avoid the
     // native DevTools stacktrace (which points to internals, not the call-site).
     const stackContent = trace
       ? (getCallerStackTrace() ?? '(no stack available)')
-      : traceCaller ?? (hasTrace ? '(call-site unavailable)' : null);
+      : (traceCaller ?? (hasTrace ? '(call-site unavailable)' : null));
 
     if (stackContent !== null) {
       activeConsole.groupCollapsed(...prefixArgs, ...callArgs);
@@ -387,8 +444,8 @@ function emitConsole(prepared: PreparedLog): void {
       effectiveMethod.apply(activeConsole, [...prefixArgs, ...callArgs]);
     }
   } else {
-    // Node: emit normally, then write the stacktrace on stdout.
-    method.apply(activeConsole, [...prefixArgs, ...callArgs]);
+    // Node pretty format: emit normally, then write the stacktrace on stdout.
+    callOnActiveConsole(method, [...prefixArgs, ...callArgs]);
     if (trace) {
       const stack = getCallerStackTrace();
       activeConsole.log(stack ?? '(no stack available)');
@@ -531,8 +588,20 @@ function createCoreLogger(state: LoggerState) {
   // Allows the worker script to dispatch a log line while bypassing the
   // worker-side stack introspection in favour of a call-site string
   // pre-captured in the main process.
-  base['__logFromMainProcess'] = (level: LogLevel, caller: string | undefined, args: unknown[], ts?: number, traceCaller?: string, callerStructuredOnly?: boolean) => {
-    emit(level, args as LogParameters, state, self, { callerOverride: caller ?? '', ts, traceCallerOverride: traceCaller, callerStructuredOnly });
+  base['__logFromMainProcess'] = (
+    level: LogLevel,
+    caller: string | undefined,
+    args: unknown[],
+    ts?: number,
+    traceCaller?: string,
+    callerStructuredOnly?: boolean,
+  ) => {
+    emit(level, args as LogParameters, state, self, {
+      callerOverride: caller ?? '',
+      ts,
+      traceCallerOverride: traceCaller,
+      callerStructuredOnly,
+    });
   };
 
   return base;
@@ -622,8 +691,12 @@ function createLogger(options: Partial<LoggerOptions> = {}): RootLogger {
   Object.assign(self, root, override, limited, spinner);
 
   Object.defineProperty(self, 'format', {
-    get(): RootLogger['format'] { return registry.format; },
-    set(f: RootLogger['format']) { registry.format = f; },
+    get(): RootLogger['format'] {
+      return registry.format;
+    },
+    set(f: RootLogger['format']) {
+      registry.format = f;
+    },
     enumerable: true,
     configurable: true,
   });

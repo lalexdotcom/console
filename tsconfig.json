@@ -12,6 +12,6 @@
     "useDefineForClassFields": true,
     "allowImportingTsExtensions": true
   },
-  "include": ["src"],
+  "include": ["src", "tests"],
   "exclude": ["src/**/*.old.ts", "src/**/*.dev.ts"]
 }

@@ -1,52 +1,59 @@
 {
-	"name": "@lalex/console",
-	"version": "2.0.0",
-	"type": "module",
-	"exports": {
-		".": {
-			"types": "./dist/index.d.ts",
-			"import": "./dist/index.js"
-		},
-		"./worker": {
-			"types": "./dist/worker/index.d.ts",
-			"import": "./dist/worker/index.js"
-		}
-	},
-	"types": "./dist/index.d.ts",
-	"files": [
-		"dist"
-	],
-	"scripts": {
-		"build": "rslib build",
-		"check": "biome check --write",
-		"dev": "rslib build --watch",
-		"format": "biome format --write",
-		"play:node": "LLOGER_FORCE_CONSOLE=true tsx src/play-node.dev.ts --mode main",
-		"play:node:logfmt": "LLOGER_FORCE_CONSOLE=true tsx src/play-node.dev.ts --mode main --format logfmt",
-		"play:node:pretty": "LLOGER_FORCE_CONSOLE=true tsx src/play-node.dev.ts --mode main --format pretty",
-		"play:node:worker": "LLOGER_FORCE_CONSOLE=true tsx src/play-node.dev.ts --mode worker",
-		"play:node:worker:logfmt": "LLOGER_FORCE_CONSOLE=true tsx src/play-node.dev.ts --mode worker --format logfmt",
-		"play:node:worker:pretty": "LLOGER_FORCE_CONSOLE=true tsx src/play-node.dev.ts --mode worker --format pretty",
-		"play:tty": "tsx --watch src/play-node.dev.ts --mode main",
-		"play:tty:worker": "tsx --watch src/play-node.dev.ts --mode worker",
-		"play:browser": "rsbuild dev --config rsbuild.config.ts",
-		"play:browser:worker": "PLAY_MODE=worker rsbuild dev --config rsbuild.config.ts",
-		"version": "npx upversion@latest"
-	},
-	"devDependencies": {
-		"@biomejs/biome": "2.4.7",
-		"@rsbuild/core": "^1.7.3",
-		"@rsbuild/plugin-node-polyfill": "^1.4.4",
-		"@rslib/core": "^0.20.0",
-		"@types/node": "^24.10.13",
-		"tsx": "^4.21.0",
-		"typescript": "^5.9.3"
-	},
-	"packageManager": "pnpm@10.11.0",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/lalexdotcom/console"
-	},
-	"homepage": "https://github.com/lalexdotcom/console#readme",
-	"private": false
+  "name": "@lalex/console",
+  "version": "2.0.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./worker": {
+      "types": "./dist/worker/index.d.ts",
+      "import": "./dist/worker/index.js"
+    }
+  },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rslib build",
+    "check": "biome check --write",
+    "dev": "rslib build --watch",
+    "format": "biome format --write",
+    "play:node": "LLOGER_FORCE_CONSOLE=true tsx src/play-node.dev.ts --mode main",
+    "play:node:logfmt": "LLOGER_FORCE_CONSOLE=true tsx src/play-node.dev.ts --mode main --format logfmt",
+    "play:node:pretty": "LLOGER_FORCE_CONSOLE=true tsx src/play-node.dev.ts --mode main --format pretty",
+    "play:node:worker": "LLOGER_FORCE_CONSOLE=true tsx src/play-node.dev.ts --mode worker",
+    "play:node:worker:logfmt": "LLOGER_FORCE_CONSOLE=true tsx src/play-node.dev.ts --mode worker --format logfmt",
+    "play:node:worker:pretty": "LLOGER_FORCE_CONSOLE=true tsx src/play-node.dev.ts --mode worker --format pretty",
+    "play:tty": "tsx --watch src/play-node.dev.ts --mode main",
+    "play:tty:worker": "tsx --watch src/play-node.dev.ts --mode worker",
+    "play:browser": "rsbuild dev --config rsbuild.config.ts",
+    "play:browser:worker": "PLAY_MODE=worker rsbuild dev --config rsbuild.config.ts",
+    "test": "rstest",
+    "test:node": "rstest --project node",
+    "test:browser": "rstest --project browser",
+    "version": "npx upversion@latest"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.7",
+    "@rsbuild/core": "^1.7.3",
+    "@rsbuild/plugin-node-polyfill": "^1.4.4",
+    "@rslib/core": "^0.20.0",
+    "@rstest/adapter-rslib": "^0.2.1",
+    "@rstest/browser": "^0.9.4",
+    "@rstest/core": "^0.9.4",
+    "@types/node": "^24.10.13",
+    "playwright": "^1.58.2",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  },
+  "packageManager": "pnpm@10.11.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lalexdotcom/console"
+  },
+  "homepage": "https://github.com/lalexdotcom/console#readme",
+  "private": false
 }

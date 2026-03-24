@@ -32,4 +32,10 @@ export const LogLevels = Object.keys(LEVEL_METHODS) as LogLevel[];
  * The caller is always captured in the proxy for these levels so that
  * browser devtools can display it alongside the log output.
  */
-export const TRACE_LEVELS = new Set<LogLevel>(['emerg', 'alert', 'crit']);
+export const TRACE_LEVELS = new Set<LogLevel>([
+  'emerg',
+  'alert',
+  'crit',
+  'error',
+  'warn',
+]);

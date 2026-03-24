@@ -12,7 +12,7 @@ This roadmap delivers an exhaustive test suite for the @lalex/console structured
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Test Infrastructure & Code Adjustment** - Configure rstest, build shared helpers, fix TRACE_LEVELS
+- [x] **Phase 1: Test Infrastructure & Code Adjustment** - Configure rstest, build shared helpers, fix TRACE_LEVELS (completed 2026-03-24)
 - [ ] **Phase 2: Core Logger Tests** - Validate the core logging pipeline via Node console mode
 - [ ] **Phase 3: Browser, TTY & Spinner Tests** - Validate environment-specific rendering and spinner lifecycle
 - [ ] **Phase 4: Worker Proxy & API Alignment** - Validate worker communication and API surface parity
@@ -28,7 +28,7 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. Browser test project runs in Playwright and a smoke test passes
   3. Logger singleton state is fully isolated between tests (no cross-test leaks)
   4. `error` and `warn` levels produce call-site traces in browser mode
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
 - [ ] 01-01-PLAN.md — Install rstest, configure dual projects (node+browser), create test helpers (stdout capture, console spy, registry reset), add smoke tests, fix TRACE_LEVELS
@@ -74,7 +74,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Test Infrastructure & Code Adjustment | 0/0 | Not started | - |
+| 1. Test Infrastructure & Code Adjustment | 0/0 | Complete    | 2026-03-24 |
 | 2. Core Logger Tests | 0/0 | Not started | - |
 | 3. Browser, TTY & Spinner Tests | 0/0 | Not started | - |
 | 4. Worker Proxy & API Alignment | 0/0 | Not started | - |

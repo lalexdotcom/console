@@ -43,7 +43,14 @@ Plans:
   3. Prefix pipeline renders level badge, date, caller, and scope in the correct structure
   4. Scoped loggers inherit from root, cache by name, and mutate independently
   5. Rate limiting (once/limit), one-shot option override, console patch/unpatch, and singleton registry all behave as documented
-**Plans**: TBD
+**Plans:** 5 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — Create shared test helpers: captureAll() (stdout+stderr) and parseLogfmt()
+- [ ] 02-02-PLAN.md — Write levels.test.ts (CORE-01, 02, 03) + formats.test.ts (CORE-04, 05, 06)
+- [ ] 02-03-PLAN.md — Write prefix.test.ts (PREFIX-01–04) + options.test.ts (OPT-01–04)
+- [ ] 02-04-PLAN.md — Write scopes.test.ts (SCOPE-01–04) + mixins.test.ts (MIX-01–04)
+- [ ] 02-05-PLAN.md — Write registry.test.ts (REG-01–04) + console.test.ts (CONS-01–04)
 
 ### Phase 3: Browser, TTY & Spinner Tests
 **Goal**: Environment-specific rendering is validated — browser devtools output with CSS styling, spinner lifecycle across all three renderers, and TTY cursor management

@@ -77,7 +77,11 @@ Plans:
   2. All WorkerMessage types (log, spin:*, opt:set/format/exclusive) are handled; unserializable args fall back gracefully
   3. Messages queued before transport is ready flush on connect; terminateWorker() kills worker and activates fallback
   4. Worker API surface (import from /worker) matches the main API surface
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 04-01-PLAN.md — Create worker-protocol.test.ts: mock node:child_process, test all WorkerMessage types and proxy serialisation (WORK-01..08)
+- [ ] 04-02-PLAN.md — Create worker-e2e.test.ts: terminateWorker() fallback + idempotence (WORK-09), WL API surface parity (API-01)
 
 ## Progress
 

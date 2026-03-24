@@ -1,0 +1,210 @@
+# Requirements: @lalex/console
+
+**Defined:** 2026-03-24
+**Core Value:** Reliable, structured logging that adapts its output format to the runtime environment — browser devtools, Node TTY, or CI — without any configuration from the consumer.
+
+## v1 Requirements
+
+Requirements for initial release. Each maps to roadmap phases.
+
+### Code Adjustment
+
+- [ ] **ADJ-01**: error and warn levels produce a call-site trace in browser mode (add to TRACE_LEVELS)
+
+### Test Infrastructure
+
+- [ ] **INFRA-01**: rstest configured with TypeScript ESM support via @rstest/adapter-rslib
+- [ ] **INFRA-02**: Shared test helpers for stdout capture (Node console mode)
+- [ ] **INFRA-03**: Shared test helpers for console spy capture (browser mode)
+- [ ] **INFRA-04**: Singleton registry reset utility for test isolation between tests
+- [ ] **INFRA-05**: rstest browser mode configured with Playwright for browser tests
+- [ ] **INFRA-06**: Test scripts added to package.json (test, test:browser, test:node)
+
+### Core Logging Tests
+
+- [ ] **CORE-01**: All 11 level methods (emerg→wth) dispatch to the correct console method
+- [ ] **CORE-02**: Level filtering suppresses levels below the configured threshold
+- [ ] **CORE-03**: Logger.enabled toggle suppresses all output when false
+- [ ] **CORE-04**: JSON format produces valid, parseable JSON with correct fields (time, level, severity, msg, data)
+- [ ] **CORE-05**: logfmt format produces valid key=value pairs with correct field ordering
+- [ ] **CORE-06**: pretty format renders ANSI-prefixed human-readable lines with correct prefix structure
+- [ ] **CORE-07**: Browser output uses %c CSS format strings and correct console methods
+- [ ] **CORE-08**: TRACE_LEVELS (emerg, alert, crit, error, warn) use console.groupCollapsed in browser mode
+
+### Prefix Pipeline Tests
+
+- [ ] **PREFIX-01**: Level badge displays correct label text and ANSI color per level
+- [ ] **PREFIX-02**: Date prefix produces ISO 8601 timestamp when Logger.date = true
+- [ ] **PREFIX-03**: Caller prefix shows file:line:col when Logger.stack = true
+- [ ] **PREFIX-04**: Scope name appears in prefix for scoped loggers
+
+### Options & Configuration Tests
+
+- [ ] **OPT-01**: All option getters/setters (enabled, level, pad, color, date, stack, uid, inspect) read/write correctly
+- [ ] **OPT-02**: Option cascade applies priority: own options > root options > defaults
+- [ ] **OPT-03**: Level cascading picks the strictest (lowest numeric) between scope and root
+- [ ] **OPT-04**: util.inspect integration forwards inspect options correctly in Node mode
+
+### Scoped Logger Tests
+
+- [ ] **SCOPE-01**: Logger.scope('name') returns a ScopeLogger with all level methods and scope property
+- [ ] **SCOPE-02**: Same scope name returns cached instance (identity equality)
+- [ ] **SCOPE-03**: Scope options inherit from root and can be overridden independently
+- [ ] **SCOPE-04**: Scope mutations do not leak to other scopes or root
+
+### Mixin Tests
+
+- [ ] **MIX-01**: Logger.once() emits exactly once per call-site regardless of repeat calls
+- [ ] **MIX-02**: Logger.limit(n) emits exactly n times per call-site
+- [ ] **MIX-03**: Logger.limit() with explicit key groups disparate call-sites under one counter
+- [ ] **MIX-04**: Logger.options({...}).level() applies overrides to one call only, then reverts
+
+### Singleton & Registry Tests
+
+- [ ] **REG-01**: Logger is the same instance across multiple imports
+- [ ] **REG-02**: globalThis registry survives across module loads
+- [ ] **REG-03**: Logger.exclusive = true silences all other loggers; release restores them
+- [ ] **REG-04**: Logger.format getter/setter reads/writes registry.format and changes output
+
+### Console Integration Tests
+
+- [ ] **CONS-01**: patch() replaces native console methods (log, info, debug, warn, error) with logger methods
+- [ ] **CONS-02**: unpatch() restores original console methods
+- [ ] **CONS-03**: bypass(console) redirects output to custom console object
+- [ ] **CONS-04**: restore() reverts bypass to system console
+
+### Spinner Tests
+
+- [ ] **SPIN-01**: Spinner lifecycle: start → update → success/fail/stop transitions work correctly
+- [ ] **SPIN-02**: Stopped spinner is terminal — success/fail after stop is idempotent
+- [ ] **SPIN-03**: autoStart: true starts immediately, false requires explicit .start()
+- [ ] **SPIN-04**: exec() wraps a promise — resolved → success, rejected → fail + re-throw
+- [ ] **SPIN-05**: duration: true shows elapsed time in success/fail message
+- [ ] **SPIN-06**: progress: true enables progress updates via .update() with ratio and {done, total}
+- [ ] **SPIN-07**: TTY renderer manages cursor, multi-spinner layout, and log queue
+- [ ] **SPIN-08**: Console renderer (non-TTY) emits ANSI icon badges without cursor control
+- [ ] **SPIN-09**: Browser renderer uses CSS-styled badges and progress bars for devtools
+
+### Worker Proxy Tests
+
+- [ ] **WORK-01**: Worker proxy log dispatch sends WorkerMessage and worker emits correctly
+- [ ] **WORK-02**: All WorkerMessage types handled: log, spin:*, opt:set, opt:format, opt:exclusive
+- [ ] **WORK-03**: Unserializable args fall back to String() then '[unserializable]'
+- [ ] **WORK-04**: Messages before transport ready are queued and flushed on connect
+- [ ] **WORK-05**: Worker proxy scoped loggers send scope info in WorkerMessage
+- [ ] **WORK-06**: Worker proxy option sync mirrors to proxy state + sends opt:set message
+- [ ] **WORK-07**: Worker proxy rate-limiting (once/limit) sends key/max over IPC
+- [ ] **WORK-08**: Worker proxy spinner lifecycle (spin:start/update/success/fail) messages work over IPC
+- [ ] **WORK-09**: terminateWorker() kills worker, activates fallback logger, is idempotent
+
+### Worker API Alignment
+
+- [ ] **API-01**: import {L} from '@lalex/console/worker' exposes the same public API surface as import {L} from '@lalex/console'
+- [ ] **API-02**: README and JSDoc updated to document unified API with only import path difference
+
+## v2 Requirements
+
+Deferred to future release. Tracked but not in current roadmap.
+
+### Cross-Environment
+
+- **ENV-01**: Environment detection tests (isNode, isBrowser, isNodeTTY, isMainBrowser, isWebWorker)
+- **ENV-02**: UID tracking tests (uid: true prepends {_uid: #N})
+- **ENV-03**: Color toggle tests (color: false suppresses ANSI)
+- **ENV-04**: Pad toggle tests (pad: true pads labels to uniform width)
+
+### Coverage
+
+- **COV-01**: Istanbul coverage thresholds configured and enforced
+- **COV-02**: CI script integration for test runs
+
+## Out of Scope
+
+Explicitly excluded. Documented to prevent scope creep.
+
+| Feature | Reason |
+|---------|--------|
+| Exact ANSI escape code assertions | Brittle; depends on terminal capabilities; snapshot for regression instead |
+| Exact spinner frame character assertions | Implementation detail; frame set may change |
+| Timer precision assertions | setTimeout is not precise; CI machines vary |
+| TTY cursor position arithmetic | Couples to terminal size; breaks on layout changes |
+| Private/internal function unit tests | Over-mocking; test through public API instead |
+| Full E2E worker process tests in CI | Slow, flaky; test protocol + message handling separately |
+| npm publishing workflow | Already planned separately |
+| Git tags / version bumps | Handled by existing upversion script |
+| Major API refactoring | Only light adjustments (TRACE_LEVELS + worker API alignment) |
+
+## Traceability
+
+Which phases cover which requirements. Updated during roadmap creation.
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| ADJ-01 | — | Pending |
+| INFRA-01 | — | Pending |
+| INFRA-02 | — | Pending |
+| INFRA-03 | — | Pending |
+| INFRA-04 | — | Pending |
+| INFRA-05 | — | Pending |
+| INFRA-06 | — | Pending |
+| CORE-01 | — | Pending |
+| CORE-02 | — | Pending |
+| CORE-03 | — | Pending |
+| CORE-04 | — | Pending |
+| CORE-05 | — | Pending |
+| CORE-06 | — | Pending |
+| CORE-07 | — | Pending |
+| CORE-08 | — | Pending |
+| PREFIX-01 | — | Pending |
+| PREFIX-02 | — | Pending |
+| PREFIX-03 | — | Pending |
+| PREFIX-04 | — | Pending |
+| OPT-01 | — | Pending |
+| OPT-02 | — | Pending |
+| OPT-03 | — | Pending |
+| OPT-04 | — | Pending |
+| SCOPE-01 | — | Pending |
+| SCOPE-02 | — | Pending |
+| SCOPE-03 | — | Pending |
+| SCOPE-04 | — | Pending |
+| MIX-01 | — | Pending |
+| MIX-02 | — | Pending |
+| MIX-03 | — | Pending |
+| MIX-04 | — | Pending |
+| REG-01 | — | Pending |
+| REG-02 | — | Pending |
+| REG-03 | — | Pending |
+| REG-04 | — | Pending |
+| CONS-01 | — | Pending |
+| CONS-02 | — | Pending |
+| CONS-03 | — | Pending |
+| CONS-04 | — | Pending |
+| SPIN-01 | — | Pending |
+| SPIN-02 | — | Pending |
+| SPIN-03 | — | Pending |
+| SPIN-04 | — | Pending |
+| SPIN-05 | — | Pending |
+| SPIN-06 | — | Pending |
+| SPIN-07 | — | Pending |
+| SPIN-08 | — | Pending |
+| SPIN-09 | — | Pending |
+| WORK-01 | — | Pending |
+| WORK-02 | — | Pending |
+| WORK-03 | — | Pending |
+| WORK-04 | — | Pending |
+| WORK-05 | — | Pending |
+| WORK-06 | — | Pending |
+| WORK-07 | — | Pending |
+| WORK-08 | — | Pending |
+| WORK-09 | — | Pending |
+| API-01 | — | Pending |
+| API-02 | — | Pending |
+
+**Coverage:**
+- v1 requirements: 53 total
+- Mapped to phases: 0
+- Unmapped: 53 ⚠️
+
+---
+*Requirements defined: 2026-03-24*
+*Last updated: 2026-03-24 after initialization*

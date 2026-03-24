@@ -61,7 +61,12 @@ Plans:
   2. Spinner lifecycle (start → update → success/fail/stop) works correctly with autoStart, exec(), duration, and progress
   3. TTY renderer manages cursor control, multi-spinner layout, and log queue
   4. Console and browser renderers emit environment-appropriate output (ANSI badges for console, CSS badges for browser)
-**Plans**: TBD
+**Plans:** 3 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Create spinner-node.test.ts: console spinner lifecycle, terminal state, autoStart, exec, duration, progress, ANSI badges (SPIN-01..06, SPIN-08)
+- [ ] 03-02-PLAN.md — Create spinner-tty.test.ts: TTY cursor management, tick output, log queue, multi-spinner (SPIN-07)
+- [ ] 03-03-PLAN.md — Create browser.test.ts: %c CSS format strings, groupCollapsed for TRACE_LEVELS, browser spinner badges (CORE-07, CORE-08, SPIN-09)
 
 ### Phase 4: Worker Proxy & API Alignment
 **Goal**: Worker proxy communication is validated and the worker API surface matches the main API

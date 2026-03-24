@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Ready to execute
-stopped_at: Completed 02-04-PLAN.md
-last_updated: "2026-03-24T16:09:22.384Z"
+status: Phase complete — ready for verification
+stopped_at: Completed 02-05-PLAN.md
+last_updated: "2026-03-24T16:26:35.513Z"
 progress:
   total_phases: 4
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 6
-  completed_plans: 5
+  completed_plans: 6
 ---
 
 # Project State
@@ -50,6 +50,7 @@ Plan: 5 of 5
 | Phase 02-core-logger-tests P02 | 3 | 2 tasks | 2 files |
 | Phase 02-core-logger-tests P03 | 8 | 2 tasks | 2 files |
 | Phase 02 P04 | 57s | 2 tasks | 2 files |
+| Phase 02 P05 | 475 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -67,6 +68,8 @@ Recent decisions affecting current work:
 - [Phase 02]: CallerPrefix is structuredOnly=true — PREFIX-03 tests target JSON format
 - [Phase 02]: Pretty format used for scope date-cascade tests since JSON always emits time field regardless of date option
 - [Phase 02]: loop-at-same-line pattern for stable once()/limit() call-site key; separate captureAll() per call for MIX-03 drop assertion
+- [Phase 02]: L.exclusive boolean setter (true/false) is the correct API; plan used non-boolean object assignment
+- [Phase 02]: bypass() requires real Console(Writable) spy; fixed callOnActiveConsole to correctly redirect output without creating patch-loop
 
 ### Pending Todos
 
@@ -78,6 +81,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-24T16:09:22.382Z
-Stopped at: Completed 02-04-PLAN.md
+Last session: 2026-03-24T16:26:35.511Z
+Stopped at: Completed 02-05-PLAN.md
 Resume file: None

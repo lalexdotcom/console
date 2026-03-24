@@ -61,17 +61,17 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Singleton & Registry Tests
 
-- [ ] **REG-01**: Logger is the same instance across multiple imports
-- [ ] **REG-02**: globalThis registry survives across module loads
-- [ ] **REG-03**: Logger.exclusive = true silences all other loggers; release restores them
-- [ ] **REG-04**: Logger.format getter/setter reads/writes registry.format and changes output
+- [x] **REG-01**: Logger is the same instance across multiple imports
+- [x] **REG-02**: globalThis registry survives across module loads
+- [x] **REG-03**: Logger.exclusive = true silences all other loggers; release restores them
+- [x] **REG-04**: Logger.format getter/setter reads/writes registry.format and changes output
 
 ### Console Integration Tests
 
-- [ ] **CONS-01**: patch() replaces native console methods (log, info, debug, warn, error) with logger methods
-- [ ] **CONS-02**: unpatch() restores original console methods
-- [ ] **CONS-03**: bypass(console) redirects output to custom console object
-- [ ] **CONS-04**: restore() reverts bypass to system console
+- [x] **CONS-01**: patch() replaces native console methods (log, info, debug, warn, error) with logger methods
+- [x] **CONS-02**: unpatch() restores original console methods
+- [x] **CONS-03**: bypass(console) redirects output to custom console object
+- [x] **CONS-04**: restore() reverts bypass to system console
 
 ### Spinner Tests
 
@@ -171,14 +171,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | MIX-02 | Phase 2 | Complete |
 | MIX-03 | Phase 2 | Complete |
 | MIX-04 | Phase 2 | Complete |
-| REG-01 | Phase 2 | Pending |
-| REG-02 | Phase 2 | Pending |
-| REG-03 | Phase 2 | Pending |
-| REG-04 | Phase 2 | Pending |
-| CONS-01 | Phase 2 | Pending |
-| CONS-02 | Phase 2 | Pending |
-| CONS-03 | Phase 2 | Pending |
-| CONS-04 | Phase 2 | Pending |
+| REG-01 | Phase 2 | Complete |
+| REG-02 | Phase 2 | Complete |
+| REG-03 | Phase 2 | Complete |
+| REG-04 | Phase 2 | Complete |
+| CONS-01 | Phase 2 | Complete |
+| CONS-02 | Phase 2 | Complete |
+| CONS-03 | Phase 2 | Complete |
+| CONS-04 | Phase 2 | Complete |
 | SPIN-01 | Phase 3 | Pending |
 | SPIN-02 | Phase 3 | Pending |
 | SPIN-03 | Phase 3 | Pending |

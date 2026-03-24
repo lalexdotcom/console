@@ -24,13 +24,13 @@ Reliable, structured logging that adapts its output format to the runtime enviro
 - ✓ Singleton registry on globalThis with cross-module dedup — existing
 - ✓ Stack trace display for emerg/alert/crit levels (TRACE_LEVELS) — existing
 - ✓ Zero runtime dependencies — existing
+- ✓ rstest testing framework configured — validated in Phase 1
+- ✓ Exhaustive test suite: console mode (stdout capture, json/logfmt/pretty) — validated in Phase 2
 
 ### Active
 
 - [ ] Add error and warn to TRACE_LEVELS for browser stack trace display
-- [ ] Set up rstest testing framework from scratch
 - [ ] Exhaustive test suite: browser mode (rstest browser mode + console capture)
-- [ ] Exhaustive test suite: console mode (stdout capture, json/logfmt/pretty)
 - [ ] Exhaustive test suite: TTY mode (hybrid: CI-testable + local visual validation)
 
 ### Out of Scope
@@ -61,7 +61,9 @@ Reliable, structured logging that adapts its output format to the runtime enviro
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| rstest as test framework | Part of the Rspack ecosystem (Rslib/Rsbuild), native TypeScript support | — Pending |
+| rstest as test framework | Part of the Rspack ecosystem (Rslib/Rsbuild), native TypeScript support | Validated in Phase 1 |
+| Console mode tests via stdout capture | captureAll() intercepts process.stdout/stderr; parseLogfmt() is the exact inverse of JSON.stringify serialization | Validated in Phase 2 |
+| Dynamic timestamps replaced with placeholder | Stable CI snapshots require deterministic output; timestamps replaced before toMatchInlineSnapshot() | Validated in Phase 2 |
 | Hybrid TTY testing | Pure CI automation isn't feasible for animated TTY output; combine ANSI snapshots with local visual checks | — Pending |
 | Browser tests via rstest browser mode | Native console capture, real browser environment | — Pending |
 
@@ -83,4 +85,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-24 after initialization*
+*Last updated: 2026-03-24 — Phase 2 (Core Logger Tests) complete — 9 test files, 105 tests passing*

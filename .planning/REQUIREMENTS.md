@@ -140,70 +140,70 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ADJ-01 | — | Pending |
-| INFRA-01 | — | Pending |
-| INFRA-02 | — | Pending |
-| INFRA-03 | — | Pending |
-| INFRA-04 | — | Pending |
-| INFRA-05 | — | Pending |
-| INFRA-06 | — | Pending |
-| CORE-01 | — | Pending |
-| CORE-02 | — | Pending |
-| CORE-03 | — | Pending |
-| CORE-04 | — | Pending |
-| CORE-05 | — | Pending |
-| CORE-06 | — | Pending |
-| CORE-07 | — | Pending |
-| CORE-08 | — | Pending |
-| PREFIX-01 | — | Pending |
-| PREFIX-02 | — | Pending |
-| PREFIX-03 | — | Pending |
-| PREFIX-04 | — | Pending |
-| OPT-01 | — | Pending |
-| OPT-02 | — | Pending |
-| OPT-03 | — | Pending |
-| OPT-04 | — | Pending |
-| SCOPE-01 | — | Pending |
-| SCOPE-02 | — | Pending |
-| SCOPE-03 | — | Pending |
-| SCOPE-04 | — | Pending |
-| MIX-01 | — | Pending |
-| MIX-02 | — | Pending |
-| MIX-03 | — | Pending |
-| MIX-04 | — | Pending |
-| REG-01 | — | Pending |
-| REG-02 | — | Pending |
-| REG-03 | — | Pending |
-| REG-04 | — | Pending |
-| CONS-01 | — | Pending |
-| CONS-02 | — | Pending |
-| CONS-03 | — | Pending |
-| CONS-04 | — | Pending |
-| SPIN-01 | — | Pending |
-| SPIN-02 | — | Pending |
-| SPIN-03 | — | Pending |
-| SPIN-04 | — | Pending |
-| SPIN-05 | — | Pending |
-| SPIN-06 | — | Pending |
-| SPIN-07 | — | Pending |
-| SPIN-08 | — | Pending |
-| SPIN-09 | — | Pending |
-| WORK-01 | — | Pending |
-| WORK-02 | — | Pending |
-| WORK-03 | — | Pending |
-| WORK-04 | — | Pending |
-| WORK-05 | — | Pending |
-| WORK-06 | — | Pending |
-| WORK-07 | — | Pending |
-| WORK-08 | — | Pending |
-| WORK-09 | — | Pending |
-| API-01 | — | Pending |
-| API-02 | — | Pending |
+| ADJ-01 | Phase 1 | Pending |
+| INFRA-01 | Phase 1 | Pending |
+| INFRA-02 | Phase 1 | Pending |
+| INFRA-03 | Phase 1 | Pending |
+| INFRA-04 | Phase 1 | Pending |
+| INFRA-05 | Phase 1 | Pending |
+| INFRA-06 | Phase 1 | Pending |
+| CORE-01 | Phase 2 | Pending |
+| CORE-02 | Phase 2 | Pending |
+| CORE-03 | Phase 2 | Pending |
+| CORE-04 | Phase 2 | Pending |
+| CORE-05 | Phase 2 | Pending |
+| CORE-06 | Phase 2 | Pending |
+| CORE-07 | Phase 3 | Pending |
+| CORE-08 | Phase 3 | Pending |
+| PREFIX-01 | Phase 2 | Pending |
+| PREFIX-02 | Phase 2 | Pending |
+| PREFIX-03 | Phase 2 | Pending |
+| PREFIX-04 | Phase 2 | Pending |
+| OPT-01 | Phase 2 | Pending |
+| OPT-02 | Phase 2 | Pending |
+| OPT-03 | Phase 2 | Pending |
+| OPT-04 | Phase 2 | Pending |
+| SCOPE-01 | Phase 2 | Pending |
+| SCOPE-02 | Phase 2 | Pending |
+| SCOPE-03 | Phase 2 | Pending |
+| SCOPE-04 | Phase 2 | Pending |
+| MIX-01 | Phase 2 | Pending |
+| MIX-02 | Phase 2 | Pending |
+| MIX-03 | Phase 2 | Pending |
+| MIX-04 | Phase 2 | Pending |
+| REG-01 | Phase 2 | Pending |
+| REG-02 | Phase 2 | Pending |
+| REG-03 | Phase 2 | Pending |
+| REG-04 | Phase 2 | Pending |
+| CONS-01 | Phase 2 | Pending |
+| CONS-02 | Phase 2 | Pending |
+| CONS-03 | Phase 2 | Pending |
+| CONS-04 | Phase 2 | Pending |
+| SPIN-01 | Phase 3 | Pending |
+| SPIN-02 | Phase 3 | Pending |
+| SPIN-03 | Phase 3 | Pending |
+| SPIN-04 | Phase 3 | Pending |
+| SPIN-05 | Phase 3 | Pending |
+| SPIN-06 | Phase 3 | Pending |
+| SPIN-07 | Phase 3 | Pending |
+| SPIN-08 | Phase 3 | Pending |
+| SPIN-09 | Phase 3 | Pending |
+| WORK-01 | Phase 4 | Pending |
+| WORK-02 | Phase 4 | Pending |
+| WORK-03 | Phase 4 | Pending |
+| WORK-04 | Phase 4 | Pending |
+| WORK-05 | Phase 4 | Pending |
+| WORK-06 | Phase 4 | Pending |
+| WORK-07 | Phase 4 | Pending |
+| WORK-08 | Phase 4 | Pending |
+| WORK-09 | Phase 4 | Pending |
+| API-01 | Phase 4 | Pending |
+| API-02 | Phase 4 | Pending |
 
 **Coverage:**
-- v1 requirements: 53 total
-- Mapped to phases: 0
-- Unmapped: 53 ⚠️
+- v1 requirements: 59 total
+- Mapped to phases: 59 ✓
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-24*

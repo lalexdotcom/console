@@ -47,7 +47,7 @@ Plans:
 
 Plans:
 - [x] 02-01-PLAN.md — Create shared test helpers: captureAll() (stdout+stderr) and parseLogfmt()
-- [ ] 02-02-PLAN.md — Write levels.test.ts (CORE-01, 02, 03) + formats.test.ts (CORE-04, 05, 06)
+- [x] 02-02-PLAN.md — Write levels.test.ts (CORE-01, 02, 03) + formats.test.ts (CORE-04, 05, 06)
 - [ ] 02-03-PLAN.md — Write prefix.test.ts (PREFIX-01–04) + options.test.ts (OPT-01–04)
 - [ ] 02-04-PLAN.md — Write scopes.test.ts (SCOPE-01–04) + mixins.test.ts (MIX-01–04)
 - [ ] 02-05-PLAN.md — Write registry.test.ts (REG-01–04) + console.test.ts (CONS-01–04)

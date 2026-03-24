@@ -23,11 +23,11 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Core Logging Tests
 
 - [x] **CORE-01**: All 11 level methods (emerg→wth) dispatch to the correct console method
-- [ ] **CORE-02**: Level filtering suppresses levels below the configured threshold
-- [ ] **CORE-03**: Logger.enabled toggle suppresses all output when false
-- [ ] **CORE-04**: JSON format produces valid, parseable JSON with correct fields (time, level, severity, msg, data)
-- [ ] **CORE-05**: logfmt format produces valid key=value pairs with correct field ordering
-- [ ] **CORE-06**: pretty format renders ANSI-prefixed human-readable lines with correct prefix structure
+- [x] **CORE-02**: Level filtering suppresses levels below the configured threshold
+- [x] **CORE-03**: Logger.enabled toggle suppresses all output when false
+- [x] **CORE-04**: JSON format produces valid, parseable JSON with correct fields (time, level, severity, msg, data)
+- [x] **CORE-05**: logfmt format produces valid key=value pairs with correct field ordering
+- [x] **CORE-06**: pretty format renders ANSI-prefixed human-readable lines with correct prefix structure
 - [ ] **CORE-07**: Browser output uses %c CSS format strings and correct console methods
 - [ ] **CORE-08**: TRACE_LEVELS (emerg, alert, crit, error, warn) use console.groupCollapsed in browser mode
 
@@ -148,11 +148,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INFRA-05 | Phase 1 | Pending |
 | INFRA-06 | Phase 1 | Pending |
 | CORE-01 | Phase 2 | Complete |
-| CORE-02 | Phase 2 | Pending |
-| CORE-03 | Phase 2 | Pending |
-| CORE-04 | Phase 2 | Pending |
-| CORE-05 | Phase 2 | Pending |
-| CORE-06 | Phase 2 | Pending |
+| CORE-02 | Phase 2 | Complete |
+| CORE-03 | Phase 2 | Complete |
+| CORE-04 | Phase 2 | Complete |
+| CORE-05 | Phase 2 | Complete |
+| CORE-06 | Phase 2 | Complete |
 | CORE-07 | Phase 3 | Pending |
 | CORE-08 | Phase 3 | Pending |
 | PREFIX-01 | Phase 2 | Pending |

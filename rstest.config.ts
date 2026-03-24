@@ -1,3 +1,4 @@
+import { pluginNodePolyfill } from '@rsbuild/plugin-node-polyfill';
 import { withRslibConfig } from '@rstest/adapter-rslib';
 import { defineConfig } from '@rstest/core';
 
@@ -15,7 +16,14 @@ export default defineConfig({
     },
     {
       name: 'browser',
-      extends: withRslibConfig(),
+      extends: withRslibConfig({
+        modifyLibConfig: (config) => ({
+          ...config,
+          // Polyfill Node built-ins (node:util etc.) required by ttyRenderer
+          // when bundling the logger source for the Playwright browser project.
+          plugins: [...(config.plugins ?? []), pluginNodePolyfill()],
+        }),
+      }),
       include: ['tests/browser/**/*.test.ts'],
       setupFiles: ['./tests/helpers/reset.ts'],
       browser: {

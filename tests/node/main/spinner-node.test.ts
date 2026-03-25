@@ -80,7 +80,8 @@ describe('spinner lifecycle (SPIN-01)', () => {
   });
 
   test('stop() terminates the spinner without emitting output', () => {
-    const sp = L.scope('spin-01-stop').info.spin('task');
+    let sp!: LoggerSpinner;
+    captureAll(() => { sp = L.scope('spin-01-stop').info.spin('task'); });
     const { stdout } = captureAll(() => sp.stop());
     expect(stdout).toHaveLength(0);
   });
@@ -90,8 +91,8 @@ describe('spinner lifecycle (SPIN-01)', () => {
 
 describe('stopped terminal state (SPIN-02)', () => {
   test('success/fail after stop() emits zero additional lines', () => {
-    const sp = L.scope('spin-02-after-stop').info.spin('task');
-    sp.stop();
+    let sp!: LoggerSpinner;
+    captureAll(() => { sp = L.scope('spin-02-after-stop').info.spin('task'); sp.stop(); });
     const { stdout: s1 } = captureAll(() => sp.success());
     const { stdout: s2 } = captureAll(() => sp.fail());
     expect(s1).toHaveLength(0);
@@ -99,7 +100,8 @@ describe('stopped terminal state (SPIN-02)', () => {
   });
 
   test('calling success() twice is idempotent', () => {
-    const sp = L.scope('spin-02-double-success').info.spin('task');
+    let sp!: LoggerSpinner;
+    captureAll(() => { sp = L.scope('spin-02-double-success').info.spin('task'); });
     captureAll(() => sp.success('first'));
     const { stdout } = captureAll(() => sp.success('second'));
     expect(stdout).toHaveLength(0);
@@ -246,7 +248,8 @@ describe('console renderer bracket badges (SPIN-08)', () => {
   });
 
   test('error-level spinner routes final line to stderr', () => {
-    const sp = L.scope('spin-08-stderr').error.spin('loading');
+    let sp!: LoggerSpinner;
+    captureAll(() => { sp = L.scope('spin-08-stderr').error.spin('loading'); });
     const { stderr } = captureAll(() => sp.success('done'));
     expect(stderr.some(l => l.includes('✔'))).toBe(true);
   });

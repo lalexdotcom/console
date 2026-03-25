@@ -237,44 +237,44 @@ Requirements for the Consolidation milestone. Phases numbered from 05 onwards.
 
 ### API Alignment
 
-- [ ] **ALIGN-01**: `@lalex/console/worker` exports `L` as `RootLogger` singleton — identical type to main `L`
-- [ ] **ALIGN-02**: `@lalex/console/worker` exports `Logger` as the `RootLogger` constructor type — identical to main `Logger`
-- [ ] **ALIGN-03**: `terminateWorker` renamed to `releaseWorker` in `src/worker/index.ts` and in the `/worker` public exports
-- [ ] **ALIGN-04**: `WL` removed from `/worker` public exports (breaking)
-- [ ] **ALIGN-05**: `WorkerLogger` removed from `/worker` public exports (breaking)
-- [ ] **ALIGN-06**: `terminateWorker` removed from `/worker` public exports (breaking)
-- [ ] **ALIGN-07**: `releaseWorker()` bug fixed — `_terminateTransport` is correctly assigned so the fork is actually killed
+- [x] **ALIGN-01**: `@lalex/console/worker` exports `L` as `RootLogger` singleton — identical type to main `L`
+- [x] **ALIGN-02**: `@lalex/console/worker` exports `Logger` as the `RootLogger` constructor type — identical to main `Logger`
+- [x] **ALIGN-03**: `terminateWorker` renamed to `releaseWorker` in `src/worker/index.ts` and in the `/worker` public exports
+- [x] **ALIGN-04**: `WL` removed from `/worker` public exports (breaking)
+- [x] **ALIGN-05**: `WorkerLogger` removed from `/worker` public exports (breaking)
+- [x] **ALIGN-06**: `terminateWorker` removed from `/worker` public exports (breaking)
+- [x] **ALIGN-07**: `releaseWorker()` bug fixed — `_terminateTransport` is correctly assigned so the fork is actually killed
 
 ### Worker Path Resolution
 
-- [ ] **WORKER-01**: Worker script filename constant defined once in `src/worker/const.ts` — single source of truth
-- [ ] **WORKER-02**: `rslib.config.ts` imports the filename constant from `src/worker/const.ts` — no hardcoded string duplication
-- [ ] **WORKER-03**: `src/worker/index.ts` derives the runtime script path from the shared constant with extension switching (`import.meta.url.endsWith('.ts')`) — no `source.define`, no `typeof __WORKER_SCRIPT__` guard
-- [ ] **WORKER-04**: `ERR_UNKNOWN_FILE_EXTENSION` no longer occurs in rstest — no tsx fallback needed
+- [x] **WORKER-01**: Worker script filename constant defined once in `src/worker/const.ts` — single source of truth
+- [x] **WORKER-02**: `rslib.config.ts` imports the filename constant from `src/worker/const.ts` — no hardcoded string duplication
+- [x] **WORKER-03**: `src/worker/index.ts` derives the runtime script path from the shared constant with extension switching (`import.meta.url.endsWith('.ts')`) — no `source.define`, no `typeof __WORKER_SCRIPT__` guard
+- [x] **WORKER-04**: `ERR_UNKNOWN_FILE_EXTENSION` no longer occurs in rstest — no tsx fallback needed
 
 ### Browser Consumer Compatibility
 
-- [ ] **BROWSER-01**: A browser-only consumer can bundle `@lalex/console` (main entry) without `node:*` import errors
-- [ ] **BROWSER-02**: `package.json` `exports` map exposes a `"browser"` condition for the main entry that excludes Node-only code paths
-- [ ] **BROWSER-03**: Tree-shaking verified — the browser bundle contains no `node:child_process`, `node:path`, `node:url` references
+- [x] **BROWSER-01**: A browser-only consumer can bundle `@lalex/console` (main entry) without `node:*` import errors
+- [x] **BROWSER-02**: `package.json` `exports` map exposes a `"browser"` condition for the main entry that excludes Node-only code paths
+- [x] **BROWSER-03**: Tree-shaking verified — the browser bundle contains no `node:child_process`, `node:path`, `node:url` references
 
 ### Build Validation
 
-- [ ] **BUILD-01**: `dist/` structure matches all `exports` entries in `package.json` (CJS/ESM × runtime + types)
-- [ ] **BUILD-02**: DTS output is present and correct for all public entry points
-- [ ] **BUILD-03**: `pnpm run build` exits cleanly with no errors or warnings
+- [x] **BUILD-01**: `dist/` structure matches all `exports` entries in `package.json` (CJS/ESM × runtime + types)
+- [x] **BUILD-02**: DTS output is present and correct for all public entry points
+- [x] **BUILD-03**: `pnpm run build` exits cleanly with no errors or warnings
 
 ### Test Cleanup
 
-- [ ] **TEST-01**: `tests/node/main/smoke.test.ts` removed — coverage absorbed into targeted tests
-- [ ] **TEST-02**: `tests/browser/main/smoke.test.ts` removed — coverage absorbed into browser tests
+- [x] **TEST-01**: `tests/node/main/smoke.test.ts` removed — coverage absorbed into targeted tests
+- [x] **TEST-02**: `tests/browser/main/smoke.test.ts` removed — coverage absorbed into browser tests
 - [ ] **TEST-03**: rstest builtins audited — custom helpers replaced where rstest 0.9.x provides an equivalent
 - [ ] **TEST-04**: Worker mock pattern in `worker-protocol.test.ts` simplified if a cleaner alternative to `__non_webpack_require__` is available in rstest 0.9.x
 - [ ] **TEST-05**: `releaseWorker()` covered by E2E test (replaces the `terminateWorker` / WORK-09 scope)
 
 ### Version
 
-- [ ] **VERSION-01**: `package.json` version set to `3.0.0-rc.0` at end of milestone
+- [x] **VERSION-01**: `package.json` version set to `3.0.0-rc.0` at end of milestone
 
 ### Shared Test Battery
 
@@ -317,3 +317,42 @@ Requirements for the Consolidation milestone. Phases numbered from 05 onwards.
 - Requirements in scope: 20 (ALIGN-01..07, WORKER-01..04, BROWSER-01..03, BUILD-01..03, TEST-01..02, VERSION-01)
 - Mapped to phases: 20 ✓
 - Deferred (future milestone): TEST-03, TEST-04, TEST-05, BATTERY-01..07
+
+---
+
+## v3.0.1 Requirements
+
+Requirements for the Shared Test Battery milestone. Phases numbered from 08 onwards.
+
+### Shared Test Battery
+
+- [ ] **BATTERY-01**: `TestAdapter` interface in `tests/common/adapter.ts` — `setup()`, `capture()`, `logger` property
+- [ ] **BATTERY-02**: Shared suites in `tests/common/*.suite.ts` — levels, formats, scopes, options, prefix, mixins, spinners; each exports `makeSuite(adapter)`
+- [ ] **BATTERY-03**: Adapters for `node-console` (json / logfmt / pretty) and `browser-main`
+- [ ] **BATTERY-04**: Worker adapters for `node-console-worker` and `node-tty-worker`; parity verified against main adapters
+- [ ] **BATTERY-05**: `rstest.config.ts` restructured into 3 independent projects: `browser`, `node-console`, `node-tty`
+- [ ] **BATTERY-06**: `tests/tty/env.ts` exports `isNodeTTY = true`; `node-tty` project uses `source.alias` to redirect `src/utils/env` → `tests/tty/env.ts`; no env-var in `src/`
+- [ ] **BATTERY-07**: Parity suite (`tests/common/parity.suite.ts`) asserts main ↔ worker output identical (timestamps stripped) for every shared case
+
+### Version
+
+- [ ] **VERSION-02**: `package.json` version set to `3.0.1-rc.0` at end of milestone
+
+---
+
+## v3.0.1 Requirement → Phase Mapping
+
+| Req | Phase | Status |
+|-----|-------|--------|
+| BATTERY-01 | Phase 08 | Pending |
+| BATTERY-02 | Phase 08 | Pending |
+| BATTERY-03 | Phase 08 | Pending |
+| BATTERY-04 | Phase 08 | Pending |
+| BATTERY-05 | Phase 08 | Pending |
+| BATTERY-06 | Phase 08 | Pending |
+| BATTERY-07 | Phase 08 | Pending |
+| VERSION-02 | Phase 08 | Pending |
+
+**Coverage (v3.0.1 — TBD phases):**
+- Requirements in scope: 8 (BATTERY-01..07, VERSION-02)
+- Mapped to phases: TBD (roadmapper pending)

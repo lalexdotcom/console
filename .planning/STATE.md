@@ -84,10 +84,11 @@ None yet.
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260325-jnb | Les types ne sont pas bons dans les tests. Vérifie aussi src | 2026-03-25 | 172a684 | [260325-jnb-les-types-ne-sont-pas-bons-dans-les-test](./quick/260325-jnb-les-types-ne-sont-pas-bons-dans-les-test/) |
+| 260325-jv8 | le output de rstest est pollué par des logs, comment n'avoir que les resultats? | 2026-03-25 | b6844f4 | [260325-jv8-le-output-de-rstest-est-pollu-par-des-lo](./quick/260325-jv8-le-output-de-rstest-est-pollu-par-des-lo/) |
 
 ## Session Continuity
 
-Last activity: 2026-03-25 - Completed quick task 260325-jnb: Les types ne sont pas bons dans les tests. Vérifie aussi src
+Last activity: 2026-03-25 - Completed quick task 260325-jv8: le output de rstest est pollué par des logs, comment n'avoir que les resultats?
 Last session: 2026-03-24T16:26:35.511Z
 Stopped at: Completed 02-05-PLAN.md
 Resume file: None

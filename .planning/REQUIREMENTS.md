@@ -207,4 +207,86 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 ---
 *Requirements defined: 2026-03-24*
-*Last updated: 2026-03-24 after initialization*
+*Last updated: 2026-03-25 — v3.0.0 requirements appended*
+
+---
+
+## v3.0.0 Requirements
+
+Requirements for the Consolidation milestone. Phases numbered from 05 onwards.
+
+### API Alignment
+
+- [ ] **ALIGN-01**: `@lalex/console/worker` exports `L` as `RootLogger` singleton — identical type to main `L`
+- [ ] **ALIGN-02**: `@lalex/console/worker` exports `Logger` as the `RootLogger` constructor type — identical to main `Logger`
+- [ ] **ALIGN-03**: `terminateWorker` renamed to `releaseWorker` in `src/worker/index.ts` and in the `/worker` public exports
+- [ ] **ALIGN-04**: `WL` removed from `/worker` public exports (breaking)
+- [ ] **ALIGN-05**: `WorkerLogger` removed from `/worker` public exports (breaking)
+- [ ] **ALIGN-06**: `terminateWorker` removed from `/worker` public exports (breaking)
+- [ ] **ALIGN-07**: `releaseWorker()` bug fixed — `_terminateTransport` is correctly assigned so the fork is actually killed
+
+### Worker Path Resolution
+
+- [ ] **WORKER-01**: Worker script filename constant defined once in `src/worker/const.ts` — single source of truth
+- [ ] **WORKER-02**: `rslib.config.ts` imports the filename constant from `src/worker/const.ts` — no hardcoded string duplication
+- [ ] **WORKER-03**: `src/worker/index.ts` derives the runtime script path from the shared constant with extension switching (`import.meta.url.endsWith('.ts')`) — no `source.define`, no `typeof __WORKER_SCRIPT__` guard
+- [ ] **WORKER-04**: `ERR_UNKNOWN_FILE_EXTENSION` no longer occurs in rstest — no tsx fallback needed
+
+### Browser Consumer Compatibility
+
+- [ ] **BROWSER-01**: A browser-only consumer can bundle `@lalex/console` (main entry) without `node:*` import errors
+- [ ] **BROWSER-02**: `package.json` `exports` map exposes a `"browser"` condition for the main entry that excludes Node-only code paths
+- [ ] **BROWSER-03**: Tree-shaking verified — the browser bundle contains no `node:child_process`, `node:path`, `node:url` references
+
+### Build Validation
+
+- [ ] **BUILD-01**: `dist/` structure matches all `exports` entries in `package.json` (CJS/ESM × runtime + types)
+- [ ] **BUILD-02**: DTS output is present and correct for all public entry points
+- [ ] **BUILD-03**: `pnpm run build` exits cleanly with no errors or warnings
+
+### Test Cleanup
+
+- [ ] **TEST-01**: `tests/node/main/smoke.test.ts` removed — coverage absorbed into targeted tests
+- [ ] **TEST-02**: `tests/browser/main/smoke.test.ts` removed — coverage absorbed into browser tests
+- [ ] **TEST-03**: rstest builtins audited — custom helpers replaced where rstest 0.9.x provides an equivalent
+- [ ] **TEST-04**: Worker mock pattern in `worker-protocol.test.ts` simplified if a cleaner alternative to `__non_webpack_require__` is available in rstest 0.9.x
+- [ ] **TEST-05**: `releaseWorker()` covered by E2E test (replaces the `terminateWorker` / WORK-09 scope)
+
+### Version
+
+- [ ] **VERSION-01**: `package.json` version set to `3.0.0-rc.0` at end of milestone
+
+---
+
+## v3.0.0 Requirement → Phase Mapping
+
+| Req | Phase | Status |
+|-----|-------|--------|
+| ALIGN-01 | Phase 05 | Pending |
+| ALIGN-02 | Phase 05 | Pending |
+| ALIGN-03 | Phase 05 | Pending |
+| ALIGN-04 | Phase 05 | Pending |
+| ALIGN-05 | Phase 05 | Pending |
+| ALIGN-06 | Phase 05 | Pending |
+| ALIGN-07 | Phase 05 | Pending |
+| WORKER-01 | Phase 05 | Pending |
+| WORKER-02 | Phase 05 | Pending |
+| WORKER-03 | Phase 05 | Pending |
+| WORKER-04 | Phase 05 | Pending |
+| BROWSER-01 | Phase 06 | Pending |
+| BROWSER-02 | Phase 06 | Pending |
+| BROWSER-03 | Phase 06 | Pending |
+| BUILD-01 | Phase 06 | Pending |
+| BUILD-02 | Phase 06 | Pending |
+| BUILD-03 | Phase 06 | Pending |
+| TEST-01 | Phase 07 | Pending |
+| TEST-02 | Phase 07 | Pending |
+| TEST-03 | Phase 07 | Pending |
+| TEST-04 | Phase 07 | Pending |
+| TEST-05 | Phase 07 | Pending |
+| VERSION-01 | Phase 07 | Pending |
+
+**Coverage:**
+- v3.0.0 requirements: 23 total
+- Mapped to phases: 23 ✓
+- Unmapped: 0

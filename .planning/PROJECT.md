@@ -8,6 +8,22 @@ A zero-dependency, environment-adaptive structured logger for Node.js and browse
 
 Reliable, structured logging that adapts its output format to the runtime environment — browser devtools, Node TTY, or CI — without any configuration from the consumer.
 
+## Current Milestone: v3.0.0 Consolidation
+
+**Goal:** Align the `/worker` API exactly on the main package API (same import, different path), fix the `releaseWorker` regression, simplify the worker script path resolution, ensure browser-consumer compatibility, clean up tests, and deliver a clean `3.0.0-rc.0` package.
+
+**Target features:**
+- `@lalex/console/worker` exports `L`, `Logger`, and `releaseWorker` — identical API surface to `@lalex/console`, only the import path differs
+- `releaseWorker()`: destroys the fork/Worker and transitions `L`/`Logger` to main-process mode (fallback) — restores a function that existed in a prior version
+- Worker script path: single TypeScript constant in `src/worker/const.ts`, imported by both `rslib.config.ts` and the runtime source — no `source.define` injection, no tsx fallback hack
+- Browser-consumer compatibility: packages can import `@lalex/console` in browser-only bundlers without Node module import errors
+- Test cleanup: smoke tests removed, custom helpers replaced by rstest native equivalents where available
+- `package.json` version bumped to `3.0.0-rc.0`
+
+**Breaking changes:** `WL`, `WorkerLogger`, and `terminateWorker` removed from `/worker` exports → semver major.
+
+---
+
 ## Requirements
 
 ### Validated
@@ -34,21 +50,37 @@ Reliable, structured logging that adapts its output format to the runtime enviro
 
 ### Active
 
-- [ ] API-02: README and JSDoc updated to document unified API with only import path difference
-- [ ] terminateWorker() process termination bug: `_terminateTransport` is never assigned, fork is not killed (known, deferred)
+- [ ] ALIGN-01: `/worker` exports `L` (same RootLogger singleton type as main `L`)
+- [ ] ALIGN-02: `/worker` exports `Logger` (same constructor type as main `Logger`)
+- [ ] ALIGN-03: `terminateWorker` renamed to `releaseWorker` in `/worker` exports — same behaviour, new name
+- [ ] ALIGN-04: `/worker` exports `releaseWorker()` under the new name; old `terminateWorker` export removed (breaking)
+- [ ] ALIGN-05: `WL` and `WorkerLogger` removed from `/worker` public exports (breaking)
+- [ ] WORKER-01: Worker script filename defined once in `src/worker/const.ts`, imported by both rslib.config.ts and src/worker/index.ts
+- [ ] WORKER-02: Runtime path resolution supports built (`.js`) and tsx (`.ts`) modes via `import.meta.url` extension detection
+- [ ] BROWSER-01: Package buildable by browser-only consumers without `node:*` import errors
+- [ ] BROWSER-02: `exports` map in `package.json` exposes `"browser"` condition for the `/worker` entry
+- [ ] BUILD-01: `dist/` structure matches all `exports` entries in `package.json` (types + runtime)
+- [ ] BUILD-02: Tree-shaking verified — browser consumers do not pull in Node-only code paths
+- [ ] TEST-01: Smoke tests removed (node + browser), coverage absorbed into meaningful tests
+- [ ] TEST-02: Custom test helpers audited against rstest builtins — replaced where rstest provides equivalent
+- [ ] TEST-03: Worker mock pattern simplified if rstest 0.9.x provides a cleaner alternative to `__non_webpack_require__`
+- [ ] TEST-04: `releaseWorker()` test coverage (replaces terminateWorker / WORK-09 scope)
+- [ ] VERSION-01: `package.json` version set to `3.0.0-rc.0` at end of milestone
 
 ### Out of Scope
 
-- npm publishing workflow — already planned separately
-- Git tag creation / version bumps — handled by existing `upversion` script
-- Major API refactoring — only light adjustments
+- npm publishing workflow — handled by dedicated tooling
+- Git tag creation / version bumps — handled by `upversion` script; **never git-tag manually**
+- Full internal rename of WL/WorkerLogger internals (only public exports change)
 
 ## Context
 
-- **Brownfield project**: Fully functional library — exhaustive test suite now shipped (v1.0)
+- **Brownfield project**: Fully functional library — exhaustive test suite shipped (v1.0), now entering Consolidation (v3.0.0)
 - **171 tests passing** across 15 test files: node/main (13 files), tty/main (1 file), browser/main (1 file)
 - **Stack trace adjustment shipped**: `error` and `warn` added to `TRACE_LEVELS` in `src/levels.ts`
-- **Known bug**: `_terminateTransport` in `src/worker/index.ts` is never assigned — `terminateWorker()` does NOT kill the forked child process. Only fallback activation happens. Deferred to v1.1.
+- **Known bug (active)**: `_terminateTransport` in `src/worker/index.ts` is never assigned — `terminateWorker()` (soon `releaseWorker()`) does NOT kill the forked child process. The rename to `releaseWorker` and the kill fix are both in scope for v3.0.0.
+- **Worker path hack**: `__WORKER_SCRIPT__` define in rslib.config.ts lib[1] is never propagated to rstest by `withRslibConfig()` — the tsx fallback (`'./worker.ts'`) silently causes `ERR_UNKNOWN_FILE_EXTENSION`, bypassed by piping stderr. To be replaced by the shared-constant approach.
+- **Browser compat issue**: A browser-only consumer reported bundling errors due to `node:*` static imports leaking through `/worker` entry — requires `"browser"` exports condition pointing to a safe build.
 - **Build toolchain**: Rslib (ESM + DTS), Rsbuild (browser playground), Biome (lint/format), rstest v0.9.4
 - **Key testing insight**: rspack `importDynamic: false` means `import('node:child_process')` bypasses the webpack module registry; mock interception requires `__non_webpack_require__` in `rs.hoisted()` to mutate the Node CJS singleton directly
 

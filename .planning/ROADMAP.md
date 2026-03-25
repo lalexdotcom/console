@@ -96,4 +96,63 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 ---
 *Created: 2026-03-24*
-*Last updated: 2026-03-24*
+*Last updated: 2026-03-25*
+
+---
+
+## v3.0.0 Consolidation
+
+- [ ] **Phase 05: Worker API Alignment** — Rename `terminateWorker` → `releaseWorker`, remove `WL`/`WorkerLogger` exports, fix the fork-kill bug, and replace the `__WORKER_SCRIPT__` define with a shared constant in `src/worker/const.ts`
+- [ ] **Phase 06: Browser Compatibility & Build Validation** — Add a `"browser"` exports condition to `package.json`, verify tree-shaking eliminates `node:*` references, and validate that `dist/` matches the exports map exactly
+- [ ] **Phase 07: Test Cleanup & Release Prep** — Remove smoke tests, audit rstest builtins, add `releaseWorker` E2E coverage, and bump `package.json` to `3.0.0-rc.0`
+
+### Phase 05: Worker API Alignment
+**Goal**: `@lalex/console/worker` exports `L`, `Logger`, and `releaseWorker` with types identical to the main entry; worker script path sourced from a shared constant in `src/worker/const.ts`; `releaseWorker` bug fixed so the fork is actually killed
+**Depends on**: Nothing (first phase of v3.0.0)
+**Requirements**: ALIGN-01, ALIGN-02, ALIGN-03, ALIGN-04, ALIGN-05, ALIGN-06, ALIGN-07, WORKER-01, WORKER-02, WORKER-03, WORKER-04
+**Success Criteria** (what must be TRUE):
+  1. `import { L, Logger, releaseWorker } from '@lalex/console/worker'` compiles without TypeScript errors and the inferred types match their `@lalex/console` counterparts
+  2. `WL`, `WorkerLogger`, and `terminateWorker` are absent from the `/worker` public exports — importing any of those names is a compile error
+  3. After the fork is ready, `_terminateTransport` is non-null; calling `releaseWorker()` invokes it and the child process is killed (verified via `child.killed === true` or exit event)
+  4. `src/worker/const.ts` exports `WORKER_FILENAME`; both `rslib.config.ts` and `src/worker/index.ts` import it — no literal `'worker'` string duplicated in either file
+  5. `src/worker/index.ts` resolves the script path using `import.meta.url.endsWith('.ts')` extension switching — the `__WORKER_SCRIPT__` define and the `typeof __WORKER_SCRIPT__` guard are deleted
+  6. `tsc --noEmit` passes with zero errors
+**Plans**: TBD
+
+### Phase 06: Browser Compatibility & Build Validation
+**Goal**: Browser-only consumers can bundle `@lalex/console` without `node:*` errors; `package.json` exports map has a `"browser"` condition; `dist/` shape matches every `exports` entry including DTS files
+**Depends on**: Phase 05
+**Requirements**: BROWSER-01, BROWSER-02, BROWSER-03, BUILD-01, BUILD-02, BUILD-03
+**Success Criteria** (what must be TRUE):
+  1. A Rsbuild browser-target build that imports `@lalex/console` completes without any unresolved `node:*` module errors
+  2. `package.json` `exports` map contains a `"browser"` condition for the main entry pointing to a build artifact that excludes Node-only code paths
+  3. `grep -r 'node:child_process\|node:path\|node:url' dist/index.js` returns no matches (those symbols are tree-shaken from the browser output)
+  4. Every path declared in the `exports` map has a corresponding file in `dist/`; no extra unreferenced artifacts exist under `dist/`
+  5. DTS output is present at every path declared under `"types"` conditions in `exports`
+  6. `pnpm run build` exits with code 0 and zero warnings
+  7. `tsc --noEmit` passes with zero errors
+**Plans**: TBD
+
+### Phase 07: Test Cleanup & Release Prep
+**Goal**: Smoke tests deleted, rstest builtins replace custom helpers where possible, `releaseWorker` E2E coverage added, and `package.json` version bumped to `3.0.0-rc.0`
+**Depends on**: Phase 05, Phase 06
+**Requirements**: TEST-01, TEST-02, TEST-03, TEST-04, TEST-05, VERSION-01
+**Success Criteria** (what must be TRUE):
+  1. `tests/node/main/smoke.test.ts` and `tests/browser/main/smoke.test.ts` no longer exist on disk
+  2. `pnpm test` passes with all remaining tests green (test count does not decrease — former smoke coverage is absorbed by targeted tests)
+  3. At least one test in `worker-e2e.test.ts` asserts `releaseWorker()` kills the fork and activates the fallback logger
+  4. Each remaining custom test helper either has a documented reason for keeping it or is replaced by an rstest 0.9.x builtin
+  5. `package.json` `version` field is exactly `3.0.0-rc.0`
+  6. `tsc --noEmit` passes with zero errors
+**Plans**: TBD
+
+## v3.0.0 Progress
+
+**Execution Order:**
+Phases execute in numeric order: 05 → 06 → 07
+
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 05. Worker API Alignment | 0/0 | Not started | - |
+| 06. Browser Compatibility & Build Validation | 0/0 | Not started | - |
+| 07. Test Cleanup & Release Prep | 0/0 | Not started | - |

@@ -1,4 +1,3 @@
-import { stripVTControlCharacters } from 'node:util';
 import { colorize } from '../../../../utils/color';
 import { TTY_SPINNER_INTERVAL } from './const';
 
@@ -72,6 +71,12 @@ export function renderProgressLabel(
     text = `(${doneStr}/${totalStr})`;
   }
   return color ? (colorize(text, { color }) ?? text) : text;
+}
+
+/** Strips ANSI/VT control sequences from a string. Equivalent to node:util stripVTControlCharacters. */
+function stripVTControlCharacters(text: string): string {
+  // biome-ignore lint/suspicious/noControlCharactersInRegex: intentional ANSI escape stripping
+  return text.replace(/\x1b(?:[@-Z\\-_]|\[[0-9;]*[ -/]*[@-~])/g, '');
 }
 
 /** Returns the number of terminal lines a rendered string occupies. */

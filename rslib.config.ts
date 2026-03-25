@@ -52,5 +52,16 @@ export default defineConfig({
         distPath: { root: './dist/worker' },
       },
     },
-  ],
-});
+      // Browser-safe entry — consumed via the "browser" exports condition.
+      // Targets es2020 modern browsers; no node: imports survive in this bundle.
+      // dts: false — browser entry shares type declarations with lib[0].
+      {
+        format: 'esm',
+        syntax: 'es2020',
+        dts: false,
+        output: {
+          distPath: { root: './dist/browser' },
+        },
+      },
+    ],
+  });

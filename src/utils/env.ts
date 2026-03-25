@@ -1,5 +1,7 @@
-import { env as processEnv } from 'node:process';
 import type { inspect } from 'node:util';
+
+// Runtime-safe access to process.env — works in both Node.js and browser contexts.
+const processEnv = typeof process !== 'undefined' ? (process.env ?? {}) : {} as Record<string, string | undefined>;
 
 /** True when running inside a Node.js process. */
 export const isNode =

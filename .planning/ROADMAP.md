@@ -13,9 +13,9 @@ This roadmap delivers an exhaustive test suite for the @lalex/console structured
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Test Infrastructure & Code Adjustment** - Configure rstest, build shared helpers, fix TRACE_LEVELS (completed 2026-03-24)
-- [ ] **Phase 2: Core Logger Tests** - Validate the core logging pipeline via Node console mode
-- [ ] **Phase 3: Browser, TTY & Spinner Tests** - Validate environment-specific rendering and spinner lifecycle
-- [ ] **Phase 4: Worker Proxy & API Alignment** - Validate worker communication and API surface parity
+- [x] **Phase 2: Core Logger Tests** - Validate the core logging pipeline via Node console mode (completed 2026-03-24)
+- [x] **Phase 3: Browser, TTY & Spinner Tests** - Validate environment-specific rendering and spinner lifecycle (completed 2026-03-25)
+- [x] **Phase 4: Worker Proxy & API Alignment** - Validate worker communication and API surface parity (completed 2026-03-25)
 
 ## Phase Details
 
@@ -31,7 +31,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans:** 1/1 plans complete
 
 Plans:
-- [ ] 01-01-PLAN.md — Install rstest, configure dual projects (node+browser), create test helpers (stdout capture, console spy, registry reset), add smoke tests, fix TRACE_LEVELS
+- [x] 01-01-PLAN.md — Install rstest, configure dual projects (node+browser), create test helpers (stdout capture, console spy, registry reset), add smoke tests, fix TRACE_LEVELS
 
 ### Phase 2: Core Logger Tests
 **Goal**: Core logging pipeline is fully validated through Node console capture — levels, formats, prefix, options, scopes, mixins, registry, and console patching all behave correctly
@@ -43,7 +43,7 @@ Plans:
   3. Prefix pipeline renders level badge, date, caller, and scope in the correct structure
   4. Scoped loggers inherit from root, cache by name, and mutate independently
   5. Rate limiting (once/limit), one-shot option override, console patch/unpatch, and singleton registry all behave as documented
-**Plans:** 4/5 plans executed
+**Plans:** 5/5 plans complete
 
 Plans:
 - [x] 02-01-PLAN.md — Create shared test helpers: captureAll() (stdout+stderr) and parseLogfmt()
@@ -64,9 +64,9 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — Create spinner-node.test.ts: console spinner lifecycle, terminal state, autoStart, exec, duration, progress, ANSI badges (SPIN-01..06, SPIN-08)
-- [ ] 03-02-PLAN.md — Create spinner-tty.test.ts: TTY cursor management, tick output, log queue, multi-spinner (SPIN-07)
-- [ ] 03-03-PLAN.md — Create browser.test.ts: %c CSS format strings, groupCollapsed for TRACE_LEVELS, browser spinner badges (CORE-07, CORE-08, SPIN-09)
+- [x] 03-01-PLAN.md — Create spinner-node.test.ts: console spinner lifecycle, terminal state, autoStart, exec, duration, progress, ANSI badges (SPIN-01..06, SPIN-08)
+- [x] 03-02-PLAN.md — Create spinner-tty.test.ts: TTY cursor management, tick output, log queue, multi-spinner (SPIN-07)
+- [x] 03-03-PLAN.md — Create browser.test.ts: %c CSS format strings, groupCollapsed for TRACE_LEVELS, browser spinner badges (CORE-07, CORE-08, SPIN-09)
 
 ### Phase 4: Worker Proxy & API Alignment
 **Goal**: Worker proxy communication is validated and the worker API surface matches the main API
@@ -81,7 +81,7 @@ Plans:
 
 Plans:
 - [x] 04-01-PLAN.md — Create worker-protocol.test.ts: mock node:child_process, test all WorkerMessage types and proxy serialisation (WORK-01..08)
-- [ ] 04-02-PLAN.md — Create worker-e2e.test.ts: terminateWorker() fallback + idempotence (WORK-09), WL API surface parity (API-01)
+- [x] 04-02-PLAN.md — Create worker-e2e.test.ts: terminateWorker() fallback + idempotence (WORK-09), WL API surface parity (API-01)
 
 ## Progress
 

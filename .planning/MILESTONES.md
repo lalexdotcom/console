@@ -1,5 +1,27 @@
 # Milestones
 
+## v3.0.0 Consolidation (Shipped: 2026-03-25)
+
+**Phases completed:** 7 phases, 16 plans, 27 tasks
+
+**Key accomplishments:**
+
+- rstest dual-project test runner operational: Node smoke test runs in 122ms, browser smoke test runs in 511ms via headless Chromium, and TRACE_LEVELS now includes `error` and `warn` for browser call-site traces.
+- Two foundational test utilities — `captureAll()` and `parseLogfmt()` — now give Wave 2 tests the tools to assert dispatch routing, output format, and logfmt field parsing.
+- Six core behavioral contracts now proven: all 11 levels route to the correct stream, threshold filtering suppresses as expected, and all three output formats (JSON, logfmt, pretty) emit correct field names without ANSI codes.
+- Prefix pipeline and option cascade verified end-to-end: all 11 level badges, date bracket, caller in JSON, scope bracket, 8-option getter/setter round-trips, 3-layer cascade, level strictness, and util.inspect depth forwarding.
+- One-liner:
+- One-liner:
+- Problem
+- Problem
+- 31 protocol-unit tests covering all WORK-01..08 requirements, using __non_webpack_require__ to intercept node:child_process.fork without spawning a real process.
+- 9 E2E tests validating terminateWorker() fallback activation and WL API surface parity with L, using the real WL singleton without mocks.
+- Worker API aligned: const.ts created, releaseWorker() introduced, _terminateTransport bug fixed, L/Logger exported.
+- Worker test files updated to use renamed API: L/Logger/releaseWorker — 191 tests passing, tsc clean.
+- `src/utils/env.ts`
+
+---
+
 ## v1.0 Test Suite (Shipped: 2026-03-25)
 
 **Phases completed:** 4 phases, 11 plans, 14 tasks

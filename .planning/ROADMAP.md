@@ -153,7 +153,10 @@ Plans:
   3. Each remaining custom test helper either has a documented reason for keeping it or is replaced by an rstest 0.9.x builtin
   4. `package.json` `version` field is exactly `3.0.0-rc.0`
   5. `tsc --noEmit` passes with zero errors
-**Plans**: TBD
+**Plans:** 1 plan
+
+Plans:
+- [ ] 07-01-PLAN.md — Delete smoke tests (TEST-01, TEST-02), document helper audit rationale, bump package.json to 3.0.0-rc.0 (VERSION-01)
 
 ---
 

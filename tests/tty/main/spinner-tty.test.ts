@@ -1,7 +1,7 @@
 import { stripVTControlCharacters } from 'node:util';
 import { afterEach, describe, expect, rs, test } from '@rstest/core';
 import { type TTYSpinnerState, ttyRenderer } from '../../../src/logger/mixins/spinner/tty/renderer';
-import { captureAll } from '../../helpers/capture';
+import { captureAll } from '../../common/capture.helper';
 
 // reset.ts is registered globally via rstest.config.ts setupFiles — no import needed.
 

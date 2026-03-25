@@ -2,7 +2,7 @@ import { describe, expect, test } from '@rstest/core';
 import { L } from '../../../src';
 import type { RootLogger } from '../../../src/types';
 import { terminateWorker, WL, WorkerLogger } from '../../../src/worker/index';
-import { captureAll } from '../../helpers/capture';
+import { captureAll } from '../../common/capture.helper';
 
 // Importing L guarantees $logger-registry is populated before any test runs.
 // This means activateFallback() will take Path A (synchronous) when

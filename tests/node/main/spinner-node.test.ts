@@ -3,7 +3,7 @@ import { L } from '../../../src';
 import { CONSOLE_SPINNER_INTERVAL } from '../../../src/logger/mixins/spinner/console/const';
 import { SPINNER_INTERVAL_JITTER } from '../../../src/logger/mixins/spinner/const';
 import type { LoggerSpinner } from '../../../src/types';
-import { captureAll } from '../../helpers/capture';
+import { captureAll } from '../../common/capture.helper';
 
 // reset.ts resets format to 'json' in beforeEach; override to 'pretty' so
 // renderConsolePrefix renders [ ⋯ ] / [ ✔ ] / [ ✖ ] bracket badges.

@@ -8,7 +8,7 @@ export default defineConfig({
       name: 'node',
       extends: withRslibConfig(),
       include: ['tests/node/**/*.test.ts', 'tests/tty/**/*.test.ts'],
-      setupFiles: ['./tests/helpers/reset.ts'],
+      setupFiles: ['./tests/common/reset.helper.ts'],
       // Disable rstest's built-in console intercept so it doesn't conflict
       // with the logger's own patch()/unpatch() console replacement.
       disableConsoleIntercept: true,
@@ -25,7 +25,7 @@ export default defineConfig({
         }),
       }),
       include: ['tests/browser/**/*.test.ts'],
-      setupFiles: ['./tests/helpers/reset.ts'],
+      setupFiles: ['./tests/common/reset.helper.ts'],
       browser: {
         enabled: true,
         provider: 'playwright',

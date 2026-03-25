@@ -1,6 +1,6 @@
 import { describe, expect, test } from '@rstest/core';
 import { L, LogLevels } from '../../../src';
-import { captureAll } from '../../helpers/capture';
+import { captureAll } from '../../common/capture.helper';
 
 // reset.ts is registered globally via rstest.config.ts setupFiles.
 // beforeEach: registry.scopes is cleared → each test using L.scope() gets a fresh scope.

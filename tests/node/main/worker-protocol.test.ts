@@ -107,7 +107,7 @@ describe('log dispatch (WORK-01)', () => {
 
     for (const level of levels) {
       fakeFork.sentMessages.length = 0;
-      (WL as Record<string, (...args: unknown[]) => void>)[level](
+      (WL as unknown as Record<string, (...args: unknown[]) => void>)[level](
         `test-${level}`,
       );
       await flush();

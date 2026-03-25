@@ -143,6 +143,14 @@ export interface RootLogger extends Logger {
   unpatch(): void;
 
   /**
+   * Redirects all logger output to `console` instead of the system console.
+   * Call `restore()` to revert.
+   */
+  bypass(console: Console): void;
+  /** Restores output back to the system console after a `bypass()` call. */
+  restore(): void;
+
+  /**
    * Internal — do not call directly.
    * Used by the worker script to dispatch a log line with a call-site string
    * pre-captured in the main process, bypassing worker-side stack introspection.

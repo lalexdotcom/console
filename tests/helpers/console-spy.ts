@@ -35,7 +35,7 @@ export function spyOnConsole(fn: () => void): ConsoleCall[] {
   ) as Record<SpyMethod, (...args: unknown[]) => void>;
 
   for (const method of SPY_METHODS) {
-    (console as Record<string, unknown>)[method] = (...args: unknown[]) => {
+    (console as unknown as Record<string, unknown>)[method] = (...args: unknown[]) => {
       calls.push({ method, args });
     };
   }
@@ -44,7 +44,7 @@ export function spyOnConsole(fn: () => void): ConsoleCall[] {
     fn();
   } finally {
     for (const method of SPY_METHODS) {
-      (console as Record<string, unknown>)[method] = originals[method];
+      (console as unknown as Record<string, unknown>)[method] = originals[method];
     }
   }
 

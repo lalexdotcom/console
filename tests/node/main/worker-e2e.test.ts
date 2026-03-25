@@ -37,7 +37,7 @@ describe('API-01: WL exposes the same public surface as L', () => {
   test('WL exposes all 11 log-level methods as callable functions', () => {
     for (const level of LOG_LEVELS) {
       expect(
-        typeof (WL as Record<string, unknown>)[level],
+        typeof (WL as unknown as Record<string, unknown>)[level],
         `WL.${level} should be a function`,
       ).toBe('function');
     }

@@ -232,9 +232,11 @@ async function createNodeTransport(): Promise<Transport> {
     : undefined;
 
   const child = fork(scriptPath, [], {
-    // Pass the same stdin/stdout/stderr file descriptors to the child so it
-    // becomes the sole owner of the TTY. IPC is added as fd[3].
-    stdio: ['inherit', 'inherit', 'inherit', 'ipc'],
+    // Pass the same stdin/stdout file descriptors to the child so it becomes
+    // the sole owner of the TTY. Stderr is piped (not inherited) so any
+    // accidental worker stderr does not bleed into the parent terminal or test
+    // output. IPC is added as fd[3].
+    stdio: ['inherit', 'inherit', 'pipe', 'ipc'],
     execArgv,
   });
 

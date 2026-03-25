@@ -26,12 +26,16 @@ Reliable, structured logging that adapts its output format to the runtime enviro
 - ✓ Zero runtime dependencies — existing
 - ✓ rstest testing framework configured — validated in Phase 1
 - ✓ Exhaustive test suite: console mode (stdout capture, json/logfmt/pretty) — validated in Phase 2
+- ✓ Add error and warn to TRACE_LEVELS for browser stack trace display — validated in Phase 1
+- ✓ Exhaustive test suite: browser mode (rstest browser mode + Playwright) — validated in Phase 3
+- ✓ Exhaustive test suite: TTY mode (console spinner + TTY renderer) — validated in Phase 3
+- ✓ Worker proxy protocol tests (WORK-01..08) — validated in Phase 4
+- ✓ Worker proxy E2E + API surface parity (WORK-09, API-01) — validated in Phase 4
 
 ### Active
 
-- [ ] Add error and warn to TRACE_LEVELS for browser stack trace display
-- [ ] Exhaustive test suite: browser mode (rstest browser mode + console capture)
-- [ ] Exhaustive test suite: TTY mode (hybrid: CI-testable + local visual validation)
+- [ ] API-02: README and JSDoc updated to document unified API with only import path difference
+- [ ] terminateWorker() process termination bug: `_terminateTransport` is never assigned, fork is not killed (known, deferred)
 
 ### Out of Scope
 
@@ -41,14 +45,12 @@ Reliable, structured logging that adapts its output format to the runtime enviro
 
 ## Context
 
-- **Brownfield project**: Fully functional library, needs tests and a minor adjustment
-- **Stack trace adjustment**: Adding `error` and `warn` to `TRACE_LEVELS` in `src/levels.ts` — the rest of the codebase already respects this set, so the behavior propagates automatically
-- **Testing challenge**: Three distinct runtime modes require different test strategies:
-  - Browser: rstest browser mode with console output capture
-  - Console (Node CI): stdout capture for json/logfmt/pretty output validation
-  - TTY (Node terminal): Hybrid approach — snapshot-based tests runnable in CI + optional visual validation locally
-- **Build toolchain**: Rslib (ESM + DTS), Rsbuild (browser playground), Biome (lint/format)
-- **No existing tests**: rstest needs to be configured from scratch
+- **Brownfield project**: Fully functional library — exhaustive test suite now shipped (v1.0)
+- **171 tests passing** across 15 test files: node/main (13 files), tty/main (1 file), browser/main (1 file)
+- **Stack trace adjustment shipped**: `error` and `warn` added to `TRACE_LEVELS` in `src/levels.ts`
+- **Known bug**: `_terminateTransport` in `src/worker/index.ts` is never assigned — `terminateWorker()` does NOT kill the forked child process. Only fallback activation happens. Deferred to v1.1.
+- **Build toolchain**: Rslib (ESM + DTS), Rsbuild (browser playground), Biome (lint/format), rstest v0.9.4
+- **Key testing insight**: rspack `importDynamic: false` means `import('node:child_process')` bypasses the webpack module registry; mock interception requires `__non_webpack_require__` in `rs.hoisted()` to mutate the Node CJS singleton directly
 
 ## Constraints
 
@@ -64,8 +66,10 @@ Reliable, structured logging that adapts its output format to the runtime enviro
 | rstest as test framework | Part of the Rspack ecosystem (Rslib/Rsbuild), native TypeScript support | Validated in Phase 1 |
 | Console mode tests via stdout capture | captureAll() intercepts process.stdout/stderr; parseLogfmt() is the exact inverse of JSON.stringify serialization | Validated in Phase 2 |
 | Dynamic timestamps replaced with placeholder | Stable CI snapshots require deterministic output; timestamps replaced before toMatchInlineSnapshot() | Validated in Phase 2 |
-| Hybrid TTY testing | Pure CI automation isn't feasible for animated TTY output; combine ANSI snapshots with local visual checks | — Pending |
-| Browser tests via rstest browser mode | Native console capture, real browser environment | — Pending |
+| Hybrid TTY testing | Pure CI automation isn't feasible for animated TTY output; call ttyRenderer directly, bypassing selectSpinnerFactory() | Validated in Phase 3 |
+| Browser tests via rstest browser mode | Native console capture, real headless Chromium environment | Validated in Phase 3 |
+| `__non_webpack_require__` in `rs.hoisted()` for fork mock | `importDynamic: false` in rspack config means `import('node:child_process')` bypasses the module registry; only CJS singleton mutation via `__non_webpack_require__` intercepts it | Validated in Phase 4 |
+| Worker stderr piped (not inherited) | Prevents `ERR_UNKNOWN_FILE_EXTENSION` from child process polluting test output; correct production behavior too | Validated in Phase 4 (quick task) |
 
 ## Evolution
 
@@ -85,4 +89,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-24 — Phase 2 (Core Logger Tests) complete — 9 test files, 105 tests passing*
+*Last updated: 2026-03-25 after v1.0 milestone — 4 phases, 171 tests passing*

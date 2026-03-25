@@ -118,6 +118,11 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
   4. `src/worker/const.ts` exports `WORKER_FILENAME`; both `rslib.config.ts` and `src/worker/index.ts` import it — no literal `'worker'` string duplicated in either file
   5. `src/worker/index.ts` resolves the script path using `import.meta.url.endsWith('.ts')` extension switching — the `__WORKER_SCRIPT__` define and the `typeof __WORKER_SCRIPT__` guard are deleted
   6. `tsc --noEmit` passes with zero errors
+**Plans:** 2 plans
+
+Plans:
+- [ ] 05-01-PLAN.md — Create `src/worker/const.ts`, update `rslib.config.ts` (import + remove define), refactor `src/worker/index.ts` (path fix, bug fix, export rename), clean `src/env.d.ts`
+- [ ] 05-02-PLAN.md — Update `worker-e2e.test.ts` and `worker-protocol.test.ts` to new export names; `tsc --noEmit` + full test run
 **Plans**: TBD
 
 ### Phase 06: Browser Compatibility & Build Validation

@@ -38,21 +38,18 @@ import type {
 import { getCallerInfoAt, getCallerStackTraceAt } from '../utils/stack';
 import { createWorkerLimitMixin } from './limit';
 import type { WorkerMessage } from './protocol';
+import { WORKER_FILENAME } from './const';
 
 // ── Worker script path ────────────────────────────────────────────────────────
 
 /**
  * Resolves to the worker script path.
- * In production this is replaced at build time by rslib.config.ts `source.define`
- * (e.g. './worker.js'). When running via tsx without a build (dev play scripts),
- * the define is never applied and __WORKER_SCRIPT__ throws a ReferenceError.
- * The typeof guard avoids that: we fall back to the TypeScript source path so
- * tsx can load it directly, inheriting the loader via process.execArgv.
+ * In rstest / tsx dev mode import.meta.url ends with '.ts' — load the TypeScript source directly.
+ * In production builds it ends with '.js' — load the compiled output.
  */
-const _workerScriptPath: string =
-  // typeof never throws on undeclared identifiers — safe under tsx where the
-  // build-time define was never applied.
-  typeof __WORKER_SCRIPT__ !== 'undefined' ? __WORKER_SCRIPT__ : './worker.ts'; // dev fallback: tsx runs the TypeScript source directly
+const _workerScriptPath: string = import.meta.url.endsWith('.ts')
+  ? `./${WORKER_FILENAME}.ts`
+  : `./${WORKER_FILENAME}.js`;
 
 // ── Stack capture state ──────────────────────────────────────────────────────
 
@@ -77,7 +74,7 @@ let _exclusive = false;
 
 /**
  * Terminate callback set once the transport is ready.
- * Called by terminateWorker() — null before the fork/Worker is alive or
+ * Called by releaseWorker() — null before the fork/Worker is alive or
  * after termination.
  */
 let _terminateTransport: (() => void) | null = null;
@@ -85,10 +82,10 @@ let _terminateTransport: (() => void) | null = null;
 /**
  * Stops the underlying worker/fork and activates the fallback logger.
  * Must be called at most once — subsequent calls are no-ops.
- * After this point WL continues to operate via the main-thread logger (L).
+ * After this point L continues to operate via the main-thread logger.
  * There is no way to return to worker mode.
  */
-export function terminateWorker(): void {
+export function releaseWorker(): void {
   _terminateTransport?.();
   _terminateTransport = null;
   activateFallback();
@@ -725,6 +722,7 @@ function createWorkerProxy(): RootLogger {
   transportPromise
     .then((transport) => {
       resolvedTransport = transport;
+      _terminateTransport = transport.terminate.bind(transport);
       // Drain queued messages before any future send() calls land.
       for (const msg of queue) transport.send(msg);
       queue.length = 0;
@@ -947,4 +945,4 @@ export const workerLoggerSingleton = anyGlobal[
   WORKER_REGISTRY_KEY
 ] as RootLogger;
 
-export { workerLoggerSingleton as WorkerLogger, workerLoggerSingleton as WL };
+export { workerLoggerSingleton as L, workerLoggerSingleton as Logger };

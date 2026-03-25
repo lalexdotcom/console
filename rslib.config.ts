@@ -1,6 +1,5 @@
 import { defineConfig } from '@rslib/core';
-
-const WORKER_FILENAME = 'worker';
+import { WORKER_FILENAME } from './src/worker/const.ts';
 
 export default defineConfig({
   // Exclude dev playground files from all build entries.
@@ -35,11 +34,6 @@ export default defineConfig({
       dts: true,
       source: {
         entry: { index: './src/worker/index.ts' },
-        // Inject the worker script filename as a compile-time constant so
-        // new URL() calls in index.ts stay in sync with the esm2 entry name.
-        define: {
-          __WORKER_SCRIPT__: JSON.stringify(`./${WORKER_FILENAME}.js`),
-        },
       },
       output: {
         distPath: { root: './dist/worker' },

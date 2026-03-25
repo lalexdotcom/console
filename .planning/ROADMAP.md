@@ -3,6 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 Test Suite** — Phases 1–4 (shipped 2026-03-25)
+- 🚧 **v3.0.0 Consolidation** — Phases 5–7 (in progress)
 
 ## Phases
 
@@ -104,8 +105,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 - [ ] **Phase 05: Worker API Alignment** — Rename `terminateWorker` → `releaseWorker`, remove `WL`/`WorkerLogger` exports, fix the fork-kill bug, and replace the `__WORKER_SCRIPT__` define with a shared constant in `src/worker/const.ts`
 - [ ] **Phase 06: Browser Compatibility & Build Validation** — Add a `"browser"` exports condition to `package.json`, verify tree-shaking eliminates `node:*` references, and validate that `dist/` matches the exports map exactly
-- [ ] **Phase 07: Test Cleanup & Release Prep** — Remove smoke tests, audit rstest builtins, add `releaseWorker` E2E coverage, and bump `package.json` to `3.0.0-rc.0`
-- [ ] **Phase 08: Shared Test Battery & Full TTY Coverage** — `TestAdapter` abstraction, `tests/common/*.suite.ts` battery across all environments, dedicated `node-tty` rstest project via rspack alias, main ↔ worker parity suite
+- [ ] **Phase 07: Test Cleanup & Release Prep** — Remove smoke tests, audit custom helpers against rstest builtins, and bump `package.json` to `3.0.0-rc.0`
 
 ### Phase 05: Worker API Alignment
 **Goal**: `@lalex/console/worker` exports `L`, `Logger`, and `releaseWorker` with types identical to the main entry; worker script path sourced from a shared constant in `src/worker/const.ts`; `releaseWorker` bug fixed so the fork is actually killed
@@ -140,30 +140,15 @@ Plans:
 **Plans**: TBD
 
 ### Phase 07: Test Cleanup & Release Prep
-**Goal**: Smoke tests deleted, rstest builtins replace custom helpers where possible, `releaseWorker` E2E coverage added, and `package.json` version bumped to `3.0.0-rc.0`
+**Goal**: Smoke tests removed, custom helpers audited against rstest builtins, and `package.json` version bumped to `3.0.0-rc.0`
 **Depends on**: Phase 05, Phase 06
-**Requirements**: TEST-01, TEST-02, TEST-03, TEST-04, TEST-05, VERSION-01
+**Requirements**: TEST-01, TEST-02, VERSION-01
 **Success Criteria** (what must be TRUE):
   1. `tests/node/main/smoke.test.ts` and `tests/browser/main/smoke.test.ts` no longer exist on disk
-  2. `pnpm test` passes with all remaining tests green (test count does not decrease — former smoke coverage is absorbed by targeted tests)
-  3. At least one test in `worker-e2e.test.ts` asserts `releaseWorker()` kills the fork and activates the fallback logger
-  4. Each remaining custom test helper either has a documented reason for keeping it or is replaced by an rstest 0.9.x builtin
-  5. `package.json` `version` field is exactly `3.0.0-rc.0`
-  6. `tsc --noEmit` passes with zero errors
-**Plans**: TBD
-
-### Phase 08: Shared Test Battery & Full TTY Coverage
-**Goal**: `TestAdapter` abstraction + `tests/common/*.suite.ts` suites run identically across browser, node-console, node-tty, and worker variants; dedicated `node-tty` rstest project using rspack `source.alias` to compile the logger with `isNodeTTY = true`; parity suite verifies main ↔ worker output is identical for every shared case
-**Depends on**: Phase 05, Phase 06, Phase 07
-**Requirements**: BATTERY-01, BATTERY-02, BATTERY-03, BATTERY-04, BATTERY-05, BATTERY-06, BATTERY-07
-**Success Criteria** (what must be TRUE):
-  1. `rstest.config.ts` has exactly 3 projects: `browser`, `node-console`, `node-tty`
-  2. `node-tty` project uses `source.alias` → `tests/tty/env.ts` (exports `isNodeTTY = true`); no `LLOGER_FORCE_TTY` or any env-var hack in `src/`
-  3. `tests/common/*.suite.ts` covers levels, formats, scopes, options, prefix, mixins, and spinners
-  4. Every suite is executed under at least 2 different adapters (e.g. node-console + node-tty)
-  5. Parity suite passes: main and worker adapters produce identical output (timestamps stripped)
-  6. `pnpm test` passes — all previous tests green, new tests added
-  7. `tsc --noEmit` passes with zero errors
+  2. `pnpm test` passes with all remaining tests green (test count does not decrease — former smoke coverage absorbed by targeted tests)
+  3. Each remaining custom test helper either has a documented reason for keeping it or is replaced by an rstest 0.9.x builtin
+  4. `package.json` `version` field is exactly `3.0.0-rc.0`
+  5. `tsc --noEmit` passes with zero errors
 **Plans**: TBD
 
 ---
@@ -171,11 +156,10 @@ Plans:
 ## v3.0.0 Progress
 
 **Execution Order:**
-Phases execute in numeric order: 05 → 06 → 07 → 08
+Phases execute in numeric order: 05 → 06 → 07
 
 | Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 05. Worker API Alignment | 0/0 | Not started | - |
+|-------|----------------|--------|----------|
+| 05. Worker API Alignment | 0/2 | Not started | - |
 | 06. Browser Compatibility & Build Validation | 0/0 | Not started | - |
 | 07. Test Cleanup & Release Prep | 0/0 | Not started | - |
-| 08. Shared Test Battery & Full TTY Coverage | 0/0 | Not started | - |

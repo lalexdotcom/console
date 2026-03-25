@@ -198,6 +198,26 @@ Which phases cover which requirements. Updated during roadmap creation.
 | WORK-08 | Phase 4 | Pending |
 | WORK-09 | Phase 4 | Pending |
 | API-01 | Phase 4 | Pending |
+| ALIGN-01 | Phase 5 | Pending |
+| ALIGN-02 | Phase 5 | Pending |
+| ALIGN-03 | Phase 5 | Pending |
+| ALIGN-04 | Phase 5 | Pending |
+| ALIGN-05 | Phase 5 | Pending |
+| ALIGN-06 | Phase 5 | Pending |
+| ALIGN-07 | Phase 5 | Pending |
+| WORKER-01 | Phase 5 | Pending |
+| WORKER-02 | Phase 5 | Pending |
+| WORKER-03 | Phase 5 | Pending |
+| WORKER-04 | Phase 5 | Pending |
+| BROWSER-01 | Phase 6 | Pending |
+| BROWSER-02 | Phase 6 | Pending |
+| BROWSER-03 | Phase 6 | Pending |
+| BUILD-01 | Phase 6 | Pending |
+| BUILD-02 | Phase 6 | Pending |
+| BUILD-03 | Phase 6 | Pending |
+| TEST-01 | Phase 7 | Pending |
+| TEST-02 | Phase 7 | Pending |
+| VERSION-01 | Phase 7 | Pending |
 | API-02 | Phase 4 | Pending |
 
 **Coverage:**
@@ -291,19 +311,9 @@ Requirements for the Consolidation milestone. Phases numbered from 05 onwards.
 | BUILD-03 | Phase 06 | Pending |
 | TEST-01 | Phase 07 | Pending |
 | TEST-02 | Phase 07 | Pending |
-| TEST-03 | Phase 07 | Pending |
-| TEST-04 | Phase 07 | Pending |
-| TEST-05 | Phase 07 | Pending |
 | VERSION-01 | Phase 07 | Pending |
-| BATTERY-01 | Phase 08 | Pending |
-| BATTERY-02 | Phase 08 | Pending |
-| BATTERY-03 | Phase 08 | Pending |
-| BATTERY-04 | Phase 08 | Pending |
-| BATTERY-05 | Phase 08 | Pending |
-| BATTERY-06 | Phase 08 | Pending |
-| BATTERY-07 | Phase 08 | Pending |
 
-**Coverage:**
-- v3.0.0 requirements: 30 total (23 original + 7 Phase 08)
-- Mapped to phases: 30 ✓
-- Unmapped: 0
+**Coverage (v3.0.0 — 3 phases):**
+- Requirements in scope: 20 (ALIGN-01..07, WORKER-01..04, BROWSER-01..03, BUILD-01..03, TEST-01..02, VERSION-01)
+- Mapped to phases: 20 ✓
+- Deferred (future milestone): TEST-03, TEST-04, TEST-05, BATTERY-01..07

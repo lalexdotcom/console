@@ -80,7 +80,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Create worker-protocol.test.ts: mock node:child_process, test all WorkerMessage types and proxy serialisation (WORK-01..08)
+- [x] 04-01-PLAN.md — Create worker-protocol.test.ts: mock node:child_process, test all WorkerMessage types and proxy serialisation (WORK-01..08)
 - [ ] 04-02-PLAN.md — Create worker-e2e.test.ts: terminateWorker() fallback + idempotence (WORK-09), WL API surface parity (API-01)
 
 ## Progress

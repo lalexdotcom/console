@@ -36,9 +36,9 @@ import type {
   SpinnerUpdateOptions,
 } from '../types';
 import { getCallerInfoAt, getCallerStackTraceAt } from '../utils/stack';
+import { WORKER_FILENAME } from './const';
 import { createWorkerLimitMixin } from './limit';
 import type { WorkerMessage } from './protocol';
-import { WORKER_FILENAME } from './const';
 
 // ── Worker script path ────────────────────────────────────────────────────────
 

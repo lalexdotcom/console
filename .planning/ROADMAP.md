@@ -137,7 +137,11 @@ Plans:
   5. DTS output is present at every path declared under `"types"` conditions in `exports`
   6. `pnpm run build` exits with code 0 and zero warnings
   7. `tsc --noEmit` passes with zero errors
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 06-01-PLAN.md — Remove top-level node: imports from source (env.ts, renderer.ts), add browser lib entry to rslib.config.ts, add "browser" exports condition to package.json
+- [ ] 06-02-PLAN.md — Run pnpm run build, verify dist/ structure matches exports map, verify browser bundle purity, run tsc + full test suite
 
 ### Phase 07: Test Cleanup & Release Prep
 **Goal**: Smoke tests removed, custom helpers audited against rstest builtins, and `package.json` version bumped to `3.0.0-rc.0`

@@ -12,8 +12,7 @@ import type { WorkerMessage } from './protocol';
 // ── Transport detection ───────────────────────────────────────────────────────
 
 const isNodeProcess =
-  typeof process !== 'undefined' &&
-  process?.versions?.node != null;
+  typeof process !== 'undefined' && process?.versions?.node != null;
 
 // ── Spinner registry ──────────────────────────────────────────────────────────
 
@@ -29,24 +28,36 @@ const spinners = new Map<string, LoggerSpinner>();
 function handle(msg: WorkerMessage): void {
   switch (msg.type) {
     case 'log': {
-      const target = msg.scope ? Logger.scope(msg.scope.name, msg.scope.options) : Logger;
+      const target = msg.scope
+        ? Logger.scope(msg.scope.name, msg.scope.options)
+        : Logger;
       if (msg.key !== undefined) {
         // Rate-limited call: delegate to Logger.once / Logger.limit so the
         // counter map lives in the worker — the single source of truth.
-        const limited = (msg.max ?? 1) > 1
-          ? target.limit(msg.max as number, msg.key)
-          : target.once(msg.key);
+        const limited =
+          (msg.max ?? 1) > 1
+            ? target.limit(msg.max as number, msg.key)
+            : target.once(msg.key);
         limited[msg.level](...(msg.args as Parameters<typeof console.log>));
       } else {
         // Use __logFromMainProcess so the call-site string captured in the main
         // process is forwarded to prepareLog, bypassing worker-side introspection.
-        target.__logFromMainProcess(msg.level, msg.caller, msg.args, msg.ts, msg.traceCaller, msg.callerStructuredOnly);
+        target.__logFromMainProcess(
+          msg.level,
+          msg.caller,
+          msg.args,
+          msg.ts,
+          msg.traceCaller,
+          msg.callerStructuredOnly,
+        );
       }
       break;
     }
 
     case 'spin:start': {
-      const target = msg.scope ? Logger.scope(msg.scope.name, msg.scope.options) : Logger;
+      const target = msg.scope
+        ? Logger.scope(msg.scope.name, msg.scope.options)
+        : Logger;
       const spinner = target[msg.level].spin(msg.message, msg.options ?? {});
       spinner.start();
       spinners.set(msg.id, spinner);

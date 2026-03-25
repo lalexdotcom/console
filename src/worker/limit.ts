@@ -27,8 +27,15 @@ function getCallSiteKey(): string {
 
 function cloneArgs(args: LogParameters): unknown[] {
   return args.map((arg) => {
-    try { return structuredClone(arg); }
-    catch { try { return String(arg); } catch { return '[unserializable]'; } }
+    try {
+      return structuredClone(arg);
+    } catch {
+      try {
+        return String(arg);
+      } catch {
+        return '[unserializable]';
+      }
+    }
   });
 }
 
@@ -80,8 +87,9 @@ function buildLimitedProxy(
   } as unknown as LimitedLogger;
 
   for (const level of LogLevels) {
-    (result as unknown as Record<string, unknown>)[level] = (...args: LogParameters) =>
-      logLevel(level, args);
+    (result as unknown as Record<string, unknown>)[level] = (
+      ...args: LogParameters
+    ) => logLevel(level, args);
   }
 
   return result;
@@ -106,7 +114,10 @@ export function createWorkerLimitMixin(
   sendFn: LimitSendFn,
   captureStack: () => boolean,
   scopeName?: string,
-): { once: (key?: string) => LimitedLogger; limit: (count: number, key?: string) => LimitedLogger } {
+): {
+  once: (key?: string) => LimitedLogger;
+  limit: (count: number, key?: string) => LimitedLogger;
+} {
   return {
     once(key?: string): LimitedLogger {
       const resolvedKey = key ?? getCallSiteKey();
@@ -114,7 +125,13 @@ export function createWorkerLimitMixin(
     },
     limit(count: number, key?: string): LimitedLogger {
       const resolvedKey = key ?? getCallSiteKey();
-      return buildLimitedProxy(resolvedKey, count, sendFn, captureStack, scopeName);
+      return buildLimitedProxy(
+        resolvedKey,
+        count,
+        sendFn,
+        captureStack,
+        scopeName,
+      );
     },
   };
 }

@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, rs, test } from '@rstest/core';
 import { L } from '../../../src';
-import type { LoggerSpinner } from '../../../src/types';
-import { captureAll } from '../../helpers/capture';
 import { CONSOLE_SPINNER_INTERVAL } from '../../../src/logger/mixins/spinner/console/const';
 import { SPINNER_INTERVAL_JITTER } from '../../../src/logger/mixins/spinner/const';
+import type { LoggerSpinner } from '../../../src/types';
+import { captureAll } from '../../helpers/capture';
 
 // reset.ts resets format to 'json' in beforeEach; override to 'pretty' so
 // renderConsolePrefix renders [ ⋯ ] / [ ✔ ] / [ ✖ ] bracket badges.

@@ -12,7 +12,13 @@ export type DispatchOptions = {
    * renderer instead of writing a regular log line.
    */
   ttySpinner?:
-    | { action: 'register'; id: symbol; frames: string[]; color?: string; progress?: boolean }
+    | {
+        action: 'register';
+        id: symbol;
+        frames: string[];
+        color?: string;
+        progress?: boolean;
+      }
     | { action: 'stop'; id: symbol };
 };
 

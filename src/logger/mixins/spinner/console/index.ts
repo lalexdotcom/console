@@ -35,8 +35,9 @@ function buildConsoleProgressText(
     colorize(CONSOLE_PROGRESS_BAR_DONE_CHAR.repeat(filled), { color }) ??
     CONSOLE_PROGRESS_BAR_DONE_CHAR.repeat(filled);
   const bgStr =
-    colorize(CONSOLE_PROGRESS_BAR_BACKGROUND_CHAR.repeat(width - filled), { color: 'grey' }) ??
-    CONSOLE_PROGRESS_BAR_BACKGROUND_CHAR.repeat(width - filled);
+    colorize(CONSOLE_PROGRESS_BAR_BACKGROUND_CHAR.repeat(width - filled), {
+      color: 'grey',
+    }) ?? CONSOLE_PROGRESS_BAR_BACKGROUND_CHAR.repeat(width - filled);
   const labelStr = colorize(label, { color }) ?? label;
   return `[${doneStr}${bgStr}] ${labelStr}`;
 }
@@ -67,14 +68,24 @@ export function createConsoleSpinner(
       showDuration && elapsedMs > 0 ? ` (+${formatDuration(elapsedMs)})` : '';
     const extraPrefixItems: Prefix[] = [];
     if (opts?.progress != null) {
-      extraPrefixItems.push({ type: 'text', text: buildConsoleProgressText(opts.progress, def.color ?? 'dodgerblue') });
+      extraPrefixItems.push({
+        type: 'text',
+        text: buildConsoleProgressText(
+          opts.progress,
+          def.color ?? 'dodgerblue',
+        ),
+      });
       extraPrefixItems.push({ type: 'progress', value: opts.progress });
     } else {
       const iconContent =
         opts?.icon ??
         options[`${state === 'running' ? 'running' : state}Icon`] ??
         def.icon;
-      extraPrefixItems.push({ type: 'icon', text: iconContent, color: def.color });
+      extraPrefixItems.push({
+        type: 'icon',
+        text: iconContent,
+        color: def.color,
+      });
     }
     dispatch(level, [`${t}${duration}`], { stackOffset, extraPrefixItems });
   };

@@ -40,12 +40,18 @@ export type TTYRenderer = {
 // ── helpers ───────────────────────────────────────────────────────────────────
 
 /** Renders an 8-character wide progress bar for a [0, 1] ratio, with colors. */
-export function renderProgressBar(progress: number, color: string | undefined): string {
+export function renderProgressBar(
+  progress: number,
+  color: string | undefined,
+): string {
   const WIDTH = 8;
   const filled = Math.round(Math.min(1, Math.max(0, progress)) * WIDTH);
   const filledBar = '━'.repeat(filled);
   const emptyBar = '━'.repeat(WIDTH - filled);
-  const filledColored = filled > 0 && color ? (colorize(filledBar, { color }) ?? filledBar) : filledBar;
+  const filledColored =
+    filled > 0 && color
+      ? (colorize(filledBar, { color }) ?? filledBar)
+      : filledBar;
   const emptyColored = colorize(emptyBar, { color: 'gray' }) ?? emptyBar;
   return filledColored + emptyColored;
 }
@@ -57,7 +63,9 @@ export function renderProgressLabel(
 ): string {
   let text: string;
   if (typeof raw === 'number') {
-    text = `(${Math.round(raw * 100).toString().padStart(3)}%)`;
+    text = `(${Math.round(raw * 100)
+      .toString()
+      .padStart(3)}%)`;
   } else {
     const totalStr = String(raw.total);
     const doneStr = String(raw.done).padStart(totalStr.length);
@@ -108,7 +116,10 @@ function createTTYRenderer(): TTYRenderer {
       let frameAndText: string;
       if (state.progress !== undefined) {
         const bar = renderProgressBar(state.progress, state.color);
-        const label = state.progress > 0 ? ` ${renderProgressLabel(state.progressRaw ?? state.progress, state.color)}` : '     ';
+        const label =
+          state.progress > 0
+            ? ` ${renderProgressLabel(state.progressRaw ?? state.progress, state.color)}`
+            : '     ';
         frameAndText = `${bar}${label} ${state.text}`;
       } else {
         let rawFrame: string;
@@ -183,7 +194,10 @@ function createTTYRenderer(): TTYRenderer {
             let frameAndText: string;
             if (s.progress !== undefined) {
               const bar = renderProgressBar(s.progress, s.color);
-              const label = s.progress > 0 ? ` ${renderProgressLabel(s.progressRaw ?? s.progress, s.color)}` : '     ';
+              const label =
+                s.progress > 0
+                  ? ` ${renderProgressLabel(s.progressRaw ?? s.progress, s.color)}`
+                  : '     ';
               frameAndText = `${bar}${label} ${s.text}`;
             } else {
               const rawFrame =

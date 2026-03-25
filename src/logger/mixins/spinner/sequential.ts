@@ -86,7 +86,9 @@ export function createSequentialSpinner(
   let stopped = false;
   let startTime = 0;
   let currentText = text;
-  let currentOpts: SpinnerUpdateOptions | undefined = options.progress ? { progress: 0 } : undefined;
+  let currentOpts: SpinnerUpdateOptions | undefined = options.progress
+    ? { progress: 0 }
+    : undefined;
   let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
   function elapsedMs(): number {
@@ -132,7 +134,10 @@ export function createSequentialSpinner(
       if (stopped) return;
       stopped = true;
       if (timeoutId !== undefined) clearTimeout(timeoutId);
-      const resolvedOpts = opts?.progress != null ? opts : { ...opts, progress: currentOpts?.progress };
+      const resolvedOpts =
+        opts?.progress != null
+          ? opts
+          : { ...opts, progress: currentOpts?.progress };
       render('fail', t ?? currentText, elapsedMs(), resolvedOpts, null);
     },
 

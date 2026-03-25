@@ -11,7 +11,11 @@ import {
   TTY_DEFAULT_SUCCESS_ICON,
   type TTYSpinnerIcon,
 } from './const';
-import { renderProgressBar, renderProgressLabel, ttyRenderer } from './renderer';
+import {
+  renderProgressBar,
+  renderProgressLabel,
+  ttyRenderer,
+} from './renderer';
 
 // ── helpers ──────────────────────────────────────────────────────────────
 
@@ -69,14 +73,20 @@ export function createTTYSpinner(
       const ratio = outcome === 'success' ? 1 : (currentProgressRatio ?? 0);
       const rawForLabel: number | { done: number; total: number } =
         outcome === 'success'
-          ? (currentProgressRaw === undefined
+          ? currentProgressRaw === undefined
+            ? 1
+            : typeof currentProgressRaw === 'number'
               ? 1
-              : typeof currentProgressRaw === 'number'
-                ? 1
-                : { done: currentProgressRaw.total, total: currentProgressRaw.total })
+              : {
+                  done: currentProgressRaw.total,
+                  total: currentProgressRaw.total,
+                }
           : (currentProgressRaw ?? 0);
       const bar = renderProgressBar(ratio, iconDef.color);
-      const label = ratio > 0 ? ` ${renderProgressLabel(rawForLabel, iconDef.color)}` : '     ';
+      const label =
+        ratio > 0
+          ? ` ${renderProgressLabel(rawForLabel, iconDef.color)}`
+          : '     ';
       dispatch(level, [message ?? currentText], {
         stackOffset: null,
         extraPrefixItems: [{ type: 'text', text: `${bar}${label}` }],
@@ -87,7 +97,9 @@ export function createTTYSpinner(
 
     dispatch(level, [message ?? currentText], {
       stackOffset: null,
-      extraPrefixItems: [{ type: 'icon', text: iconDef.icon, color: iconDef.color }],
+      extraPrefixItems: [
+        { type: 'icon', text: iconDef.icon, color: iconDef.color },
+      ],
       ttySpinner: { action: 'stop', id },
     });
   }

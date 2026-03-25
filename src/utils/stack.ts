@@ -72,7 +72,9 @@ export const getCallerStackTrace = (stackOffset = 0): string | undefined => {
  *
  * @param absoluteDepth - Absolute index into the `Error.stack` lines array.
  */
-export const getCallerStackTraceAt = (absoluteDepth: number): string | undefined => {
+export const getCallerStackTraceAt = (
+  absoluteDepth: number,
+): string | undefined => {
   const lines = captureLines().slice(absoluteDepth);
   return lines.length ? lines.join('\n') : undefined;
 };

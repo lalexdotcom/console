@@ -3,7 +3,13 @@ import { LEVEL_DISPLAY } from '../levels';
 import type { LoggerOptions } from '../types';
 import type { LevelPrefix, Prefix } from './types';
 
-export type { DatePrefix, IconPrefix, LevelPrefix, Prefix, TextPrefix } from './types';
+export type {
+  DatePrefix,
+  IconPrefix,
+  LevelPrefix,
+  Prefix,
+  TextPrefix,
+} from './types';
 
 // ── Level prefix ──────────────────────────────────────────────────────────────
 
@@ -45,7 +51,10 @@ export function getDatePrefix(date: Date): string {
 export function getDurationPrefix(durationMs: number): string;
 /** Overload 2: formats the elapsed time between two timestamps → `[+1.234s]`. */
 export function getDurationPrefix(since: Date, to?: Date): string;
-export function getDurationPrefix(sinceOrDurationMs: Date | number, to?: Date): string {
+export function getDurationPrefix(
+  sinceOrDurationMs: Date | number,
+  to?: Date,
+): string {
   const duration =
     typeof sinceOrDurationMs === 'number'
       ? sinceOrDurationMs

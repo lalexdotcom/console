@@ -68,9 +68,15 @@ export function createBrowserSpinner(
       const iconContent =
         opts?.icon === null
           ? def.icon
-          : (opts?.icon ?? options[`${state === 'running' ? 'running' : state}Icon`] ?? def.icon);
+          : (opts?.icon ??
+            options[`${state === 'running' ? 'running' : state}Icon`] ??
+            def.icon);
       if (iconContent !== '') {
-        extraPrefixItems.push({ type: 'icon', text: iconContent, color: def.color });
+        extraPrefixItems.push({
+          type: 'icon',
+          text: iconContent,
+          color: def.color,
+        });
       }
     }
 

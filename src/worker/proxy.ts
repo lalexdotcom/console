@@ -195,7 +195,7 @@ function nextSpinnerId(): string {
  *   child, so isTTY is true and the VT100 spinner renderer works as expected.
  */
 async function createNodeTransport(): Promise<Transport> {
-  const { fork } = await import('child_process');
+  const { fork } = await import('node:child_process');
 
   // new URL('./script.js', import.meta.url) is the standard pattern that Rspack,
   // Webpack 5, and Vite all recognise as a chunk-split boundary — the script is
@@ -220,8 +220,12 @@ async function createNodeTransport(): Promise<Transport> {
   return {
     // child.send() serialises via Node's built-in IPC serialisation (same
     // algorithm as structuredClone). Delivery is async and FIFO-ordered.
-    send: (msg) => { child.send(msg); },
-    terminate: () => { child.kill(); },
+    send: (msg) => {
+      child.send(msg);
+    },
+    terminate: () => {
+      child.kill();
+    },
   };
 }
 
@@ -237,13 +241,20 @@ function createBrowserTransport(): Transport {
   // The webpackChunkName magic comment instructs Rspack/Webpack to name the
   // generated worker chunk "console-worker" instead of a numeric hash.
   const worker = new Worker(
-    new URL(/* webpackChunkName: "console-worker" */ './script.js', import.meta.url),
+    new URL(
+      /* webpackChunkName: "console-worker" */ './script.js',
+      import.meta.url,
+    ),
     { type: 'module' },
   );
 
   return {
-    send: (msg) => { worker.postMessage(msg); },
-    terminate: () => { worker.terminate(); },
+    send: (msg) => {
+      worker.postMessage(msg);
+    },
+    terminate: () => {
+      worker.terminate();
+    },
   };
 }
 
@@ -255,8 +266,7 @@ function createBrowserTransport(): Transport {
  * bundle into the proxy, defeating the purpose of the separate entry point.
  */
 const _isNode =
-  typeof process !== 'undefined' &&
-  process?.versions?.node != null;
+  typeof process !== 'undefined' && process?.versions?.node != null;
 
 const _isNodeTTY =
   _isNode &&
@@ -320,24 +330,36 @@ function buildFallbackSend(root: RootLogger): SendFn {
       case 'log': {
         // Re-create the scope with its original options so that level filtering
         // and scope name are consistent with the pre-terminate worker output.
-        const target = msg.scope ? root.scope(msg.scope.name, msg.scope.options) : root;
+        const target = msg.scope
+          ? root.scope(msg.scope.name, msg.scope.options)
+          : root;
         if (msg.key !== undefined) {
           // Rate-limited call: delegate to Logger.once / Logger.limit.
-          const limited = (msg.max ?? 1) > 1
-            ? target.limit(msg.max as number, msg.key)
-            : target.once(msg.key);
+          const limited =
+            (msg.max ?? 1) > 1
+              ? target.limit(msg.max as number, msg.key)
+              : target.once(msg.key);
           limited[msg.level](...(msg.args as Parameters<typeof console.log>));
         } else {
           // Always go through __logFromMainProcess to avoid spurious stack introspection
           // and to forward the traceCaller string for TRACE_LEVELS display.
-          target.__logFromMainProcess(msg.level, msg.caller, msg.args, msg.ts, msg.traceCaller);
+          target.__logFromMainProcess(
+            msg.level,
+            msg.caller,
+            msg.args,
+            msg.ts,
+            msg.traceCaller,
+          );
         }
         break;
       }
       case 'spin:start': {
-        const target = msg.scope ? root.scope(msg.scope.name, msg.scope.options) : root;
+        const target = msg.scope
+          ? root.scope(msg.scope.name, msg.scope.options)
+          : root;
         // biome-ignore lint/suspicious/noExplicitAny: level methods share the same shape
-        const spinFn = ((target as any)[msg.level] as LogMethod | undefined)?.spin;
+        const spinFn = ((target as any)[msg.level] as LogMethod | undefined)
+          ?.spin;
         if (spinFn) {
           const handle = spinFn(msg.message, msg.options ?? {});
           handle.start();
@@ -417,23 +439,27 @@ function activateFallback(): void {
   // temporary buffer so no messages are lost while the dynamic import resolves,
   // then drain it in order once the logger is ready.
   const pending: WorkerMessage[] = [];
-  _fallbackSend = (msg) => { pending.push(msg); };
+  _fallbackSend = (msg) => {
+    pending.push(msg);
+  };
 
-  import(/* webpackChunkName: "fallback-logger" */ '../logger').then(({ Logger }) => {
-    Logger.stack = _captureStack;
-    Logger.enabled = _enabled;
-    // Replace the buffer with the live send function, then replay buffered msgs.
-    _fallbackSend = buildFallbackSend(Logger);
-    for (const msg of pending) (_fallbackSend as SendFn)(msg);
-  }).catch((e: unknown) => {
-    console.error(
-      '[WorkerLogger] Failed to load fallback logger:',
-      e instanceof Error ? e.message : String(e),
-    );
-    // Null out the send function so further calls are silently dropped rather
-    // than buffered indefinitely in the now-unreachable pending array.
-    _fallbackSend = null;
-  });
+  import(/* webpackChunkName: "fallback-logger" */ '../logger')
+    .then(({ Logger }) => {
+      Logger.stack = _captureStack;
+      Logger.enabled = _enabled;
+      // Replace the buffer with the live send function, then replay buffered msgs.
+      _fallbackSend = buildFallbackSend(Logger);
+      for (const msg of pending) (_fallbackSend as SendFn)(msg);
+    })
+    .catch((e: unknown) => {
+      console.error(
+        '[WorkerLogger] Failed to load fallback logger:',
+        e instanceof Error ? e.message : String(e),
+      );
+      // Null out the send function so further calls are silently dropped rather
+      // than buffered indefinitely in the now-unreachable pending array.
+      _fallbackSend = null;
+    });
 }
 
 // ── WorkerScopeLogger proxy ───────────────────────────────────────────────────
@@ -456,9 +482,10 @@ function createWorkerScopeProxy(
   // Pre-compute the numeric severity threshold from the scope-level option so
   // each log call only does a cheap integer comparison rather than a string lookup.
   // undefined means no filter — all levels are forwarded.
-  const scopeSeverity = scopeOptions.level !== undefined
-    ? LEVEL_METHODS[scopeOptions.level]
-    : undefined;
+  const scopeSeverity =
+    scopeOptions.level !== undefined
+      ? LEVEL_METHODS[scopeOptions.level]
+      : undefined;
 
   const base: Record<string, unknown> = { scope: scopeName };
 
@@ -467,11 +494,22 @@ function createWorkerScopeProxy(
       // Drop messages below the scope threshold without touching the IPC pipe.
       // This mirrors the filtering the real Logger does inside the worker, but
       // avoids the serialisation overhead for calls that would be discarded anyway.
-      if (scopeSeverity !== undefined && LEVEL_METHODS[level] > scopeSeverity) return;
+      if (scopeSeverity !== undefined && LEVEL_METHODS[level] > scopeSeverity)
+        return;
       const callerInfo = _captureStack ? getCallerInfoAt(4) : undefined;
       const caller = callerInfo ? formatCallerString(callerInfo) : undefined;
-      const traceCaller = TRACE_LEVELS.has(level) ? getCallerStackTraceAt(4) : undefined;
-      send({ type: 'log', level, scope, args: cloneArgs(args), caller, traceCaller, ts: Date.now() });
+      const traceCaller = TRACE_LEVELS.has(level)
+        ? getCallerStackTraceAt(4)
+        : undefined;
+      send({
+        type: 'log',
+        level,
+        scope,
+        args: cloneArgs(args),
+        caller,
+        traceCaller,
+        ts: Date.now(),
+      });
     };
 
     const spinFn: LogMethod['spin'] = (
@@ -488,17 +526,38 @@ function createWorkerScopeProxy(
   }
 
   base['log'] = (level: LogLevel, ...args: LogParameters) => {
-    if (scopeSeverity !== undefined && LEVEL_METHODS[level] > scopeSeverity) return;
+    if (scopeSeverity !== undefined && LEVEL_METHODS[level] > scopeSeverity)
+      return;
     const callerInfo = _captureStack ? getCallerInfoAt(4) : undefined;
     const caller = callerInfo ? formatCallerString(callerInfo) : undefined;
-    const traceCaller = TRACE_LEVELS.has(level) ? getCallerStackTraceAt(4) : undefined;
-    send({ type: 'log', level, scope, args: cloneArgs(args), caller, traceCaller, ts: Date.now() });
+    const traceCaller = TRACE_LEVELS.has(level)
+      ? getCallerStackTraceAt(4)
+      : undefined;
+    send({
+      type: 'log',
+      level,
+      scope,
+      args: cloneArgs(args),
+      caller,
+      traceCaller,
+      ts: Date.now(),
+    });
   };
 
   // Scope option setters are intentionally inert on the proxy side.
   // All option changes must go through the root WorkerLogger (opt:set messages)
   // so the worker remains the single source of truth for configuration.
-  for (const key of ['enabled', 'level', 'pad', 'color', 'date', 'stack', 'uid', 'inspect', 'exclusive'] as const) {
+  for (const key of [
+    'enabled',
+    'level',
+    'pad',
+    'color',
+    'date',
+    'stack',
+    'uid',
+    'inspect',
+    'exclusive',
+  ] as const) {
     Object.defineProperty(base, key, {
       get: () => undefined,
       set: () => {},
@@ -622,7 +681,10 @@ function createWorkerProxy(): RootLogger {
   const send: SendFn = (msg) => {
     // After terminateWorker() the fallback is active — bypass the transport
     // entirely and delegate directly to the main-thread logger.
-    if (_fallbackSend) { _fallbackSend(msg); return; }
+    if (_fallbackSend) {
+      _fallbackSend(msg);
+      return;
+    }
     // Honour the enabled flag without paying for IPC serialisation. The mirror
     // variable is updated synchronously by the opt:set setter.
     if (!_enabled) return;
@@ -670,8 +732,17 @@ function createWorkerProxy(): RootLogger {
     const fn = (...args: LogParameters) => {
       const callerInfo = _captureStack ? getCallerInfoAt(4) : undefined;
       const caller = callerInfo ? formatCallerString(callerInfo) : undefined;
-      const traceCaller = TRACE_LEVELS.has(level) ? getCallerStackTraceAt(4) : undefined;
-      send({ type: 'log', level, args: cloneArgs(args), caller, traceCaller, ts: Date.now() });
+      const traceCaller = TRACE_LEVELS.has(level)
+        ? getCallerStackTraceAt(4)
+        : undefined;
+      send({
+        type: 'log',
+        level,
+        args: cloneArgs(args),
+        caller,
+        traceCaller,
+        ts: Date.now(),
+      });
     };
 
     const spinFn: LogMethod['spin'] = (
@@ -691,12 +762,24 @@ function createWorkerProxy(): RootLogger {
   base['log'] = (level: LogLevel, ...args: LogParameters) => {
     const callerInfo = _captureStack ? getCallerInfoAt(4) : undefined;
     const caller = callerInfo ? formatCallerString(callerInfo) : undefined;
-    const traceCaller = TRACE_LEVELS.has(level) ? getCallerStackTraceAt(4) : undefined;
-    send({ type: 'log', level, args: cloneArgs(args), caller, traceCaller, ts: Date.now() });
+    const traceCaller = TRACE_LEVELS.has(level)
+      ? getCallerStackTraceAt(4)
+      : undefined;
+    send({
+      type: 'log',
+      level,
+      args: cloneArgs(args),
+      caller,
+      traceCaller,
+      ts: Date.now(),
+    });
   };
 
   // ── scope() ──────────────────────────────────────────────────────────────────
-  base['scope'] = (scopeName: string, scopeOptions: Partial<LoggerOptions> = {}): ScopeLogger => {
+  base['scope'] = (
+    scopeName: string,
+    scopeOptions: Partial<LoggerOptions> = {},
+  ): ScopeLogger => {
     const existing = scopes.get(scopeName);
     if (existing) return existing;
     // The scope proxy shares the root's send function — it is unaware of the
@@ -709,7 +792,14 @@ function createWorkerProxy(): RootLogger {
 
   // ── option setters — forwarded to the worker via opt:set messages ─────────────
   const optKeys: (keyof LoggerOptions)[] = [
-    'enabled', 'level', 'pad', 'color', 'date', 'stack', 'uid', 'inspect',
+    'enabled',
+    'level',
+    'pad',
+    'color',
+    'date',
+    'stack',
+    'uid',
+    'inspect',
   ];
 
   for (const key of optKeys) {
@@ -758,15 +848,35 @@ function createWorkerProxy(): RootLogger {
    */
   base['patch'] = () => {
     const infoFn = (...args: unknown[]) =>
-      send({ type: 'log', level: 'info', args: cloneArgs(args as LogParameters), ts: Date.now() });
+      send({
+        type: 'log',
+        level: 'info',
+        args: cloneArgs(args as LogParameters),
+        ts: Date.now(),
+      });
     console.log = infoFn;
     console.info = infoFn;
     console.debug = (...args: unknown[]) =>
-      send({ type: 'log', level: 'debug', args: cloneArgs(args as LogParameters), ts: Date.now() });
+      send({
+        type: 'log',
+        level: 'debug',
+        args: cloneArgs(args as LogParameters),
+        ts: Date.now(),
+      });
     console.warn = (...args: unknown[]) =>
-      send({ type: 'log', level: 'warn', args: cloneArgs(args as LogParameters), ts: Date.now() });
+      send({
+        type: 'log',
+        level: 'warn',
+        args: cloneArgs(args as LogParameters),
+        ts: Date.now(),
+      });
     console.error = (...args: unknown[]) =>
-      send({ type: 'log', level: 'crit', args: cloneArgs(args as LogParameters), ts: Date.now() });
+      send({
+        type: 'log',
+        level: 'crit',
+        args: cloneArgs(args as LogParameters),
+        ts: Date.now(),
+      });
   };
 
   /** Restores the console methods that were replaced by patch(). */
@@ -797,4 +907,6 @@ if (!anyGlobal[WORKER_REGISTRY_KEY]) {
   anyGlobal[WORKER_REGISTRY_KEY] = createWorkerProxy();
 }
 
-export const workerLoggerSingleton = anyGlobal[WORKER_REGISTRY_KEY] as RootLogger;
+export const workerLoggerSingleton = anyGlobal[
+  WORKER_REGISTRY_KEY
+] as RootLogger;

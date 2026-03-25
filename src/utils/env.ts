@@ -13,9 +13,7 @@ export const isMainBrowser =
 
 /** True when running inside a Web Worker (Dedicated, Shared, or Service Worker). */
 export const isWebWorker =
-  !isNode &&
-  typeof window === 'undefined' &&
-  typeof self !== 'undefined';
+  !isNode && typeof window === 'undefined' && typeof self !== 'undefined';
 
 /** True when running in any browser context: main thread or Web Worker. */
 export const isBrowser = isMainBrowser || isWebWorker;

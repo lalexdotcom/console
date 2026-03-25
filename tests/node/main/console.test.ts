@@ -1,6 +1,6 @@
-import { afterEach, describe, expect, test } from '@rstest/core';
 import { Console } from 'node:console';
 import { Writable } from 'node:stream';
+import { afterEach, describe, expect, test } from '@rstest/core';
 import { L } from '../../../src';
 import { captureAll } from '../../helpers/capture';
 

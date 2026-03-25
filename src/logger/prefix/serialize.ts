@@ -14,7 +14,10 @@ type ExtractedFields = {
   data?: unknown;
 };
 
-function extractFields(items: Prefix[], callArgs: LogParameters): ExtractedFields {
+function extractFields(
+  items: Prefix[],
+  callArgs: LogParameters,
+): ExtractedFields {
   let level = '';
   let severity = '';
   let scope: string | undefined;
@@ -59,8 +62,12 @@ function extractFields(items: Prefix[], callArgs: LogParameters): ExtractedField
 
 // ── Serializers ───────────────────────────────────────────────────────────────
 
-export function serializeJSON(items: Prefix[], callArgs: LogParameters): string {
-  const { level, severity, scope, time, caller, progress, msg, data } = extractFields(items, callArgs);
+export function serializeJSON(
+  items: Prefix[],
+  callArgs: LogParameters,
+): string {
+  const { level, severity, scope, time, caller, progress, msg, data } =
+    extractFields(items, callArgs);
   const obj: Record<string, unknown> = {};
   obj.time = time;
   obj.level = level;
@@ -73,16 +80,24 @@ export function serializeJSON(items: Prefix[], callArgs: LogParameters): string 
   return JSON.stringify(obj);
 }
 
-export function serializeLogfmt(items: Prefix[], callArgs: LogParameters): string {
-  const { level, severity, scope, time, caller, progress, msg, data } = extractFields(items, callArgs);
+export function serializeLogfmt(
+  items: Prefix[],
+  callArgs: LogParameters,
+): string {
+  const { level, severity, scope, time, caller, progress, msg, data } =
+    extractFields(items, callArgs);
   const parts: string[] = [];
   parts.push(`time=${JSON.stringify(time)}`);
   parts.push(`level=${level}`);
   parts.push(`severity=${severity}`);
   if (scope !== undefined) parts.push(`scope=${scope}`);
   if (caller !== undefined) parts.push(`caller=${JSON.stringify(caller)}`);
-  if (progress !== undefined) parts.push(`progress=${JSON.stringify(progress)}`);
+  if (progress !== undefined)
+    parts.push(`progress=${JSON.stringify(progress)}`);
   parts.push(`msg=${JSON.stringify(msg)}`);
-  if (data !== undefined) parts.push(`data=${JSON.stringify(typeof data === 'string' ? data : JSON.stringify(data))}`);
+  if (data !== undefined)
+    parts.push(
+      `data=${JSON.stringify(typeof data === 'string' ? data : JSON.stringify(data))}`,
+    );
   return parts.join(' ');
 }

@@ -1,4 +1,9 @@
-import type { LoggerOptions, LogLevel, SpinnerOptions, SpinnerUpdateOptions } from '../types';
+import type {
+  LoggerOptions,
+  LogLevel,
+  SpinnerOptions,
+  SpinnerUpdateOptions,
+} from '../types';
 
 // ── WorkerMessage ─────────────────────────────────────────────────────────────
 

@@ -147,7 +147,14 @@ export interface RootLogger extends Logger {
    * Used by the worker script to dispatch a log line with a call-site string
    * pre-captured in the main process, bypassing worker-side stack introspection.
    */
-  __logFromMainProcess(level: LogLevel, caller: string | undefined, args: unknown[], ts?: number, traceCaller?: string, callerStructuredOnly?: boolean): void;
+  __logFromMainProcess(
+    level: LogLevel,
+    caller: string | undefined,
+    args: unknown[],
+    ts?: number,
+    traceCaller?: string,
+    callerStructuredOnly?: boolean,
+  ): void;
 }
 
 export interface ScopeLogger extends Logger {
@@ -158,5 +165,11 @@ export interface ScopeLogger extends Logger {
    * Used by the worker script to dispatch a log line with a call-site string
    * pre-captured in the main process, bypassing worker-side stack introspection.
    */
-  __logFromMainProcess(level: LogLevel, caller: string | undefined, args: unknown[], ts?: number, traceCaller?: string): void;
+  __logFromMainProcess(
+    level: LogLevel,
+    caller: string | undefined,
+    args: unknown[],
+    ts?: number,
+    traceCaller?: string,
+  ): void;
 }

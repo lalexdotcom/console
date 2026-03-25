@@ -73,7 +73,13 @@ export type CallerPrefix = {
 };
 
 /** Union of all prefix element types. */
-export type Prefix = TextPrefix | IconPrefix | DatePrefix | LevelPrefix | ProgressPrefix | CallerPrefix;
+export type Prefix =
+  | TextPrefix
+  | IconPrefix
+  | DatePrefix
+  | LevelPrefix
+  | ProgressPrefix
+  | CallerPrefix;
 
 /**
  * A spinner progress element — ignored in pretty renderers, serialized as a

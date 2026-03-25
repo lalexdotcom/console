@@ -1,10 +1,6 @@
 import { LogLevels } from '../../levels';
 import type { DispatchFn } from '../dispatch';
-import type {
-  LimitedLogger,
-  LogLevel,
-  LogParameters,
-} from '../types';
+import type { LimitedLogger, LogLevel, LogParameters } from '../types';
 
 // ── Call-site key ─────────────────────────────────────────────────────────────
 

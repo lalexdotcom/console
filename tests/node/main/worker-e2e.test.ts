@@ -1,7 +1,7 @@
 import { describe, expect, test } from '@rstest/core';
 import { L } from '../../../src';
-import { WL, WorkerLogger, terminateWorker } from '../../../src/worker/index';
 import type { RootLogger } from '../../../src/types';
+import { terminateWorker, WL, WorkerLogger } from '../../../src/worker/index';
 import { captureAll } from '../../helpers/capture';
 
 // Importing L guarantees $logger-registry is populated before any test runs.

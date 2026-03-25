@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, rs, test } from '@rstest/core';
 
-// Patch child_process.fork in Node's require cache before WL is imported.
+// Patch child_process.fork in Node's require cache before L is imported.
 //
 // Why this works:
 //   - `createNodeTransport()` calls `await import('node:child_process')` (dynamic)
@@ -42,7 +42,7 @@ const fakeFork = rs.hoisted(() => {
   return { sentMessages, restore };
 });
 
-import { WL } from '../../../src/worker/index';
+import { L } from '../../../src/worker/index';
 import type { WorkerMessage } from '../../../src/worker/protocol';
 
 // Flushes the microtask queue so createNodeTransport()'s async Promise chain
@@ -63,18 +63,18 @@ beforeEach(() => {
 
 afterEach(() => {
   // Restore any option state that WORK-06 tests may have set.
-  // WL is a singleton — option values persist across tests without explicit reset.
-  (WL as unknown as { level: undefined }).level = undefined;
-  (WL as unknown as { format: string }).format = 'json';
-  (WL as unknown as { exclusive: boolean }).exclusive = false;
+  // L is a singleton — option values persist across tests without explicit reset.
+  (L as unknown as { level: undefined }).level = undefined;
+  (L as unknown as { format: string }).format = 'json';
+  (L as unknown as { exclusive: boolean }).exclusive = false;
   fakeFork.sentMessages.length = 0;
 });
 
 // ── WORK-01: log dispatch ─────────────────────────────────────────────────────
 
 describe('log dispatch (WORK-01)', () => {
-  test('CANARY: WL.info sends a WorkerMessage log to the fake fork', async () => {
-    WL.info('hello canary');
+  test('CANARY: L.info sends a WorkerMessage log to the fake fork', async () => {
+    L.info('hello canary');
     await flush();
 
     // If fakeFork.sentMessages is still empty, the require cache patch did NOT
@@ -107,7 +107,7 @@ describe('log dispatch (WORK-01)', () => {
 
     for (const level of levels) {
       fakeFork.sentMessages.length = 0;
-      (WL as unknown as Record<string, (...args: unknown[]) => void>)[level](
+      (L as unknown as Record<string, (...args: unknown[]) => void>)[level](
         `test-${level}`,
       );
       await flush();
@@ -118,21 +118,21 @@ describe('log dispatch (WORK-01)', () => {
     }
   });
 
-  test('when WL.stack = true, log message includes a caller string', async () => {
-    (WL as unknown as { stack: boolean }).stack = true;
-    WL.info('caller-test');
+  test('when L.stack = true, log message includes a caller string', async () => {
+    (L as unknown as { stack: boolean }).stack = true;
+    L.info('caller-test');
     await flush();
     const msg = getLogMsgs().at(-1);
     expect(typeof msg?.caller).toBe('string');
-    (WL as unknown as { stack: boolean }).stack = false; // restore
+    (L as unknown as { stack: boolean }).stack = false; // restore
   });
 });
 
 // ── WORK-02: all WorkerMessage type variants dispatched ───────────────────────
 
 describe('all WorkerMessage types dispatched (WORK-02)', () => {
-  test('opt:set — WL.level setter sends { type: "opt:set", key: "level", value: "debug" }', async () => {
-    (WL as unknown as { level: string }).level = 'debug';
+  test('opt:set — L.level setter sends { type: "opt:set", key: "level", value: "debug" }', async () => {
+    (L as unknown as { level: string }).level = 'debug';
     await flush();
 
     const msg = (fakeFork.sentMessages as WorkerMessage[]).find(
@@ -143,8 +143,8 @@ describe('all WorkerMessage types dispatched (WORK-02)', () => {
     expect(msg?.value).toBe('debug');
   });
 
-  test('opt:format — WL.format setter sends { type: "opt:format", value: "logfmt" }', async () => {
-    (WL as unknown as { format: string }).format = 'logfmt';
+  test('opt:format — L.format setter sends { type: "opt:format", value: "logfmt" }', async () => {
+    (L as unknown as { format: string }).format = 'logfmt';
     await flush();
 
     const msg = (fakeFork.sentMessages as WorkerMessage[]).find(
@@ -155,8 +155,8 @@ describe('all WorkerMessage types dispatched (WORK-02)', () => {
     expect(msg?.value).toBe('logfmt');
   });
 
-  test('opt:exclusive — WL.exclusive setter sends { type: "opt:exclusive", value: true }', async () => {
-    (WL as unknown as { exclusive: boolean }).exclusive = true;
+  test('opt:exclusive — L.exclusive setter sends { type: "opt:exclusive", value: true }', async () => {
+    (L as unknown as { exclusive: boolean }).exclusive = true;
     await flush();
 
     const msg = (fakeFork.sentMessages as WorkerMessage[]).find(
@@ -167,8 +167,8 @@ describe('all WorkerMessage types dispatched (WORK-02)', () => {
     expect(msg?.value).toBe(true);
   });
 
-  test('spin:start — WL.info.spin() sends { type: "spin:start", id: string, level: "info" }', async () => {
-    const handle = WL.info.spin('loading text');
+  test('spin:start — L.info.spin() sends { type: "spin:start", id: string, level: "info" }', async () => {
+    const handle = L.info.spin('loading text');
     await flush();
 
     const msg = (fakeFork.sentMessages as WorkerMessage[]).find(
@@ -183,7 +183,7 @@ describe('all WorkerMessage types dispatched (WORK-02)', () => {
   });
 
   test('spin:update — handle.update() sends { type: "spin:update", id, text }', async () => {
-    const handle = WL.info.spin('initial text');
+    const handle = L.info.spin('initial text');
     await flush();
 
     const startMsg = (fakeFork.sentMessages as WorkerMessage[]).find(
@@ -206,7 +206,7 @@ describe('all WorkerMessage types dispatched (WORK-02)', () => {
   });
 
   test('spin:success — spinnerHandle.success() sends { type: "spin:success", id, text }', async () => {
-    const handle = WL.info.spin('task');
+    const handle = L.info.spin('task');
     await flush();
 
     const startMsg = (fakeFork.sentMessages as WorkerMessage[]).find(
@@ -230,7 +230,7 @@ describe('all WorkerMessage types dispatched (WORK-02)', () => {
   });
 
   test('spin:fail — spinnerHandle.fail() sends { type: "spin:fail", id, text }', async () => {
-    const handle = WL.warn.spin('risky task');
+    const handle = L.warn.spin('risky task');
     await flush();
 
     const startMsg = (fakeFork.sentMessages as WorkerMessage[]).find(
@@ -253,7 +253,7 @@ describe('all WorkerMessage types dispatched (WORK-02)', () => {
   });
 
   test('spin:stop — spinnerHandle.stop() sends { type: "spin:stop", id }', async () => {
-    const handle = WL.info.spin('cancellable');
+    const handle = L.info.spin('cancellable');
     await flush();
 
     const startMsg = (fakeFork.sentMessages as WorkerMessage[]).find(
@@ -281,7 +281,7 @@ describe('all WorkerMessage types dispatched (WORK-02)', () => {
 describe('unserializable args cloning (WORK-03)', () => {
   test('function argument is serialised to a string via String()', async () => {
     const fn = () => 'hello';
-    WL.info('prefix', fn);
+    L.info('prefix', fn);
     await flush();
 
     const msg = getLogMsgs().at(-1);
@@ -294,7 +294,7 @@ describe('unserializable args cloning (WORK-03)', () => {
 
   test('plain object argument is passed through structuredClone unchanged', async () => {
     const obj = { x: 42, nested: { y: 'test' } };
-    WL.info('data', obj);
+    L.info('data', obj);
     await flush();
 
     const msg = getLogMsgs().at(-1);
@@ -305,7 +305,7 @@ describe('unserializable args cloning (WORK-03)', () => {
   });
 
   test('multiple args are each independently cloned', async () => {
-    WL.info('a', 1, true, null, { z: 3 });
+    L.info('a', 1, true, null, { z: 3 });
     await flush();
 
     const msg = getLogMsgs().at(-1);
@@ -317,9 +317,9 @@ describe('unserializable args cloning (WORK-03)', () => {
 
 describe('message ordering (WORK-04)', () => {
   test('messages are delivered in call order', async () => {
-    WL.info('first');
-    WL.warn('second');
-    WL.debug('third');
+    L.info('first');
+    L.warn('second');
+    L.debug('third');
     await flush();
 
     const msgs = getLogMsgs();
@@ -332,7 +332,7 @@ describe('message ordering (WORK-04)', () => {
   });
 
   test('each log message has a ts (timestamp) field', async () => {
-    WL.info('ts-test');
+    L.info('ts-test');
     await flush();
 
     const msg = getLogMsgs().at(-1);
@@ -345,8 +345,8 @@ describe('message ordering (WORK-04)', () => {
 // ── WORK-05: scope proxy ──────────────────────────────────────────────────────
 
 describe('scope proxy (WORK-05)', () => {
-  test('WL.scope() returns a scoped logger that prefixes messages with scope name', async () => {
-    const scoped = WL.scope('my-service');
+  test('L.scope() returns a scoped logger that prefixes messages with scope name', async () => {
+    const scoped = L.scope('my-service');
     scoped.info('scoped message');
     await flush();
 
@@ -356,14 +356,14 @@ describe('scope proxy (WORK-05)', () => {
     expect(msg?.args[0]).toBe('scoped message');
   });
 
-  test('WL.scope() returns the same instance for the same name (cache)', () => {
-    const s1 = WL.scope('cached-scope');
-    const s2 = WL.scope('cached-scope');
+  test('L.scope() returns the same instance for the same name (cache)', () => {
+    const s1 = L.scope('cached-scope');
+    const s2 = L.scope('cached-scope');
     expect(s1).toBe(s2);
   });
 
   test('scoped logger sends correct level in the message', async () => {
-    const scoped = WL.scope('svc-level-test');
+    const scoped = L.scope('svc-level-test');
     scoped.error('oh no');
     await flush();
 
@@ -376,8 +376,8 @@ describe('scope proxy (WORK-05)', () => {
 // ── WORK-06: option sync ──────────────────────────────────────────────────────
 
 describe('option sync to worker (WORK-06)', () => {
-  test('WL.level = "debug" sends { type: "opt:set", key: "level", value: "debug" }', async () => {
-    (WL as unknown as { level: string }).level = 'debug';
+  test('L.level = "debug" sends { type: "opt:set", key: "level", value: "debug" }', async () => {
+    (L as unknown as { level: string }).level = 'debug';
     await flush();
 
     const msg = (fakeFork.sentMessages as WorkerMessage[]).find(
@@ -388,8 +388,8 @@ describe('option sync to worker (WORK-06)', () => {
     expect(msg?.value).toBe('debug');
   });
 
-  test('WL.format = "logfmt" sends { type: "opt:format", value: "logfmt" }', async () => {
-    (WL as unknown as { format: string }).format = 'logfmt';
+  test('L.format = "logfmt" sends { type: "opt:format", value: "logfmt" }', async () => {
+    (L as unknown as { format: string }).format = 'logfmt';
     await flush();
 
     const msg = (fakeFork.sentMessages as WorkerMessage[]).find(
@@ -400,8 +400,8 @@ describe('option sync to worker (WORK-06)', () => {
     expect(msg?.value).toBe('logfmt');
   });
 
-  test('WL.exclusive = true sends { type: "opt:exclusive", value: true }', async () => {
-    (WL as unknown as { exclusive: boolean }).exclusive = true;
+  test('L.exclusive = true sends { type: "opt:exclusive", value: true }', async () => {
+    (L as unknown as { exclusive: boolean }).exclusive = true;
     await flush();
 
     const msg = (fakeFork.sentMessages as WorkerMessage[]).find(
@@ -412,8 +412,8 @@ describe('option sync to worker (WORK-06)', () => {
     expect(msg?.value).toBe(true);
   });
 
-  test('WL.stack = true sends { type: "opt:set", key: "stack", value: true }', async () => {
-    (WL as unknown as { stack: boolean }).stack = true;
+  test('L.stack = true sends { type: "opt:set", key: "stack", value: true }', async () => {
+    (L as unknown as { stack: boolean }).stack = true;
     await flush();
 
     const msg = (fakeFork.sentMessages as WorkerMessage[]).find(
@@ -423,15 +423,15 @@ describe('option sync to worker (WORK-06)', () => {
     expect(msg).toBeDefined();
     expect(msg?.value).toBe(true);
     // Restore — afterEach does not cover stack
-    (WL as unknown as { stack: boolean }).stack = false;
+    (L as unknown as { stack: boolean }).stack = false;
   });
 });
 
 // ── WORK-07: rate-limiting key/max fields ─────────────────────────────────────
 
 describe('rate-limiting key/max in WorkerMessage (WORK-07)', () => {
-  test('WL.once().info() sends { key: string } with no max field', async () => {
-    WL.once().info('once-message');
+  test('L.once().info() sends { key: string } with no max field', async () => {
+    L.once().info('once-message');
     await flush();
 
     const msg = getLogMsgs().at(-1);
@@ -442,8 +442,8 @@ describe('rate-limiting key/max in WorkerMessage (WORK-07)', () => {
     expect(msg?.max).toBeUndefined();
   });
 
-  test('WL.limit(3).info() sends { key: string, max: 3 }', async () => {
-    WL.limit(3).info('limited-message');
+  test('L.limit(3).info() sends { key: string, max: 3 }', async () => {
+    L.limit(3).info('limited-message');
     await flush();
 
     const msg = getLogMsgs().at(-1);
@@ -452,8 +452,8 @@ describe('rate-limiting key/max in WorkerMessage (WORK-07)', () => {
     expect(msg?.max).toBe(3);
   });
 
-  test('WL.once(explicit-key).info() forwards the explicit key', async () => {
-    WL.once('my-explicit-key').info('keyed-message');
+  test('L.once(explicit-key).info() forwards the explicit key', async () => {
+    L.once('my-explicit-key').info('keyed-message');
     await flush();
 
     const msg = getLogMsgs().at(-1);
@@ -461,8 +461,8 @@ describe('rate-limiting key/max in WorkerMessage (WORK-07)', () => {
     expect(msg?.max).toBeUndefined();
   });
 
-  test('WL.limit(5, explicit-key).info() forwards the explicit key with max', async () => {
-    WL.limit(5, 'my-limit-key').info('keyed-limited-message');
+  test('L.limit(5, explicit-key).info() forwards the explicit key with max', async () => {
+    L.limit(5, 'my-limit-key').info('keyed-limited-message');
     await flush();
 
     const msg = getLogMsgs().at(-1);
@@ -475,7 +475,7 @@ describe('rate-limiting key/max in WorkerMessage (WORK-07)', () => {
 
 describe('spinner lifecycle WorkerMessages (WORK-08)', () => {
   test('full success lifecycle: spin:start → spin:update → spin:success', async () => {
-    const handle = WL.info.spin('loading...');
+    const handle = L.info.spin('loading...');
     await flush();
 
     // Capture the ID from spin:start to verify consistency across messages.
@@ -511,7 +511,7 @@ describe('spinner lifecycle WorkerMessages (WORK-08)', () => {
   });
 
   test('fail lifecycle: spin:start → spin:fail with matching ID', async () => {
-    const handle = WL.error.spin('dangerous operation');
+    const handle = L.error.spin('dangerous operation');
     await flush();
 
     const startMsg = (fakeFork.sentMessages as WorkerMessage[]).find(
@@ -534,7 +534,7 @@ describe('spinner lifecycle WorkerMessages (WORK-08)', () => {
   });
 
   test('stop lifecycle: spin:start → spin:stop with matching ID', async () => {
-    const handle = WL.info.spin('cancellable');
+    const handle = L.info.spin('cancellable');
     await flush();
 
     const startMsg = (fakeFork.sentMessages as WorkerMessage[]).find(
@@ -555,8 +555,8 @@ describe('spinner lifecycle WorkerMessages (WORK-08)', () => {
   });
 
   test('two concurrent spinners get distinct IDs', async () => {
-    const h1 = WL.info.spin('first spinner');
-    const h2 = WL.info.spin('second spinner');
+    const h1 = L.info.spin('first spinner');
+    const h2 = L.info.spin('second spinner');
     await flush();
 
     const starts = (fakeFork.sentMessages as WorkerMessage[]).filter(

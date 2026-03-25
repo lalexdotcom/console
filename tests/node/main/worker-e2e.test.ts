@@ -1,19 +1,19 @@
 import { describe, expect, test } from '@rstest/core';
 import { L } from '../../../src';
 import type { RootLogger } from '../../../src/types';
-import { terminateWorker, WL, WorkerLogger } from '../../../src/worker/index';
+import { releaseWorker, L as WL, Logger } from '../../../src/worker/index';
 import { captureAll } from '../../common/capture.helper';
 
 // Importing L guarantees $logger-registry is populated before any test runs.
 // This means activateFallback() will take Path A (synchronous) when
-// terminateWorker() is called in the WORK-09 describe block below.
+// releaseWorker() is called in the WORK-09 describe block below.
 
 // Type-level verification: WL must satisfy RootLogger.
 // If this line produces a TypeScript error, WL's shape does not match RootLogger.
 const _typeCheck: RootLogger = WL;
 void _typeCheck; // suppress "unused variable" warning
 
-// ── API-01: WL surface parity with L ─────────────────────────────────────────
+// ── API-01: L surface parity with L ─────────────────────────────────────────
 
 describe('API-01: WL exposes the same public surface as L', () => {
   const LOG_LEVELS = [
@@ -30,11 +30,11 @@ describe('API-01: WL exposes the same public surface as L', () => {
     'wth',
   ] as const;
 
-  test('WL and WorkerLogger are the same object reference', () => {
-    expect(WL).toBe(WorkerLogger);
+  test('WL and Logger are the same object reference', () => {
+    expect(WL).toBe(Logger);
   });
 
-  test('WL exposes all 11 log-level methods as callable functions', () => {
+  test('L exposes all 11 log-level methods as callable functions', () => {
     for (const level of LOG_LEVELS) {
       expect(
         typeof (WL as unknown as Record<string, unknown>)[level],
@@ -47,7 +47,7 @@ describe('API-01: WL exposes the same public surface as L', () => {
     expect(typeof WL.scope).toBe('function');
   });
 
-  test('WL exposes the expected complete key set (runtime enumeration)', () => {
+  test('L exposes the expected complete key set (runtime enumeration)', () => {
     // Authoritative list from the source: every property assigned or defineProperty'd
     // on the proxy base object + option properties.
     const expectedKeys = [
@@ -112,23 +112,23 @@ describe('API-01: WL exposes the same public surface as L', () => {
   });
 });
 
-// ── WORK-09: terminateWorker() fallback and idempotence ───────────────────────
+// ── WORK-09: releaseWorker() fallback and idempotence ───────────────────────
 
-describe('terminateWorker() — WORK-09', () => {
-  // NOTE: terminateWorker() is called in the first test below.
+describe('releaseWorker() — WORK-09', () => {
+  // NOTE: releaseWorker() is called in the first test below.
   // After that call, WL permanently routes through the main-thread fallback logger (L).
   // All tests in this describe depend on (or verify) that post-terminate state.
-  // reset.ts beforeEach does NOT undo terminateWorker() — it only resets the logger
+  // reset.ts beforeEach does NOT undo releaseWorker() — it only resets the logger
   // registry state (scopes, format, rootOptions), which is fine for these tests.
 
-  test('terminateWorker() activates fallback — WL.info() output appears on stdout', () => {
+  test('releaseWorker() activates fallback — WL.info() output appears on stdout', () => {
     // Ensure L is in json format so we can parse the output.
     L.format = 'json';
 
-    // This is the first and only call to terminateWorker() in this file.
+    // This is the first and only call to releaseWorker() in this file.
     // _terminateTransport is null (never assigned) → _terminateTransport?.() is a no-op.
     // activateFallback() runs → finds L in $logger-registry (Path A) → sets _fallbackSend.
-    terminateWorker();
+    releaseWorker();
 
     // After termination, WL routes ALL sends through L (the fallback).
     // captureAll() intercepts process.stdout.write synchronously.
@@ -142,8 +142,8 @@ describe('terminateWorker() — WORK-09', () => {
     expect(parsed['msg']).toBe('post-terminate-message');
   });
 
-  test('WL continues to work after terminateWorker() — all level methods route to L', () => {
-    // terminateWorker() was called in the previous test — fallback is active.
+  test('WL continues to work after releaseWorker() — all level methods route to L', () => {
+    // releaseWorker() was called in the previous test — fallback is active.
     L.format = 'json';
 
     // warn → console.warn → stderr in Node.js (same as L.warn directly)
@@ -157,16 +157,16 @@ describe('terminateWorker() — WORK-09', () => {
     expect(parsed['msg']).toBe('fallback-warn-message');
   });
 
-  test('terminateWorker() is idempotent — calling it again does not throw', () => {
-    // terminateWorker() was already called in the test above.
+  test('releaseWorker() is idempotent — calling it again does not throw', () => {
+    // releaseWorker() was already called in the test above.
     // Each call: _terminateTransport?.() → no-op, activateFallback() → re-runs safely.
     // activateFallback() in Path A just overwrites _fallbackSend — no throw.
     expect(() => {
-      terminateWorker();
+      releaseWorker();
     }).not.toThrow();
   });
 
-  test('WL still produces output after the second idempotent terminateWorker()', () => {
+  test('WL still produces output after the second idempotent releaseWorker()', () => {
     // Belt-and-suspenders: verify WL still routes to L after the extra terminate call.
     L.format = 'json';
 

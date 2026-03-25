@@ -3,6 +3,11 @@
  * callback execution. Returns { stdout, stderr } arrays of string chunks.
  * Synchronous — the logger's dispatch is synchronous.
  *
+ * rstest audit (v3.0.0): No rstest 0.9.x builtin intercepts stream writes at
+ * the process.stdout/stderr level. @rstest/core provides vi.spyOn for function
+ * mocking but not low-level stream capture. This helper must be kept until
+ * rstest exposes a stream-capture primitive.
+ *
  * @param fn - Callback to execute while both streams are intercepted.
  * @returns Object with stdout and stderr arrays of captured string chunks.
  */

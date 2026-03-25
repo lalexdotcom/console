@@ -8,6 +8,10 @@ const REGISTRY_KEY = '$logger-registry';
  * src/logger/index.ts captures the reference by closure — deleting it from
  * globalThis wouldn't affect the live reference inside the module.
  *
+ * rstest audit (v3.0.0): No rstest 0.9.x builtin handles logger-specific
+ * singleton teardown. The beforeEach hook itself uses the rstest builtin;
+ * only the registry-mutation logic is custom and cannot be replaced.
+ *
  * Resets: scopes cache, exclusive lock, output format, root option overrides.
  */
 beforeEach(() => {

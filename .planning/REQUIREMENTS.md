@@ -256,6 +256,16 @@ Requirements for the Consolidation milestone. Phases numbered from 05 onwards.
 
 - [ ] **VERSION-01**: `package.json` version set to `3.0.0-rc.0` at end of milestone
 
+### Shared Test Battery
+
+- [ ] **BATTERY-01**: `TestAdapter` interface in `tests/common/adapter.ts` — `setup()`, `capture()`, `logger` property
+- [ ] **BATTERY-02**: Shared suites in `tests/common/*.suite.ts` — levels, formats, scopes, options, prefix, mixins, spinners; each exports `makeSuite(adapter)`
+- [ ] **BATTERY-03**: Adapters for `node-console` (json / logfmt / pretty) and `browser-main`
+- [ ] **BATTERY-04**: Worker adapters for `node-console-worker` and `node-tty-worker`; parity verified against main adapters
+- [ ] **BATTERY-05**: `rstest.config.ts` restructured into 3 independent projects: `browser`, `node-console`, `node-tty`
+- [ ] **BATTERY-06**: `tests/tty/env.ts` exports `isNodeTTY = true`; `node-tty` project uses `source.alias` to redirect `src/utils/env` → `tests/tty/env.ts`; no env-var in `src/`
+- [ ] **BATTERY-07**: Parity suite (`tests/common/parity.suite.ts`) asserts main ↔ worker output identical (timestamps stripped) for every shared case
+
 ---
 
 ## v3.0.0 Requirement → Phase Mapping
@@ -285,8 +295,15 @@ Requirements for the Consolidation milestone. Phases numbered from 05 onwards.
 | TEST-04 | Phase 07 | Pending |
 | TEST-05 | Phase 07 | Pending |
 | VERSION-01 | Phase 07 | Pending |
+| BATTERY-01 | Phase 08 | Pending |
+| BATTERY-02 | Phase 08 | Pending |
+| BATTERY-03 | Phase 08 | Pending |
+| BATTERY-04 | Phase 08 | Pending |
+| BATTERY-05 | Phase 08 | Pending |
+| BATTERY-06 | Phase 08 | Pending |
+| BATTERY-07 | Phase 08 | Pending |
 
 **Coverage:**
-- v3.0.0 requirements: 23 total
-- Mapped to phases: 23 ✓
+- v3.0.0 requirements: 30 total (23 original + 7 Phase 08)
+- Mapped to phases: 30 ✓
 - Unmapped: 0

@@ -105,6 +105,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 - [ ] **Phase 05: Worker API Alignment** — Rename `terminateWorker` → `releaseWorker`, remove `WL`/`WorkerLogger` exports, fix the fork-kill bug, and replace the `__WORKER_SCRIPT__` define with a shared constant in `src/worker/const.ts`
 - [ ] **Phase 06: Browser Compatibility & Build Validation** — Add a `"browser"` exports condition to `package.json`, verify tree-shaking eliminates `node:*` references, and validate that `dist/` matches the exports map exactly
 - [ ] **Phase 07: Test Cleanup & Release Prep** — Remove smoke tests, audit rstest builtins, add `releaseWorker` E2E coverage, and bump `package.json` to `3.0.0-rc.0`
+- [ ] **Phase 08: Shared Test Battery & Full TTY Coverage** — `TestAdapter` abstraction, `tests/common/*.suite.ts` battery across all environments, dedicated `node-tty` rstest project via rspack alias, main ↔ worker parity suite
 
 ### Phase 05: Worker API Alignment
 **Goal**: `@lalex/console/worker` exports `L`, `Logger`, and `releaseWorker` with types identical to the main entry; worker script path sourced from a shared constant in `src/worker/const.ts`; `releaseWorker` bug fixed so the fork is actually killed
@@ -146,13 +147,30 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
   6. `tsc --noEmit` passes with zero errors
 **Plans**: TBD
 
+### Phase 08: Shared Test Battery & Full TTY Coverage
+**Goal**: `TestAdapter` abstraction + `tests/common/*.suite.ts` suites run identically across browser, node-console, node-tty, and worker variants; dedicated `node-tty` rstest project using rspack `source.alias` to compile the logger with `isNodeTTY = true`; parity suite verifies main ↔ worker output is identical for every shared case
+**Depends on**: Phase 05, Phase 06, Phase 07
+**Requirements**: BATTERY-01, BATTERY-02, BATTERY-03, BATTERY-04, BATTERY-05, BATTERY-06, BATTERY-07
+**Success Criteria** (what must be TRUE):
+  1. `rstest.config.ts` has exactly 3 projects: `browser`, `node-console`, `node-tty`
+  2. `node-tty` project uses `source.alias` → `tests/tty/env.ts` (exports `isNodeTTY = true`); no `LLOGER_FORCE_TTY` or any env-var hack in `src/`
+  3. `tests/common/*.suite.ts` covers levels, formats, scopes, options, prefix, mixins, and spinners
+  4. Every suite is executed under at least 2 different adapters (e.g. node-console + node-tty)
+  5. Parity suite passes: main and worker adapters produce identical output (timestamps stripped)
+  6. `pnpm test` passes — all previous tests green, new tests added
+  7. `tsc --noEmit` passes with zero errors
+**Plans**: TBD
+
+---
+
 ## v3.0.0 Progress
 
 **Execution Order:**
-Phases execute in numeric order: 05 → 06 → 07
+Phases execute in numeric order: 05 → 06 → 07 → 08
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 05. Worker API Alignment | 0/0 | Not started | - |
 | 06. Browser Compatibility & Build Validation | 0/0 | Not started | - |
 | 07. Test Cleanup & Release Prep | 0/0 | Not started | - |
+| 08. Shared Test Battery & Full TTY Coverage | 0/0 | Not started | - |

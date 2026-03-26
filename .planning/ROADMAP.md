@@ -177,7 +177,7 @@ Phases execute in numeric order: 05 → 06 → 07
 ## v3.0.1 Shared Test Battery
 
 - [ ] **Phase 08: TestAdapter + Shared Suites + Node-Console Adapter** — Foundation: `TestAdapter` interface, 7 parameterised shared suite files, and node-console + browser-main adapters that make the suites immediately runnable
-- [ ] **Phase 09: Node-TTY + Worker Adapters** — `tests/tty/env.ts` static TTY override, node-tty adapter, and both worker adapters (node-console-worker, node-tty-worker)
+- [x] **Phase 09: Node-TTY + Worker Adapters** — `tests/tty/env.ts` static TTY override, node-tty adapter, and both worker adapters (node-console-worker, node-tty-worker) (completed 2026-03-26)
 - [ ] **Phase 10: rstest Restructure, Parity Suite & Release** — Split `rstest.config.ts` into 3 independent projects (with TTY source alias), add parity suite, bump `package.json` to `3.0.1-rc.0`
 
 ### Phase 08: TestAdapter + Shared Suites + Node-Console Adapter
@@ -211,7 +211,7 @@ Plans:
   4. A `node-tty-worker` adapter mirrors the console-worker but routes through the TTY-configured worker instance
   5. `pnpm test` passes — all prior tests still green, new adapter tests added
   6. `tsc --noEmit` passes with zero errors
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
 Plans:
 - [ ] 09-01-PLAN.md — Create `tests/tty/env.ts` (static TTY override, alias target for Phase 10) + `battery-node-tty.test.ts` (6 suites, console-mode pretty) (BATTERY-06)
@@ -241,5 +241,5 @@ Phases execute in numeric order: 08 → 09 → 10
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|----------|
 | 08. TestAdapter + Shared Suites + Node-Console Adapter | 0/0 | Not started | - |
-| 09. Node-TTY + Worker Adapters | 0/0 | Not started | - |
+| 09. Node-TTY + Worker Adapters | 0/0 | Complete    | 2026-03-26 |
 | 10. rstest Restructure, Parity Suite & Release | 0/0 | Not started | - |

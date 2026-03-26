@@ -1,7 +1,7 @@
 import { describe, expect, test } from '@rstest/core';
 import { L } from '../../../src';
 import { captureAll } from '../../common/capture.helper';
-import { parseLogfmt } from './logfmt.helper';
+import { parseLogfmt } from '../../common/logfmt.helper';
 
 // reset.ts is registered globally via rstest.config.ts setupFiles.
 

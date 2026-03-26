@@ -223,13 +223,17 @@ Plans:
 **Requirements**: BATTERY-05, BATTERY-07, VERSION-02
 **Success Criteria** (what must be TRUE):
   1. `rstest.config.ts` defines exactly 3 project objects (`browser`, `node-console`, `node-tty`) — legacy 2-project config fully replaced
-  2. The `node-tty` project uses `source.alias` to redirect `src/utils/env` → `tests/tty/env.ts`; no `LLOGER_FORCE_TTY` or equivalent env-var exists in `src/`
+  2. The `node-tty` project uses `resolve.alias` to redirect `src/utils/env` → `tests/tty/env.ts`; no `LLOGER_FORCE_TTY` or equivalent env-var exists in `src/`
   3. Each project's `include` glob targets the correct directory: `tests/browser/**`, `tests/node/**` + `tests/common/**`, `tests/tty/**` + `tests/common/**`
   4. `tests/common/parity.suite.ts` exports `makeParitySuite(mainAdapter, workerAdapter)`; for every shared test case, main and worker outputs are byte-identical after timestamp stripping
   5. `pnpm test` executes all 3 projects and all tests pass (prior count preserved + new parity tests added)
   6. `package.json` `version` is exactly `3.0.1-rc.0`
   7. `tsc --noEmit` passes with zero errors
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 10-01-PLAN.md — Rewrite rstest.config.ts (3-project bare array, resolve.alias on node-tty), remove scopes/prefix/spinners suites from both TTY battery files (BATTERY-05)
+- [ ] 10-02-PLAN.md — Create parity.suite.ts + parity-console.test.ts + parity-tty.test.ts, bump package.json to 3.0.1-rc.0 (BATTERY-07, VERSION-02)
 
 ---
 

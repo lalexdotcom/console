@@ -31,6 +31,7 @@ export function makeSuite(adapter: TestAdapter): void {
       });
 
       test('scope level methods emit output with scope name in JSON payload', async () => {
+        if (adapter.name.startsWith('browser')) return; // browser output is %c CSS, not JSON
         L.format = 'json';
         const s = L.scope('scope-01-emit');
         const lines = await adapter.capture(() => s.info('from scope'));

@@ -12,12 +12,14 @@ export function makeSuite(adapter: TestAdapter): void {
   describe(`levels (${adapter.name})`, () => {
     beforeEach(async () => {
       await adapter.setup();
+      // Force JSON format so TRACE_LEVELS (emerg/alert/crit/error/warn) never emit a
+      // separate stack-trace line to stdout. The format is also ignored by browser tests
+      // (browser always uses %c CSS), so this guard only affects node adapters.
+      L.format = 'json';
     });
 
     // CORE-01: each level emits exactly one output line regardless of which stream it uses
     describe('Level dispatch (CORE-01)', () => {
-      // Use json format (set by adapter.setup()) to avoid TRACE_LEVELS pretty-mode
-      // stack-trace spillover that would produce extra lines for emerg/alert/crit/error/warn.
       test.each(LogLevels)('%s emits exactly one line', async (level) => {
         const lines = await adapter.capture(() => {
           (L as unknown as Record<string, (...a: unknown[]) => void>)[level]('msg');

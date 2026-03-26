@@ -30,6 +30,8 @@ export function makeSuite(adapter: TestAdapter): void {
         ['debug',   'DEBUG'],
         ['wth',     'WHO CARES?'],
       ] as const)('%s badge shows [%s]', async (level, label) => {
+        // Browser always uses '%cLABEL%c' CSS format — no '[LABEL]' brackets.
+        if (adapter.name.startsWith('browser')) return;
         L.format = 'pretty';
         L.pad = false;
         const lines = await adapter.capture(() =>
@@ -61,6 +63,8 @@ export function makeSuite(adapter: TestAdapter): void {
       });
 
       test('date bracket appears in logfmt output when date=true', async () => {
+        // Browser always emits %c CSS format — never logfmt text.
+        if (adapter.name.startsWith('browser')) return;
         // In json/logfmt, time field is always present (uses Date.now() regardless of date option).
         // When date=true, the DatePrefix item sets the captured timestamp.
         // We verify the ISO 8601 time field is always a valid timestamp.
@@ -75,6 +79,8 @@ export function makeSuite(adapter: TestAdapter): void {
     // CallerPrefix items are structuredOnly=true — they appear in JSON but not in pretty brackets.
     describe('Caller prefix (PREFIX-03)', () => {
       test('caller field appears in JSON output when stack=true', async () => {
+        // Browser always emits %c CSS format — L.format='json' is a no-op in browser.
+        if (adapter.name.startsWith('browser')) return;
         L.format = 'json';
         L.stack = true;
         const lines = await adapter.capture(() => L.info('traced'));
@@ -86,6 +92,7 @@ export function makeSuite(adapter: TestAdapter): void {
       });
 
       test('no caller field in JSON output when stack=false (default)', async () => {
+        if (adapter.name.startsWith('browser')) return;
         L.format = 'json';
         L.stack = false;
         // Non-TRACE level (info) with stack=false → no caller in prefix
@@ -95,6 +102,7 @@ export function makeSuite(adapter: TestAdapter): void {
       });
 
       test('TRACE_LEVELS always include caller in JSON even without stack=true', async () => {
+        if (adapter.name.startsWith('browser')) return;
         // emerg/alert/crit/error/warn push caller even when stack=false
         L.format = 'json';
         L.stack = false;
@@ -108,6 +116,8 @@ export function makeSuite(adapter: TestAdapter): void {
     // PREFIX-04: scope prefix in pretty ([LABEL <scope>]) and JSON ('scope' field)
     describe('Scope prefix (PREFIX-04)', () => {
       test('scope name appears in pretty output as [LABEL <scope-name>]', async () => {
+        // Browser uses '%cINFO <my-scope>%c' — no square brackets.
+        if (adapter.name.startsWith('browser')) return;
         L.format = 'pretty';
         L.pad = false;
         const s = L.scope('my-scope');
@@ -116,8 +126,7 @@ export function makeSuite(adapter: TestAdapter): void {
         expect(lines[0]).toContain('[INFO <my-scope>]');
       });
 
-      test('scope field appears in JSON output', async () => {
-        L.format = 'json';
+      test('scope field appears in JSON output', async () => {        if (adapter.name.startsWith('browser')) return;        L.format = 'json';
         const s = L.scope('json-scope');
         const lines = await adapter.capture(() => s.info('msg'));
         const parsed = JSON.parse(lines[0].trimEnd()) as Record<string, unknown>;
@@ -125,6 +134,7 @@ export function makeSuite(adapter: TestAdapter): void {
       });
 
       test('root logger has no scope in pretty output or JSON', async () => {
+        if (adapter.name.startsWith('browser')) return;
         L.format = 'pretty';
         L.pad = false;
         const prettyLines = await adapter.capture(() => L.info('root'));

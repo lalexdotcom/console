@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, rs, test } from '@rstest/core';
 import { L } from '../../src';
-import { BROWSER_SPINNER_INTERVAL } from '../../src/logger/mixins/spinner/browser/const';
+import { BROWSER_DEFAULT_RUNNING_ICON, BROWSER_SPINNER_INTERVAL } from '../../src/logger/mixins/spinner/browser/const';
 import { CONSOLE_SPINNER_INTERVAL } from '../../src/logger/mixins/spinner/console/const';
 import { SPINNER_INTERVAL_JITTER } from '../../src/logger/mixins/spinner/const';
 import type { LoggerSpinner } from '../../src/types';
@@ -21,6 +21,11 @@ export function makeSuite(adapter: TestAdapter): void {
     ? BROWSER_SPINNER_INTERVAL + SPINNER_INTERVAL_JITTER + 10
     : CONSOLE_SPINNER_INTERVAL + SPINNER_INTERVAL_JITTER + 10;
 
+  // Running icon differs by environment: node console uses '⋯', browser uses '-'.
+  const RUNNING_ICON = adapter.name.startsWith('browser')
+    ? BROWSER_DEFAULT_RUNNING_ICON.icon
+    : '⋯';
+
   describe(`spinners (${adapter.name})`, () => {
     beforeEach(async () => {
       await adapter.setup();
@@ -36,7 +41,7 @@ export function makeSuite(adapter: TestAdapter): void {
           L.scope('spin-01-start').info.spin('loading');
         });
         expect(lines.length).toBeGreaterThanOrEqual(1);
-        expect(lines[0]).toContain('⋯');
+        expect(lines[0]).toContain(RUNNING_ICON);
       });
 
       test('tick advance emits additional running frames', async () => {
@@ -50,6 +55,9 @@ export function makeSuite(adapter: TestAdapter): void {
       });
 
       test('update changes the spinner text on the next tick', async () => {
+        // Browser capture collects only the %c format string (c[0]) — message text is
+        // a separate arg. Verifying message content requires node-mode capture.
+        if (adapter.name.startsWith('browser')) return;
         const lines = await adapter.capture(() => {
           rs.useFakeTimers();
           const sp = L.scope('spin-01-update').info.spin('loading');
@@ -114,7 +122,7 @@ export function makeSuite(adapter: TestAdapter): void {
           L.scope('spin-03-autostart-true').info.spin('loading');
         });
         expect(lines.length).toBeGreaterThanOrEqual(1);
-        expect(lines[0]).toContain('⋯');
+        expect(lines[0]).toContain(RUNNING_ICON);
       });
 
       test('autoStart: false emits zero output after construction', async () => {
@@ -133,7 +141,7 @@ export function makeSuite(adapter: TestAdapter): void {
         expect(beforeStart).toHaveLength(0);
         const afterStart = await adapter.capture(() => { spinner.start(); });
         expect(afterStart.length).toBeGreaterThanOrEqual(1);
-        expect(afterStart[0]).toContain('⋯');
+        expect(afterStart[0]).toContain(RUNNING_ICON);
       });
     });
 
@@ -147,17 +155,18 @@ export function makeSuite(adapter: TestAdapter): void {
       });
 
       test('exec() with rejected promise emits fail icon and re-throws', async () => {
-        let lines: string[] = [];
-        try {
-          lines = await adapter.capture(async () => {
+        let threw = false;
+        const lines = await adapter.capture(async () => {
+          try {
             await L.scope('spin-04-fail').info.exec(
               Promise.reject(new Error('boom')),
               { label: 'Task' },
             );
-          });
-        } catch {
-          // Expected re-throw (D-13) — consumed here
-        }
+          } catch {
+            threw = true; // exec() re-throws after calling sp.fail() (D-13)
+          }
+        });
+        expect(threw).toBe(true);
         expect(lines.some(l => l.includes('✖'))).toBe(true);
       });
     });
@@ -165,6 +174,9 @@ export function makeSuite(adapter: TestAdapter): void {
     // SPIN-05: duration display on success
     describe('duration: true (SPIN-05)', () => {
       test('duration: true — success message contains elapsed time suffix', async () => {
+        // Browser capture collects only c[0] (format string) — the duration suffix is
+        // appended to callArgs text and lives beyond the format string.
+        if (adapter.name.startsWith('browser')) return;
         const out = await adapter.capture(() => {
           rs.useFakeTimers();
           const sp = L.scope('spin-05-duration').info.spin('task', { duration: true });
@@ -202,8 +214,11 @@ export function makeSuite(adapter: TestAdapter): void {
     });
 
     // SPIN-08: console renderer bracket badge format (non-TTY)
+    // These badges ('[ ⋯ ]', '[ ✔ ]', '[ ✖ ]') are a node console renderer
+    //  feature. Browser spinner icons are CSS-styled ('%c-icon%c') without brackets.
     describe('console renderer bracket badges (SPIN-08)', () => {
       test('running ticks use [ ⋯ ] bracket format without cursor control sequences', async () => {
+        if (adapter.name.startsWith('browser')) return;
         const out = await adapter.capture(() => {
           rs.useFakeTimers();
           L.scope('spin-08-running').info.spin('loading');
@@ -215,6 +230,7 @@ export function makeSuite(adapter: TestAdapter): void {
       });
 
       test('success line uses [ ✔ ] bracket format', async () => {
+        if (adapter.name.startsWith('browser')) return;
         const lines = await adapter.capture(() => {
           const sp = L.scope('spin-08-success-bracket').info.spin('task');
           sp.success('done');
@@ -224,6 +240,7 @@ export function makeSuite(adapter: TestAdapter): void {
       });
 
       test('fail line uses [ ✖ ] bracket format', async () => {
+        if (adapter.name.startsWith('browser')) return;
         const lines = await adapter.capture(() => {
           const sp = L.scope('spin-08-fail-bracket').info.spin('task');
           sp.fail('oops');

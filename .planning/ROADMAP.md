@@ -211,7 +211,11 @@ Plans:
   4. A `node-tty-worker` adapter mirrors the console-worker but routes through the TTY-configured worker instance
   5. `pnpm test` passes — all prior tests still green, new adapter tests added
   6. `tsc --noEmit` passes with zero errors
-**Plans**: TBD
+**Plans:** 2 plans
+
+Plans:
+- [ ] 09-01-PLAN.md — Create `tests/tty/env.ts` (static TTY override, alias target for Phase 10) + `battery-node-tty.test.ts` (6 suites, console-mode pretty) (BATTERY-06)
+- [ ] 09-02-PLAN.md — Create `battery-node-console-worker.test.ts` (7 suites × 3 formats via releaseWorker() fallback) + `battery-node-tty-worker.test.ts` (6 suites, pretty, via fallback) (BATTERY-04)
 
 ### Phase 10: rstest Restructure, Parity Suite & Release
 **Goal**: `rstest.config.ts` has exactly 3 independent projects; the `node-tty` project applies the TTY source alias; parity suite validates main ↔ worker byte-identical output; `package.json` bumped to `3.0.1-rc.0`

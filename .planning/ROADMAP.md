@@ -191,7 +191,14 @@ Phases execute in numeric order: 05 → 06 → 07
   4. A `browser-main` adapter runs the shared suites against the Playwright browser environment; all assertions pass
   5. `pnpm test` passes with all existing tests still green
   6. `tsc --noEmit` passes with zero errors
-**Plans**: TBD
+**Plans:** 5 plans
+
+Plans:
+- [ ] 08-01-PLAN.md — Move `parseLogfmt` to `tests/common/logfmt.helper.ts`, update import in `formats.test.ts`, create `tests/common/adapter.ts` with `TestAdapter` interface (BATTERY-01)
+- [ ] 08-02-PLAN.md — Create `tests/common/levels.suite.ts` (CORE-01/02/03) + `tests/common/formats.suite.ts` (CORE-04/05/06) (BATTERY-02)
+- [ ] 08-03-PLAN.md — Create `tests/common/scopes.suite.ts`, `options.suite.ts`, `prefix.suite.ts` (SCOPE-01–04, OPT-01–04, PREFIX-01–04) (BATTERY-02)
+- [ ] 08-04-PLAN.md — Create `tests/common/mixins.suite.ts` (MIX-01–04) + `tests/common/spinners.suite.ts` (SPIN-01–06/08) (BATTERY-02)
+- [ ] 08-05-PLAN.md — Create `tests/node/main/battery-node-console.test.ts` (async capture, 7×3 suites) + `tests/browser/main/battery-browser.test.ts` (rs.spyOn capture, 6 suites) (BATTERY-03)
 
 ### Phase 09: Node-TTY + Worker Adapters
 **Goal**: All remaining environment adapters are in place — `tests/tty/env.ts` static TTY override created, node-tty adapter instantiates the logger in TTY mode, and both worker adapters (console-worker + tty-worker) connect the shared suites to IPC-backed logger instances

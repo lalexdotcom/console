@@ -240,7 +240,7 @@ Plans:
 
 ## v3.0.2 Test Architecture Refactor
 
-- [ ] **Phase 11: Suite Infrastructure** — Define `Suite`/`TestCase` interfaces and implement the generic `runSuite()` runner with centralised `beforeEach` and automatic parity
+- [x] **Phase 11: Suite Infrastructure** — Define `Suite`/`TestCase` interfaces and implement the generic `runSuite()` runner with centralised `beforeEach` and automatic parity (completed 2026-03-27)
 - [ ] **Phase 12: Suite Migration** — Migrate all 7 shared suites to declarative format, remove `parity.suite.ts`, extract `normalise()` helper
 - [ ] **Phase 13: Directory Restructure** — Create `tests/console/{json,logfmt,pretty}/`, `tests/tty/`, `tests/browser/`; move adapters; update rstest globs
 - [ ] **Phase 14: QA + Release** — Verify behavioural coverage, `tsc --noEmit` and Biome clean, bump version to `3.0.2-rc.0`
@@ -254,10 +254,10 @@ Plans:
   2. `tests/common/suites/runner.ts` exports `runSuite(suite, mainAdapter, workerAdapter?)` — wraps each test case in `it()`, calls `beforeEach(adapter.setup())`, and iterates `suite.tests`
   3. When `workerAdapter` is provided and `testCase.parity !== false`, the runner automatically re-runs the same test case against the worker adapter inside the same `describe` block
   4. `tsc --noEmit` passes with the new interface and runner files
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
-- [ ] 11-01-PLAN.md — Create suite.ts (Suite/TestCase/RunTestFunction types) and runner.ts (runSuite implementation) — ARCH-01, ARCH-02
+- [x] 11-01-PLAN.md — Create suite.ts (Suite/TestCase/RunTestFunction types) and runner.ts (runSuite implementation) — ARCH-01, ARCH-02
 
 ### Phase 12: Suite Migration
 **Goal**: All 7 shared suites are declarative objects; `parity.suite.ts` is removed; `normalise()` helper is extracted to its dedicated file
@@ -303,7 +303,7 @@ Phases execute in numeric order: 11 → 12 → 13 → 14
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|----------|
-| 11. Suite Infrastructure | 0/0 | Not started | - |
+| 11. Suite Infrastructure | 1/1 | Complete    | 2026-03-27 |
 | 12. Suite Migration | 0/0 | Not started | - |
 | 13. Directory Restructure | 0/0 | Not started | - |
 | 14. QA + Release | 0/0 | Not started | - |

@@ -385,3 +385,29 @@ Requirements for the Shared Test Battery milestone. Phases numbered from 08 onwa
 - Requirements in scope: 8 (BATTERY-01..07, VERSION-02)
 - Mapped to phases: 8 ✓
 - Deferred (future milestone): none
+
+---
+
+## v3.0.2 Requirement → Phase Mapping
+
+| Req | Phase | Status |
+|-----|-------|--------|
+| ARCH-01 | Phase 11 | Pending |
+| ARCH-02 | Phase 11 | Pending |
+| ARCH-03 | Phase 12 | Pending |
+| PARITY-01 | Phase 12 | Pending |
+| PARITY-02 | Phase 12 | Pending |
+| STRUCT-01 | Phase 13 | Pending |
+| STRUCT-02 | Phase 13 | Pending |
+| STRUCT-03 | Phase 13 | Pending |
+| STRUCT-04 | Phase 13 | Pending |
+| STRUCT-05 | Phase 13 | Pending |
+| QA-01 | Phase 14 | Pending |
+| QA-02 | Phase 14 | Pending |
+| QA-03 | Phase 14 | Pending |
+| VERSION-03 | Phase 14 | Pending |
+
+**Coverage (v3.0.2 — 4 phases):**
+- Requirements in scope: 14 (ARCH-01..03, PARITY-01..02, STRUCT-01..05, QA-01..03, VERSION-03)
+- Mapped to phases: 14 ✓
+- Deferred (future milestone): none

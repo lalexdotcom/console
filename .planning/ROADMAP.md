@@ -4,7 +4,8 @@
 
 - ✅ **v1.0 Test Suite** — Phases 1–4 (shipped 2026-03-25)
 - ✅ **v3.0.0 Consolidation** — Phases 5–7 (shipped 2026-03-25)
-- 🚧 **v3.0.1 Shared Test Battery** — Phases 8–10 (in progress)
+- ✅ **v3.0.1 Shared Test Battery** — Phases 8–10 (shipped 2026-03-27)
+- 🚧 **v3.0.2 Test Architecture Refactor** — Phases 11–14 (in progress)
 
 ## Phases
 
@@ -237,6 +238,75 @@ Plans:
 
 ---
 
+## v3.0.2 Test Architecture Refactor
+
+- [ ] **Phase 11: Suite Infrastructure** — Define `Suite`/`TestCase` interfaces and implement the generic `runSuite()` runner with centralised `beforeEach` and automatic parity
+- [ ] **Phase 12: Suite Migration** — Migrate all 7 shared suites to declarative format, remove `parity.suite.ts`, extract `normalise()` helper
+- [ ] **Phase 13: Directory Restructure** — Create `tests/console/{json,logfmt,pretty}/`, `tests/tty/`, `tests/browser/`; move adapters; update rstest globs
+- [ ] **Phase 14: QA + Release** — Verify behavioural coverage, `tsc --noEmit` and Biome clean, bump version to `3.0.2-rc.0`
+
+### Phase 11: Suite Infrastructure
+**Goal**: The declarative suite contract exists and the generic runner is operational — `Suite`/`TestCase` interfaces defined, `runSuite()` handles centralised `beforeEach` and automatic parity re-runs
+**Depends on**: Phase 10
+**Requirements**: ARCH-01, ARCH-02
+**Success Criteria** (what must be TRUE):
+  1. `tests/common/suites/suite.ts` exports `Suite` interface (`name`, `description?`, `tests: TestCase[]`) and `TestCase` interface (`name`, `parity?`, `run(adapter: TestAdapter)`)
+  2. `tests/common/suites/runner.ts` exports `runSuite(suite, mainAdapter, workerAdapter?)` — wraps each test case in `it()`, calls `beforeEach(adapter.setup())`, and iterates `suite.tests`
+  3. When `workerAdapter` is provided and `testCase.parity !== false`, the runner automatically re-runs the same test case against the worker adapter inside the same `describe` block
+  4. `tsc --noEmit` passes with the new interface and runner files
+**Plans**: TBD
+
+### Phase 12: Suite Migration
+**Goal**: All 7 shared suites are declarative objects; `parity.suite.ts` is removed; `normalise()` helper is extracted to its dedicated file
+**Depends on**: Phase 11
+**Requirements**: ARCH-03, PARITY-01, PARITY-02
+**Success Criteria** (what must be TRUE):
+  1. Seven suite files (`levels`, `formats`, `mixins`, `options`, `prefix`, `scopes`, `spinners`) exist in `tests/common/suites/` and export a plain `Suite` object (no `makeSuite()` factory)
+  2. `tests/common/parity.suite.ts` no longer exists on disk; parity is exercised automatically by `runSuite()` for any test case where `parity !== false`
+  3. `tests/common/helpers/normalise.helper.ts` exports `normalise(s: string): string` that strips ISO timestamps, caller file paths, and ANSI escape sequences
+  4. `pnpm test` passes with all prior test counts preserved (no regression in coverage)
+**Plans**: TBD
+
+### Phase 13: Directory Restructure
+**Goal**: Test files are co-located with their adapters by environment and format; rstest globs target the new structure; no test behaviour changes
+**Depends on**: Phase 12
+**Requirements**: STRUCT-01, STRUCT-02, STRUCT-03, STRUCT-04, STRUCT-05
+**Success Criteria** (what must be TRUE):
+  1. `tests/console/{json,logfmt,pretty}/` each contain `adapter.ts` and `index.test.ts` that imports the shared suites via `runSuite()`
+  2. `tests/tty/` contains `adapter.ts` and `index.test.ts`; existing `tests/tty/env.ts` is preserved unchanged
+  3. `tests/browser/` contains `adapter.ts` and `index.test.ts`
+  4. Non-shared tests (`worker-protocol`, `registry`, `worker-e2e`, `spinner-tty`, `console.test.ts`) remain in their existing directories with no behavioural changes
+  5. `rstest.config.ts` globs address the new directory layout; `pnpm test` passes with all tests green
+**Plans**: TBD
+**UI hint**: no
+
+### Phase 14: QA + Release
+**Goal**: All quality gates pass, no behavioural regression is silent, and the milestone is tagged with a release candidate version
+**Depends on**: Phase 13
+**Requirements**: QA-01, QA-02, QA-03, VERSION-03
+**Success Criteria** (what must be TRUE):
+  1. A migration checklist confirms every pre-migration test case has a post-migration equivalent; any removed test is explicitly validated before deletion
+  2. `tsc --noEmit` exits with zero errors
+  3. `pnpm run lint` (Biome) exits with zero errors or warnings
+  4. `package.json` `version` is exactly `3.0.2-rc.0`
+**Plans**: TBD
+
+---
+
+## v3.0.2 Progress
+
+**Execution Order:**
+Phases execute in numeric order: 11 → 12 → 13 → 14
+
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|----------|
+| 11. Suite Infrastructure | 0/0 | Not started | - |
+| 12. Suite Migration | 0/0 | Not started | - |
+| 13. Directory Restructure | 0/0 | Not started | - |
+| 14. QA + Release | 0/0 | Not started | - |
+
+---
+
 ## v3.0.1 Progress
 
 **Execution Order:**
@@ -244,6 +314,6 @@ Phases execute in numeric order: 08 → 09 → 10
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|----------|
-| 08. TestAdapter + Shared Suites + Node-Console Adapter | 0/0 | Not started | - |
-| 09. Node-TTY + Worker Adapters | 0/0 | Complete    | 2026-03-26 |
-| 10. rstest Restructure, Parity Suite & Release | 0/0 | Not started | - |
+| 08. TestAdapter + Shared Suites + Node-Console Adapter | 0/0 | Complete | 2026-03-26 |
+| 09. Node-TTY + Worker Adapters | 0/0 | Complete | 2026-03-26 |
+| 10. rstest Restructure, Parity Suite & Release | 0/0 | Complete | 2026-03-27 |

@@ -8,18 +8,18 @@ A zero-dependency, environment-adaptive structured logger for Node.js and browse
 
 Reliable, structured logging that adapts its output format to the runtime environment — browser devtools, Node TTY, or CI — without any configuration from the consumer.
 
-## Current Milestone: v3.0.1 Shared Test Battery
+## Current Milestone: v3.0.2 Test Architecture Refactor
 
-**Goal:** Introduire un `TestAdapter` commun et des suites partagées exécutables sur les 3 environnements (node-console, node-tty, browser) via une abstraction adéquate, restructurer `rstest.config.ts` en 3 projets indépendants, et livrer une suite de parité main ↔ worker.
+**Goal:** Refondre l'architecture des tests pour améliorer la lisibilité, supprimer la duplication et rendre la parité main↔worker systématique via un runner générique et des suites déclaratives.
 
 **Target features:**
-- `TestAdapter` interface (`tests/common/adapter.ts`) avec `setup()`, `capture()`, `logger` — abstraction commune pour tous les environnements
-- Suites partagées `tests/common/*.suite.ts` exportant `makeSuite(adapter)` — mêmes assertions behaviorales pour tous les adaptateurs
-- Adaptateurs pour `node-console` (json/logfmt/pretty), `node-tty`, `browser-main`, + variantes worker
-- `rstest.config.ts` splité en 3 projets indépendants : `browser`, `node-console`, `node-tty`
-- `source.alias` TTY : redirect `src/utils/env` → `tests/tty/env.ts` (exports `isNodeTTY = true`) — sans modifier `src/`
-- Suite de parité main ↔ worker : output byte-identical pour chaque cas partagé (timestamps supprimés)
-- `package.json` version bumpé à `3.0.1-rc.0`
+- `Suite` / `TestCase` interface dans `tests/common/suites/suite.ts` — `name`, `parity?`, `run(adapter)`
+- Runner générique `tests/common/suites/runner.ts` — `runSuite(suite, mainAdapter, workerAdapter?)` avec `beforeEach` centralisé et parité automatique
+- Toutes les suites migrées vers le nouveau format déclaratif : `levels`, `formats`, `mixins`, `options`, `prefix`, `scopes`, `spinners`
+- Nouvelle structure de répertoires : `tests/browser/`, `tests/console/{json,logfmt,pretty}/`, `tests/tty/` — chacun avec `adapter.ts` + `index.test.ts`
+- `parity.suite.ts` supprimé — la parité est intégrée dans le runner via `parity?: boolean` (default `true`)
+- Tests spécifiques non-partagés (worker protocol, registry, spinner-tty, etc.) conservés dans leurs répertoires respectifs
+- `package.json` version → `3.0.2-rc.0`
 
 ---
 
@@ -49,14 +49,14 @@ Reliable, structured logging that adapts its output format to the runtime enviro
 
 ### Active
 
-- [ ] BATTERY-01: `TestAdapter` interface in `tests/common/adapter.ts` — `setup()`, `capture()`, `logger` property
-- [ ] BATTERY-02: Shared suites in `tests/common/*.suite.ts` — levels, formats, scopes, options, prefix, mixins, spinners; each exports `makeSuite(adapter)`
-- [ ] BATTERY-03: Adapters for `node-console` (json / logfmt / pretty) and `browser-main`
-- [ ] BATTERY-04: Worker adapters for `node-console-worker` and `node-tty-worker`; parity verified against main adapters
-- [ ] BATTERY-05: `rstest.config.ts` restructured into 3 independent projects: `browser`, `node-console`, `node-tty`
-- [ ] BATTERY-06: `tests/tty/env.ts` exports `isNodeTTY = true`; `node-tty` project uses `source.alias` to redirect `src/utils/env` → `tests/tty/env.ts`; no env-var in `src/`
-- [ ] BATTERY-07: Parity suite (`tests/common/parity.suite.ts`) asserts main ↔ worker output identical (timestamps stripped) for every shared case
-- [ ] VERSION-02: `package.json` version set to `3.0.1-rc.0` at end of milestone
+- [ ] ARCH-01: `Suite` / `TestCase` interface in `tests/common/suites/suite.ts` — `name: string`, `parity?: boolean`, `run(adapter: TestAdapter)`
+- [ ] ARCH-02: Generic runner in `tests/common/suites/runner.ts` — `runSuite(suite, mainAdapter, workerAdapter?)` with centralised `beforeEach` and automatic parity
+- [ ] ARCH-03: All shared suites migrated to declarative format — `levels`, `formats`, `mixins`, `options`, `prefix`, `scopes`, `spinners` in `tests/common/suites/`
+- [ ] ARCH-04: New directory structure — `tests/browser/`, `tests/console/{json,logfmt,pretty}/`, `tests/tty/` each with `adapter.ts` + `index.test.ts`
+- [ ] ARCH-05: `parity.suite.ts` removed — parity integrated into runner via `parity?: boolean` (default `true`)
+- [ ] ARCH-06: Non-shared tests preserved in their respective directories (worker protocol, registry, spinner-tty)
+- [ ] ARCH-07: `rstest.config.ts` globs updated for new directory structure
+- [ ] VERSION-03: `package.json` version set to `3.0.2-rc.0` at end of milestone
 
 ### Out of Scope
 
@@ -66,13 +66,14 @@ Reliable, structured logging that adapts its output format to the runtime enviro
 
 ## Context
 
-- **Brownfield project**: Fully functional library — exhaustive test suite + v3.0.0 Consolidation shipped, now entering v3.0.1 Shared Test Battery
-- **189 tests passing** across 13 test files: node/main (11 files), tty/main (1 file), browser/main (1 file)
-- **v3.0.0 Consolidation shipped**: Worker API aligned (L/Logger/releaseWorker), browser compat (node: imports removed, browser lib entry), smoke tests removed, package at `3.0.0-rc.0`
+- **Brownfield project**: Fully functional library — exhaustive test suite + v3.0.1 Shared Test Battery shipped, now entering v3.0.2 Test Architecture Refactor
+- **977 tests passing** across 3 rstest projects: `browser`, `node-console`, `node-tty`
+- **v3.0.1 Shared Test Battery shipped**: `TestAdapter` interface, shared suites (`makeSuite(adapter)` pattern), 3-project rstest config, parity suite, package at `3.0.1-rc.0`
 - **Build toolchain**: Rslib (ESM + DTS), Rsbuild (browser playground), Biome (lint/format), rstest v0.9.4
-- **rstest config**: Currently 2 projects (node + browser) in `rstest.config.ts` — v3.0.1 will split into 3 (node-console, node-tty, browser)
+- **Current test structure**: `tests/common/*.suite.ts` (makeSuite pattern), `tests/node/main/battery-*.test.ts`, `tests/tty/main/battery-*.test.ts`, `tests/browser/main/battery-*.test.ts`
 - **Key testing insight**: rspack `importDynamic: false` means `import('node:child_process')` bypasses the webpack module registry; mock interception requires `__non_webpack_require__` in `rs.hoisted()` to mutate the Node CJS singleton directly
 - **TTY testing pattern**: Pure CI automation isn't feasible for animated TTY output; call ttyRenderer directly, bypassing `selectSpinnerFactory()`
+- **New suite contract (v3.0.2)**: `{ name, description, tests: { name, parity?, run(adapter) }[] }` — `makeSuite(adapter)` pattern replaced by declarative objects + generic `runSuite(suite, main, worker?)` runner
 
 ## Constraints
 
@@ -111,4 +112,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-25 after v3.0.0 Consolidation milestone — 7 phases, 189 tests passing, package at 3.0.0-rc.0*
+*Last updated: 2026-03-27 after v3.0.1 Shared Test Battery milestone — 10 phases, 977 tests passing, package at 3.0.1-rc.0*

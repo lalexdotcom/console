@@ -25,10 +25,20 @@ export interface TestCase {
  *
  * @param name        - Used as the describe() block label.
  * @param description - Human-readable summary (optional, not used by the runner).
+ * @param setup       - Optional per-suite setup hook. Called in beforeEach after
+ *                      adapter.setup(). Use for suite-level state every test case
+ *                      requires beyond adapter reset (e.g. forcing L.format = 'json'
+ *                      to suppress TRACE_LEVELS stack traces).
  * @param tests       - Ordered list of TestCase objects.
  */
 export interface Suite {
   name: string;
   description?: string;
+  /**
+   * Optional per-suite setup hook. Called in beforeEach after adapter.setup().
+   * Use for suite-level state that every test case requires beyond adapter reset
+   * (e.g., forcing L.format = 'json' to suppress TRACE_LEVELS stack traces).
+   */
+  setup?: (adapter: TestAdapter) => void | Promise<void>;
   tests: TestCase[];
 }

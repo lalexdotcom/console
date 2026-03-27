@@ -6,8 +6,10 @@ import type { Suite } from './suite';
  * Registers a suite of test cases under a describe() block.
  *
  * Behaviour:
- * - Calls mainAdapter.setup() (and workerAdapter.setup() when provided) in
- *   a shared beforeEach so every test case starts from a clean state.
+ * - Calls mainAdapter.setup() then suite.setup?.(mainAdapter) in a shared
+ *   beforeEach so every test case starts from a clean, suite-configured state.
+ * - When workerAdapter is provided, also calls workerAdapter.setup() then
+ *   suite.setup?.(workerAdapter) in the same beforeEach.
  * - Each TestCase is registered as a test() that runs tc.run(mainAdapter).
  * - When workerAdapter is provided and tc.parity !== false, the same tc.run()
  *   is also awaited against workerAdapter (parity re-run, same test() body).
@@ -24,7 +26,11 @@ export function runSuite(
   describe(suite.name, () => {
     beforeEach(async () => {
       await mainAdapter.setup();
-      if (workerAdapter) await workerAdapter.setup();
+      if (suite.setup) await suite.setup(mainAdapter);
+      if (workerAdapter) {
+        await workerAdapter.setup();
+        if (suite.setup) await suite.setup(workerAdapter);
+      }
     });
 
     for (const tc of suite.tests) {

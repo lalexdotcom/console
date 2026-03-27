@@ -241,7 +241,7 @@ Plans:
 ## v3.0.2 Test Architecture Refactor
 
 - [x] **Phase 11: Suite Infrastructure** — Define `Suite`/`TestCase` interfaces and implement the generic `runSuite()` runner with centralised `beforeEach` and automatic parity (completed 2026-03-27)
-- [ ] **Phase 12: Suite Migration** — Migrate all 7 shared suites to declarative format, remove `parity.suite.ts`, extract `normalise()` helper
+- [x] **Phase 12: Suite Migration** — Migrate all 7 shared suites to declarative format, remove `parity.suite.ts`, extract `normalise()` helper (completed 2026-03-27)
 - [ ] **Phase 13: Directory Restructure** — Create `tests/console/{json,logfmt,pretty}/`, `tests/tty/`, `tests/browser/`; move adapters; update rstest globs
 - [ ] **Phase 14: QA + Release** — Verify behavioural coverage, `tsc --noEmit` and Biome clean, bump version to `3.0.2-rc.0`
 
@@ -304,7 +304,7 @@ Phases execute in numeric order: 11 → 12 → 13 → 14
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|----------|
 | 11. Suite Infrastructure | 1/1 | Complete    | 2026-03-27 |
-| 12. Suite Migration | 0/0 | Not started | - |
+| 12. Suite Migration | 0/0 | Complete    | 2026-03-27 |
 | 13. Directory Restructure | 0/0 | Not started | - |
 | 14. QA + Release | 0/0 | Not started | - |
 

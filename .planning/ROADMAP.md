@@ -254,7 +254,10 @@ Plans:
   2. `tests/common/suites/runner.ts` exports `runSuite(suite, mainAdapter, workerAdapter?)` — wraps each test case in `it()`, calls `beforeEach(adapter.setup())`, and iterates `suite.tests`
   3. When `workerAdapter` is provided and `testCase.parity !== false`, the runner automatically re-runs the same test case against the worker adapter inside the same `describe` block
   4. `tsc --noEmit` passes with the new interface and runner files
-**Plans**: TBD
+**Plans:** 1 plan
+
+Plans:
+- [ ] 11-01-PLAN.md — Create suite.ts (Suite/TestCase/RunTestFunction types) and runner.ts (runSuite implementation) — ARCH-01, ARCH-02
 
 ### Phase 12: Suite Migration
 **Goal**: All 7 shared suites are declarative objects; `parity.suite.ts` is removed; `normalise()` helper is extracted to its dedicated file

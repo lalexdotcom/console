@@ -1,9 +1,10 @@
 import { L } from '../../../src';
 import type { RootLogger } from '../../../src/types';
 import type { TestAdapter } from '../../common/adapter';
-import { makeSuite as makeLevelsSuite }  from '../../common/levels.suite';
-import { makeSuite as makeMixinsSuite }  from '../../common/mixins.suite';
-import { makeSuite as makeOptionsSuite } from '../../common/options.suite';
+import { runSuite } from '../../common/suites/runner';
+import { levelsSuite } from '../../common/suites/levels.suite';
+import { mixinsSuite } from '../../common/suites/mixins.suite';
+import { optionsSuite } from '../../common/suites/options.suite';
 
 // formats.suite excluded: TTY mode never produces raw json/logfmt.
 // scopes/prefix suites excluded: call JSON.parse() — throws on ANSI-prefixed output.
@@ -26,7 +27,9 @@ async function captureAsync(fn: () => void | Promise<void>): Promise<string[]> {
   const origErr = process.stderr.write.bind(process.stderr);
 
   const intercept = (chunk: string | Uint8Array): boolean => {
-    chunks.push(typeof chunk === 'string' ? chunk : new TextDecoder().decode(chunk));
+    chunks.push(
+      typeof chunk === 'string' ? chunk : new TextDecoder().decode(chunk),
+    );
     return true;
   };
 
@@ -43,7 +46,7 @@ async function captureAsync(fn: () => void | Promise<void>): Promise<string[]> {
   return chunks
     .join('\n')
     .split('\n')
-    .filter(l => l.trim().length > 0);
+    .filter((l) => l.trim().length > 0);
 }
 
 /**
@@ -71,6 +74,6 @@ const nodeTtyAdapter: TestAdapter = {
 };
 
 // 3 suites × 1 adapter — limited to suites compatible with ANSI-prefixed TTY output.
-makeLevelsSuite(nodeTtyAdapter);
-makeOptionsSuite(nodeTtyAdapter);
-makeMixinsSuite(nodeTtyAdapter);
+runSuite(levelsSuite, nodeTtyAdapter);
+runSuite(optionsSuite, nodeTtyAdapter);
+runSuite(mixinsSuite, nodeTtyAdapter);

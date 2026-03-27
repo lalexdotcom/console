@@ -1,14 +1,15 @@
 import { afterEach } from '@rstest/core';
 import type { RootLogger } from '../../../src/types';
-import { Logger as WL, releaseWorker } from '../../../src/worker/index';
+import { releaseWorker, Logger as WL } from '../../../src/worker/index';
 import type { TestAdapter } from '../../common/adapter';
-import { makeSuite as makeFormatsSuite }  from '../../common/formats.suite';
-import { makeSuite as makeLevelsSuite }   from '../../common/levels.suite';
-import { makeSuite as makeMixinsSuite }   from '../../common/mixins.suite';
-import { makeSuite as makeOptionsSuite }  from '../../common/options.suite';
-import { makeSuite as makePrefixSuite }   from '../../common/prefix.suite';
-import { makeSuite as makeScopesSuite }   from '../../common/scopes.suite';
-import { makeSuite as makeSpinnersSuite } from '../../common/spinners.suite';
+import { runSuite } from '../../common/suites/runner';
+import { formatsSuite } from '../../common/suites/formats.suite';
+import { levelsSuite } from '../../common/suites/levels.suite';
+import { mixinsSuite } from '../../common/suites/mixins.suite';
+import { optionsSuite } from '../../common/suites/options.suite';
+import { prefixSuite } from '../../common/suites/prefix.suite';
+import { scopesSuite } from '../../common/suites/scopes.suite';
+import { spinnersSuite } from '../../common/suites/spinners.suite';
 
 // Type-level check: WL must satisfy RootLogger — compile error if API surface diverges.
 const _typeCheck: RootLogger = WL as unknown as RootLogger;
@@ -29,7 +30,9 @@ async function captureAsync(fn: () => void | Promise<void>): Promise<string[]> {
   const origErr = process.stderr.write.bind(process.stderr);
 
   const intercept = (chunk: string | Uint8Array): boolean => {
-    chunks.push(typeof chunk === 'string' ? chunk : new TextDecoder().decode(chunk));
+    chunks.push(
+      typeof chunk === 'string' ? chunk : new TextDecoder().decode(chunk),
+    );
     return true;
   };
 
@@ -46,7 +49,7 @@ async function captureAsync(fn: () => void | Promise<void>): Promise<string[]> {
   return chunks
     .join('\n')
     .split('\n')
-    .filter(l => l.trim().length > 0);
+    .filter((l) => l.trim().length > 0);
 }
 
 /**
@@ -62,7 +65,9 @@ async function captureAsync(fn: () => void | Promise<void>): Promise<string[]> {
  *
  * releaseWorker() is idempotent — safe to call in every beforeEach.
  */
-function makeConsoleWorkerAdapter(format: 'json' | 'logfmt' | 'pretty'): TestAdapter {
+function makeConsoleWorkerAdapter(
+  format: 'json' | 'logfmt' | 'pretty',
+): TestAdapter {
   return {
     name: `node-console-worker:${format}`,
     setup() {
@@ -86,14 +91,16 @@ afterEach(() => {
 
 // Run all 7 suites with each of 3 format adapters → 21 suite group instantiations.
 // Mirrors battery-node-console.test.ts structure exactly (D-06, D-09 parity).
-const adapters = (['json', 'logfmt', 'pretty'] as const).map(makeConsoleWorkerAdapter);
+const adapters = (['json', 'logfmt', 'pretty'] as const).map(
+  makeConsoleWorkerAdapter,
+);
 
 for (const adapter of adapters) {
-  makeLevelsSuite(adapter);
-  makeFormatsSuite(adapter);
-  makeScopesSuite(adapter);
-  makeOptionsSuite(adapter);
-  makePrefixSuite(adapter);
-  makeMixinsSuite(adapter);
-  makeSpinnersSuite(adapter);
+  runSuite(levelsSuite, adapter);
+  runSuite(formatsSuite, adapter);
+  runSuite(scopesSuite, adapter);
+  runSuite(optionsSuite, adapter);
+  runSuite(prefixSuite, adapter);
+  runSuite(mixinsSuite, adapter);
+  runSuite(spinnersSuite, adapter);
 }

@@ -2,12 +2,13 @@ import { rs } from '@rstest/core';
 import { L } from '../../../src';
 import type { RootLogger } from '../../../src/types';
 import type { TestAdapter } from '../../common/adapter';
-import { makeSuite as makeLevelsSuite }   from '../../common/levels.suite';
-import { makeSuite as makeMixinsSuite }   from '../../common/mixins.suite';
-import { makeSuite as makeOptionsSuite }  from '../../common/options.suite';
-import { makeSuite as makePrefixSuite }   from '../../common/prefix.suite';
-import { makeSuite as makeScopesSuite }   from '../../common/scopes.suite';
-import { makeSuite as makeSpinnersSuite } from '../../common/spinners.suite';
+import { runSuite } from '../../common/suites/runner';
+import { levelsSuite } from '../../common/suites/levels.suite';
+import { mixinsSuite } from '../../common/suites/mixins.suite';
+import { optionsSuite } from '../../common/suites/options.suite';
+import { prefixSuite } from '../../common/suites/prefix.suite';
+import { scopesSuite } from '../../common/suites/scopes.suite';
+import { spinnersSuite } from '../../common/suites/spinners.suite';
 
 // formats.suite excluded: browser output is always CSS %c format strings.
 // CORE-04/05/06 tests call JSON.parse() and parseLogfmt() on captured lines,
@@ -32,11 +33,13 @@ const browserAdapter: TestAdapter = {
     // reset.helper.ts handles registry reset globally via setupFiles.
   },
   async capture(fn: () => void | Promise<void>): Promise<string[]> {
-    const logSpy   = rs.spyOn(console, 'log').mockImplementation(() => {});
-    const warnSpy  = rs.spyOn(console, 'warn').mockImplementation(() => {});
+    const logSpy = rs.spyOn(console, 'log').mockImplementation(() => {});
+    const warnSpy = rs.spyOn(console, 'warn').mockImplementation(() => {});
     const errorSpy = rs.spyOn(console, 'error').mockImplementation(() => {});
     const debugSpy = rs.spyOn(console, 'debug').mockImplementation(() => {});
-    const groupSpy = rs.spyOn(console, 'groupCollapsed').mockImplementation(() => {});
+    const groupSpy = rs
+      .spyOn(console, 'groupCollapsed')
+      .mockImplementation(() => {});
 
     try {
       await fn();
@@ -50,7 +53,7 @@ const browserAdapter: TestAdapter = {
         ...errorSpy.mock.calls.map((c: unknown[]) => String(c[0])),
         ...debugSpy.mock.calls.map((c: unknown[]) => String(c[0])),
         ...groupSpy.mock.calls.map((c: unknown[]) => String(c[0])),
-      ].filter(l => l.length > 0 && !/^\s+at /.test(l));
+      ].filter((l) => l.length > 0 && !/^\s+at /.test(l));
       return lines;
     } finally {
       logSpy.mockRestore();
@@ -67,9 +70,9 @@ const browserAdapter: TestAdapter = {
 };
 
 // Run 6 of 7 suites with the browser adapter (formats suite excluded).
-makeLevelsSuite(browserAdapter);
-makeScopesSuite(browserAdapter);
-makeOptionsSuite(browserAdapter);
-makePrefixSuite(browserAdapter);
-makeMixinsSuite(browserAdapter);
-makeSpinnersSuite(browserAdapter);
+runSuite(levelsSuite, browserAdapter);
+runSuite(scopesSuite, browserAdapter);
+runSuite(optionsSuite, browserAdapter);
+runSuite(prefixSuite, browserAdapter);
+runSuite(mixinsSuite, browserAdapter);
+runSuite(spinnersSuite, browserAdapter);

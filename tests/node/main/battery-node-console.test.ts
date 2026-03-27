@@ -1,13 +1,14 @@
 import { L } from '../../../src';
 import type { RootLogger } from '../../../src/types';
 import type { TestAdapter } from '../../common/adapter';
-import { makeSuite as makeFormatsSuite }  from '../../common/formats.suite';
-import { makeSuite as makeLevelsSuite }   from '../../common/levels.suite';
-import { makeSuite as makeMixinsSuite }   from '../../common/mixins.suite';
-import { makeSuite as makeOptionsSuite }  from '../../common/options.suite';
-import { makeSuite as makePrefixSuite }   from '../../common/prefix.suite';
-import { makeSuite as makeScopesSuite }   from '../../common/scopes.suite';
-import { makeSuite as makeSpinnersSuite } from '../../common/spinners.suite';
+import { runSuite } from '../../common/suites/runner';
+import { formatsSuite } from '../../common/suites/formats.suite';
+import { levelsSuite } from '../../common/suites/levels.suite';
+import { mixinsSuite } from '../../common/suites/mixins.suite';
+import { optionsSuite } from '../../common/suites/options.suite';
+import { prefixSuite } from '../../common/suites/prefix.suite';
+import { scopesSuite } from '../../common/suites/scopes.suite';
+import { spinnersSuite } from '../../common/suites/spinners.suite';
 
 /**
  * Async-safe stream capture: patches process.stdout.write and process.stderr.write,
@@ -23,7 +24,9 @@ async function captureAsync(fn: () => void | Promise<void>): Promise<string[]> {
   const origErr = process.stderr.write.bind(process.stderr);
 
   const intercept = (chunk: string | Uint8Array): boolean => {
-    chunks.push(typeof chunk === 'string' ? chunk : new TextDecoder().decode(chunk));
+    chunks.push(
+      typeof chunk === 'string' ? chunk : new TextDecoder().decode(chunk),
+    );
     return true;
   };
 
@@ -40,7 +43,7 @@ async function captureAsync(fn: () => void | Promise<void>): Promise<string[]> {
   return chunks
     .join('\n')
     .split('\n')
-    .filter(l => l.trim().length > 0);
+    .filter((l) => l.trim().length > 0);
 }
 
 /**
@@ -48,7 +51,9 @@ async function captureAsync(fn: () => void | Promise<void>): Promise<string[]> {
  * adapter.setup() sets L.format to the specified value (after global reset).
  * adapter.capture() uses the async stream interceptor above.
  */
-function makeNodeConsoleAdapter(format: 'json' | 'logfmt' | 'pretty'): TestAdapter {
+function makeNodeConsoleAdapter(
+  format: 'json' | 'logfmt' | 'pretty',
+): TestAdapter {
   return {
     name: `node-console:${format}`,
     setup() {
@@ -63,14 +68,16 @@ function makeNodeConsoleAdapter(format: 'json' | 'logfmt' | 'pretty'): TestAdapt
 
 // Run all 7 suites with each of 3 format adapters → 21 suite group instantiations.
 // formats.suite sets L.format per-test, so running it with all 3 adapters is harmless.
-const adapters = (['json', 'logfmt', 'pretty'] as const).map(makeNodeConsoleAdapter);
+const adapters = (['json', 'logfmt', 'pretty'] as const).map(
+  makeNodeConsoleAdapter,
+);
 
 for (const adapter of adapters) {
-  makeLevelsSuite(adapter);
-  makeFormatsSuite(adapter);
-  makeScopesSuite(adapter);
-  makeOptionsSuite(adapter);
-  makePrefixSuite(adapter);
-  makeMixinsSuite(adapter);
-  makeSpinnersSuite(adapter);
+  runSuite(levelsSuite, adapter);
+  runSuite(formatsSuite, adapter);
+  runSuite(scopesSuite, adapter);
+  runSuite(optionsSuite, adapter);
+  runSuite(prefixSuite, adapter);
+  runSuite(mixinsSuite, adapter);
+  runSuite(spinnersSuite, adapter);
 }

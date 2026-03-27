@@ -102,6 +102,34 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **API-01**: import {L} from '@lalex/console/worker' exposes the same public API surface as import {L} from '@lalex/console'
 - [ ] **API-02**: README and JSDoc updated to document unified API with only import path difference
 
+## v3.0.2 Requirements — Test Architecture Refactor
+
+### Architecture des suites (ARCH)
+
+- [ ] **ARCH-01**: Interface `Suite` / `TestCase` in `tests/common/suites/suite.ts` — `name: string`, `parity?: boolean` (default `true`), `run(adapter: TestAdapter)`
+- [ ] **ARCH-02**: Generic runner in `tests/common/suites/runner.ts` — `runSuite(suite, mainAdapter, workerAdapter?)` with centralised `beforeEach` and automatic parity
+- [ ] **ARCH-03**: All shared suites migrated to declarative format in `tests/common/suites/` — `levels`, `formats`, `mixins`, `options`, `prefix`, `scopes`, `spinners`
+
+### Structure des répertoires (STRUCT)
+
+- [ ] **STRUCT-01**: `tests/console/{json,logfmt,pretty}/` — each with `adapter.ts` and `index.test.ts`
+- [ ] **STRUCT-02**: `tests/tty/` — `adapter.ts` + `index.test.ts` (existing `env.ts` preserved)
+- [ ] **STRUCT-03**: `tests/browser/` — `adapter.ts` + `index.test.ts`
+- [ ] **STRUCT-04**: Non-shared tests preserved (`worker-protocol`, `registry`, `worker-e2e`, `spinner-tty`, `console.test.ts`) in their respective directories
+- [ ] **STRUCT-05**: `rstest.config.ts` globs updated for new directory structure
+
+### Parité (PARITY)
+
+- [ ] **PARITY-01**: `parity.suite.ts` removed — parity integrated into runner (re-run same `TestCase` against worker adapter when `parity !== false`)
+- [ ] **PARITY-02**: `normalise()` helper (strip timestamps, caller paths, ANSI) extracted to `tests/common/helpers/normalise.helper.ts`
+
+### Qualité (QA)
+
+- [ ] **QA-01**: Behavioural coverage preserved — any test identified as redundant or obsolete during migration is listed for explicit validation before removal
+- [ ] **QA-02**: `tsc --noEmit` clean after migration
+- [ ] **QA-03**: Biome clean after migration
+- [ ] **VERSION-03**: `package.json` version set to `3.0.2-rc.0` at end of milestone
+
 ## v2 Requirements
 
 Deferred to future release. Tracked but not in current roadmap.

@@ -359,6 +359,12 @@ function emitTTY(
   };
   write(line);
 
+  // Suppress stack trace for json/logfmt formats — consistent with emitConsole's
+  // early return for structured formats. The caller info is embedded in the prefix
+  // via the structuredOnly field when format is json/logfmt.
+  const format = registry.format;
+  if (format === 'json' || format === 'logfmt') return;
+
   if (trace) {
     const stack = getCallerStackTrace();
     if (stack) write(stack);

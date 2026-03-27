@@ -1,14 +1,14 @@
 import { afterEach } from '@rstest/core';
 import type { RootLogger } from '../../../src/types';
-import { Logger as WL, releaseWorker } from '../../../src/worker/index';
+import { releaseWorker, Logger as WL } from '../../../src/worker/index';
 import type { TestAdapter } from '../../common/adapter';
-import { makeSuite as makeLevelsSuite }   from '../../common/levels.suite';
-import { makeSuite as makeMixinsSuite }   from '../../common/mixins.suite';
-import { makeSuite as makeOptionsSuite }  from '../../common/options.suite';
-import { makeSuite as makePrefixSuite }   from '../../common/prefix.suite';
-import { makeSuite as makeScopesSuite }   from '../../common/scopes.suite';
-import { makeSuite as makeSpinnersSuite } from '../../common/spinners.suite';
-// formats.suite is intentionally excluded: mirrors battery-node-tty.test.ts (D-08)
+import { makeSuite as makeLevelsSuite }  from '../../common/levels.suite';
+import { makeSuite as makeMixinsSuite }  from '../../common/mixins.suite';
+import { makeSuite as makeOptionsSuite } from '../../common/options.suite';
+
+// formats.suite excluded: mirrors battery-node-tty.test.ts (D-08).
+// scopes/prefix suites excluded: call JSON.parse() — throws on ANSI TTY output.
+// spinners.suite excluded: assumes console-mode timing; TTY spinner uses ttyRenderer.
 // L is not imported directly: WL (via fallback) routes all calls through L after releaseWorker()
 
 /**
@@ -46,15 +46,14 @@ async function captureAsync(fn: () => void | Promise<void>): Promise<string[]> {
 }
 
 /**
- * Node-TTY-worker TestAdapter — single pretty-format variant.
+ * Node-TTY-worker TestAdapter — real TTY routing active via resolve.alias (Phase 10).
  *
- * Mirrors battery-node-tty.test.ts adapter: same suite set (6 suites, formats excluded),
+ * Mirrors battery-node-tty.test.ts adapter: same suite set (3 suites, formats excluded),
  * same format ('pretty'). Demonstrates structural parity between main and worker
  * variants for the TTY environment (BATTERY-04, D-09).
  *
- * After releaseWorker(), WL routes through L on the main thread. The Phase 09 TTY
- * bundle-time constraint (isNodeTTY = false) applies equally here — console mode
- * is in effect, which is consistent with battery-node-tty.test.ts.
+ * After releaseWorker(), WL routes through L on the main thread. With Phase 10
+ * resolve.alias active, isNodeTTY=true — real TTY routing is in effect.
  */
 const ttyWorkerAdapter: TestAdapter = {
   name: 'node-tty-worker:pretty',
@@ -73,10 +72,7 @@ afterEach(() => {
   releaseWorker();
 });
 
-// 6 suites × 1 adapter — mirrors battery-node-tty.test.ts suite set exactly (D-08, D-09).
+// 3 suites × 1 adapter — mirrors battery-node-tty.test.ts suite set exactly (D-08, D-09).
 makeLevelsSuite(ttyWorkerAdapter);
-makeScopesSuite(ttyWorkerAdapter);
 makeOptionsSuite(ttyWorkerAdapter);
-makePrefixSuite(ttyWorkerAdapter);
 makeMixinsSuite(ttyWorkerAdapter);
-makeSpinnersSuite(ttyWorkerAdapter);

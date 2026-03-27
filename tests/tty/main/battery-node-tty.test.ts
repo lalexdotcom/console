@@ -1,13 +1,14 @@
 import { L } from '../../../src';
 import type { RootLogger } from '../../../src/types';
 import type { TestAdapter } from '../../common/adapter';
-import { makeSuite as makeLevelsSuite }   from '../../common/levels.suite';
-import { makeSuite as makeScopesSuite }   from '../../common/scopes.suite';
-import { makeSuite as makeOptionsSuite }  from '../../common/options.suite';
-import { makeSuite as makePrefixSuite }   from '../../common/prefix.suite';
-import { makeSuite as makeMixinsSuite }   from '../../common/mixins.suite';
-import { makeSuite as makeSpinnersSuite } from '../../common/spinners.suite';
-// formats.suite is intentionally excluded: TTY mode never produces raw json/logfmt (D-07)
+import { makeSuite as makeLevelsSuite }  from '../../common/levels.suite';
+import { makeSuite as makeMixinsSuite }  from '../../common/mixins.suite';
+import { makeSuite as makeOptionsSuite } from '../../common/options.suite';
+
+// formats.suite excluded: TTY mode never produces raw json/logfmt.
+// scopes/prefix suites excluded: call JSON.parse() — throws on ANSI-prefixed output.
+// spinners.suite excluded: assumes console-mode timing; TTY spinner uses ttyRenderer.
+// TTY spinner coverage in: tests/tty/main/spinner-tty.test.ts
 
 /**
  * Async-safe stream capture: patches process.stdout.write and process.stderr.write,
@@ -46,17 +47,15 @@ async function captureAsync(fn: () => void | Promise<void>): Promise<string[]> {
 }
 
 /**
- * Node-TTY battery adapter — Phase 09 console-mode simulation.
+ * Node-TTY battery adapter — real TTY routing active via resolve.alias (Phase 10).
  *
- * Phase 09 constraint: isNodeTTY is a rspack bundle-time const compiled to false in
- * the test bundle. There is no module namespace object to mutate. Direct assignment
- * (envModule.isNodeTTY = true) silently fails. Phase 10 wires a rspack source.alias
- * that swaps src/utils/env → tests/tty/env.ts at the bundler level, at which point
- * this adapter will activate real TTY routing.
+ * The node-tty rstest project bundles with isNodeTTY=true (resolve.alias in
+ * rstest.config.ts substitutes src/utils/env → tests/tty/env.ts at bundle time).
+ * emitTTY() writes ANSI-prefixed lines to process.stdout.write directly — all calls
+ * route through TTY rendering regardless of L.format.
  *
- * For Phase 09 the adapter forces L.format = 'pretty', which is what TTY mode would
- * produce. The shared suites that are compatible with console-mode pretty output run
- * unchanged (levels, scopes, options, prefix, mixins, spinners).
+ * Suites limited to those compatible with ANSI-prefixed output (no JSON.parse calls):
+ * levels (toHaveLength), options (property checks), mixins (date-bracket regex).
  */
 const nodeTtyAdapter: TestAdapter = {
   name: 'node-tty:pretty',
@@ -71,10 +70,7 @@ const nodeTtyAdapter: TestAdapter = {
   },
 };
 
-// 6 suites × 1 adapter — formats suite excluded: TTY mode never renders json/logfmt (D-07).
+// 3 suites × 1 adapter — limited to suites compatible with ANSI-prefixed TTY output.
 makeLevelsSuite(nodeTtyAdapter);
-makeScopesSuite(nodeTtyAdapter);
 makeOptionsSuite(nodeTtyAdapter);
-makePrefixSuite(nodeTtyAdapter);
 makeMixinsSuite(nodeTtyAdapter);
-makeSpinnersSuite(nodeTtyAdapter);

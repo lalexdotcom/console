@@ -313,6 +313,16 @@ Phases execute in numeric order: 11 → 12 → 13 → 14
 | 13. Directory Restructure | 4/4 | Complete   | 2026-03-30 |
 | 14. QA + Release | 0/0 | Not started | - |
 
+### Phase 15: test-structure-cleanup
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 14
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 15 to break down)
+
 ---
 
 ## v3.0.1 Progress

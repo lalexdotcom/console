@@ -79,6 +79,10 @@ Recent decisions affecting current work:
 
 None yet.
 
+### Roadmap Evolution
+
+- Phase 15 added: test-structure-cleanup (formats.suite.ts → console-only; remove tests/browser/main/ and tests/tty/main/ dirs)
+
 ### Blockers/Concerns
 
 None yet.

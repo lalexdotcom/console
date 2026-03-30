@@ -30,7 +30,7 @@ export default defineConfig({
     {
       name: 'node-console',
       extends: withRslibConfig(),
-      include: ['tests/node/**/*.test.ts', 'tests/common/**/*.test.ts'],
+      include: ['tests/console/**/*.test.ts', 'tests/node/**/*.test.ts', 'tests/common/**/*.test.ts'],
       setupFiles: ['./tests/common/reset.helper.ts'],
       // Disable rstest's built-in console intercept so it doesn't conflict with the
       // logger's own patch()/unpatch() console replacement.

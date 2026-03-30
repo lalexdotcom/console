@@ -1,5 +1,6 @@
 import { beforeEach, describe, test } from '@rstest/core';
 import type { TestAdapter } from '../adapter';
+import { resetRegistry } from '../reset.helper';
 import type { Suite } from './suite';
 
 /**
@@ -37,6 +38,12 @@ export function runSuite(
       test(tc.name, async () => {
         await tc.run(mainAdapter);
         if (tc.parity !== false && workerAdapter) {
+          // Reset registry and re-run setup before the parity run so that state
+          // mutations from the main run (e.g. L.level, once()/limit() counters)
+          // do not bleed into the worker adapter run.
+          resetRegistry();
+          await workerAdapter.setup();
+          if (suite.setup) await suite.setup(workerAdapter);
           await tc.run(workerAdapter);
         }
       });

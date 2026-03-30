@@ -323,6 +323,16 @@ Phases execute in numeric order: 11 → 12 → 13 → 14
 Plans:
 - [ ] TBD (run /gsd-plan-phase 15 to break down)
 
+### Phase 16: browser-playwright-direct
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 15
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 16 to break down)
+
 ---
 
 ## v3.0.1 Progress

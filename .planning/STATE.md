@@ -82,6 +82,7 @@ None yet.
 ### Roadmap Evolution
 
 - Phase 15 added: test-structure-cleanup (formats.suite.ts → console-only; remove tests/browser/main/ and tests/tty/main/ dirs)
+- Phase 16 added: browser-playwright-direct (remplacer le mode browser rstest par une instance Playwright directe dans les tests)
 
 ### Blockers/Concerns
 

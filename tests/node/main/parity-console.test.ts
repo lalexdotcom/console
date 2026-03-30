@@ -1,7 +1,7 @@
 import { afterEach } from '@rstest/core';
 import { L } from '../../../src';
-import { releaseWorker, Logger as WL } from '../../../src/worker/index';
 import type { RootLogger } from '../../../src/types';
+import { releaseWorker, Logger as WL } from '../../../src/worker/index';
 import type { TestAdapter } from '../../common/adapter';
 import { makeParitySuite } from '../../common/parity.suite';
 
@@ -17,7 +17,9 @@ async function captureAsync(fn: () => void | Promise<void>): Promise<string[]> {
   const origOut = process.stdout.write.bind(process.stdout);
   const origErr = process.stderr.write.bind(process.stderr);
   const intercept = (chunk: string | Uint8Array): boolean => {
-    chunks.push(typeof chunk === 'string' ? chunk : new TextDecoder().decode(chunk));
+    chunks.push(
+      typeof chunk === 'string' ? chunk : new TextDecoder().decode(chunk),
+    );
     return true;
   };
   process.stdout.write = intercept as typeof process.stdout.write;
@@ -28,7 +30,10 @@ async function captureAsync(fn: () => void | Promise<void>): Promise<string[]> {
     process.stdout.write = origOut;
     process.stderr.write = origErr;
   }
-  return chunks.join('\n').split('\n').filter(l => l.trim().length > 0);
+  return chunks
+    .join('\n')
+    .split('\n')
+    .filter((l) => l.trim().length > 0);
 }
 
 /**

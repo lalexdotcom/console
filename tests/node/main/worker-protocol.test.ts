@@ -1,4 +1,11 @@
-import { afterEach, beforeEach, describe, expect, rs, test } from '@rstest/core';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  rs,
+  test,
+} from '@rstest/core';
 
 // Patch child_process.fork in Node's require cache before L is imported.
 //
@@ -19,7 +26,9 @@ import { afterEach, beforeEach, describe, expect, rs, test } from '@rstest/core'
 declare const __non_webpack_require__: NodeRequire;
 
 const fakeFork = rs.hoisted(() => {
-  const cp = __non_webpack_require__('node:child_process') as { fork: (...a: unknown[]) => unknown };
+  const cp = __non_webpack_require__('node:child_process') as {
+    fork: (...a: unknown[]) => unknown;
+  };
   const sentMessages: unknown[] = [];
   const originalFork = cp.fork;
 
@@ -112,7 +121,10 @@ describe('log dispatch (WORK-01)', () => {
       );
       await flush();
       const msgs = getLogMsgs();
-      expect(msgs.length, `${level}: expected 1 log message`).toBeGreaterThanOrEqual(1);
+      expect(
+        msgs.length,
+        `${level}: expected 1 log message`,
+      ).toBeGreaterThanOrEqual(1);
       expect(msgs[0].level).toBe(level);
       expect(msgs[0].args[0]).toBe(`test-${level}`);
     }
@@ -244,8 +256,7 @@ describe('all WorkerMessage types dispatched (WORK-02)', () => {
     await flush();
 
     const msg = (fakeFork.sentMessages as WorkerMessage[]).find(
-      (m): m is WorkerMessage & { type: 'spin:fail' } =>
-        m.type === 'spin:fail',
+      (m): m is WorkerMessage & { type: 'spin:fail' } => m.type === 'spin:fail',
     );
     expect(msg).toBeDefined();
     expect(msg?.text).toBe('oops');
@@ -267,8 +278,7 @@ describe('all WorkerMessage types dispatched (WORK-02)', () => {
     await flush();
 
     const msg = (fakeFork.sentMessages as WorkerMessage[]).find(
-      (m): m is WorkerMessage & { type: 'spin:stop' } =>
-        m.type === 'spin:stop',
+      (m): m is WorkerMessage & { type: 'spin:stop' } => m.type === 'spin:stop',
     );
     expect(msg).toBeDefined();
     expect(msg?.id).toBe(spinnerId);
@@ -526,8 +536,7 @@ describe('spinner lifecycle WorkerMessages (WORK-08)', () => {
     await flush();
 
     const failMsg = (fakeFork.sentMessages as WorkerMessage[]).find(
-      (m): m is WorkerMessage & { type: 'spin:fail' } =>
-        m.type === 'spin:fail',
+      (m): m is WorkerMessage & { type: 'spin:fail' } => m.type === 'spin:fail',
     );
     expect(failMsg?.id).toBe(spinnerId);
     expect(failMsg?.text).toBe('operation failed');
@@ -548,8 +557,7 @@ describe('spinner lifecycle WorkerMessages (WORK-08)', () => {
     await flush();
 
     const stopMsg = (fakeFork.sentMessages as WorkerMessage[]).find(
-      (m): m is WorkerMessage & { type: 'spin:stop' } =>
-        m.type === 'spin:stop',
+      (m): m is WorkerMessage & { type: 'spin:stop' } => m.type === 'spin:stop',
     );
     expect(stopMsg?.id).toBe(spinnerId);
   });

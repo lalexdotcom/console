@@ -57,7 +57,7 @@ describe('Exclusive lock (REG-03)', () => {
     // Set the exclusive lock: registry.exclusive = L (the root logger).
     L.exclusive = true;
     const { stdout, stderr } = captureAll(() => {
-      other.info('silenced');    // other !== registry.exclusive → suppressed
+      other.info('silenced'); // other !== registry.exclusive → suppressed
       other.error('also muted'); // same — suppressed
     });
     expect(stdout).toHaveLength(0);

@@ -138,8 +138,8 @@ describe('releaseWorker() — WORK-09', () => {
 
     expect(stdout).toHaveLength(1);
     const parsed = JSON.parse(stdout[0].trimEnd()) as Record<string, unknown>;
-    expect(parsed['severity']).toBe('info');
-    expect(parsed['msg']).toBe('post-terminate-message');
+    expect(parsed.severity).toBe('info');
+    expect(parsed.msg).toBe('post-terminate-message');
   });
 
   test('WL continues to work after releaseWorker() — all level methods route to L', () => {
@@ -153,8 +153,8 @@ describe('releaseWorker() — WORK-09', () => {
 
     expect(stderr).toHaveLength(1);
     const parsed = JSON.parse(stderr[0].trimEnd()) as Record<string, unknown>;
-    expect(parsed['severity']).toBe('warn');
-    expect(parsed['msg']).toBe('fallback-warn-message');
+    expect(parsed.severity).toBe('warn');
+    expect(parsed.msg).toBe('fallback-warn-message');
   });
 
   test('releaseWorker() is idempotent — calling it again does not throw', () => {
@@ -177,7 +177,7 @@ describe('releaseWorker() — WORK-09', () => {
 
     expect(stderr).toHaveLength(1);
     const parsed = JSON.parse(stderr[0].trimEnd()) as Record<string, unknown>;
-    expect(parsed['severity']).toBe('error');
-    expect(parsed['msg']).toBe('idempotent-error-message');
+    expect(parsed.severity).toBe('error');
+    expect(parsed.msg).toBe('idempotent-error-message');
   });
 });

@@ -1,12 +1,12 @@
 import { L } from '../../../src';
 import type { RootLogger } from '../../../src/types';
 import type { TestAdapter } from '../../common/adapter';
-import { runSuite } from '../../common/suites/runner';
 import { formatsSuite } from '../../common/suites/formats.suite';
 import { levelsSuite } from '../../common/suites/levels.suite';
 import { mixinsSuite } from '../../common/suites/mixins.suite';
 import { optionsSuite } from '../../common/suites/options.suite';
 import { prefixSuite } from '../../common/suites/prefix.suite';
+import { runSuite } from '../../common/suites/runner';
 import { scopesSuite } from '../../common/suites/scopes.suite';
 import { spinnersSuite } from '../../common/suites/spinners.suite';
 

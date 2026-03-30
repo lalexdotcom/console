@@ -37,7 +37,7 @@
 		"@biomejs/biome": "2.4.7",
 		"@rsbuild/core": "^1.7.3",
 		"@rsbuild/plugin-node-polyfill": "^1.4.4",
-		"@rslib/core": "^0.20.0",
+		"@rslib/core": "^0.20.1",
 		"@types/node": "^24.10.13",
 		"tsx": "^4.21.0",
 		"typescript": "^5.9.3"

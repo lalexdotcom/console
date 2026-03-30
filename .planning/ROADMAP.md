@@ -325,13 +325,15 @@ Plans:
 
 ### Phase 16: browser-playwright-direct
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** Replace rstest browser.enabled mode with direct Playwright instantiation — tests/browser/ runs as Node-side code; two Playwright pages act as pure I/O relays for L (main) and WL (worker), enabling reliable browser and browser-worker capture via page.on('console')
+**Requirements**: INFRA-03, INFRA-05, CORE-07, CORE-08
 **Depends on:** Phase 15
-**Plans:** 0 plans
+**Plans:** 3 plans
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 16 to break down)
+- [ ] 16-P01-PLAN.md — Create tests/browser/fixture/index.ts; convert rstest browser project to plain Node (remove browser.enabled + pluginNodePolyfill); delete tests/browser/browser.test.ts
+- [ ] 16-P02-PLAN.md — Full rewrite of tests/browser/adapter.ts: keep browserAdapter (Node-side spyOn, name='browser-main') + add createBrowserWorkerAdapter factory (Node-side spyOn capture, WL proxy via page.evaluate)
+- [ ] 16-P03-PLAN.md — Rewrite tests/browser/index.test.ts: beforeAll launches rsbuild dev server (port 7357) + Chromium + workerPage; all six runSuite() calls pass browserWorkerAdapter as parity adapter
 
 ---
 

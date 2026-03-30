@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v3.0.2
 milestone_name: Test Architecture Refactor
-status: Phase 14 complete — all QA gates passed, v3.0.2-rc.0 ready
-stopped_at: Phase 14 complete — P01 (audit), P02 (biome fix), P03 (tsc+tests+version=3.0.2-rc.0). Milestone done.
+status: Phase 15 complete — test-structure-cleanup done
+stopped_at: Phase 15 complete — P01 (formats.suite.ts → console), P02 (flatten browser/main + tty/main)
 last_updated: "2026-03-30T10:19:44.628Z"
 last_activity: 2026-03-30
 progress:
-  total_phases: 14
-  completed_phases: 14
+  total_phases: 15
+  completed_phases: 15
   total_plans: 43
   completed_plans: 40
 ---

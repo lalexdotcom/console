@@ -1,7 +1,7 @@
 import { expect } from '@rstest/core';
-import { L } from '../../../src';
-import { parseLogfmt } from '../logfmt.helper';
-import type { Suite } from './suite';
+import { L } from '../../src';
+import { parseLogfmt } from '../common/logfmt.helper';
+import type { Suite } from '../common/suites/suite';
 
 /**
  * Declarative suite covering JSON, logfmt, and pretty format output (CORE-04/05/06).
@@ -42,7 +42,10 @@ export const formatsSuite: Suite = {
         L.format = 'json';
         const lines = await adapter.capture(() => L.emerg('critical'));
         expect(lines).toHaveLength(1);
-        const parsed = JSON.parse(lines[0].trimEnd()) as Record<string, unknown>;
+        const parsed = JSON.parse(lines[0].trimEnd()) as Record<
+          string,
+          unknown
+        >;
         expect(parsed.level).toBe('error'); // console.error.name
         expect(parsed.severity).toBe('emerg'); // actual log level
         expect(parsed.msg).toBe('critical');
@@ -54,7 +57,10 @@ export const formatsSuite: Suite = {
         L.format = 'json';
         const lines = await adapter.capture(() => L.warn('warning msg'));
         expect(lines).toHaveLength(1);
-        const parsed = JSON.parse(lines[0].trimEnd()) as Record<string, unknown>;
+        const parsed = JSON.parse(lines[0].trimEnd()) as Record<
+          string,
+          unknown
+        >;
         expect(parsed.level).toBe('warn');
         expect(parsed.severity).toBe('warn');
       },
@@ -66,7 +72,10 @@ export const formatsSuite: Suite = {
         L.format = 'json';
         const lines = await adapter.capture(() => L.debug('verbose'));
         expect(lines).toHaveLength(1);
-        const parsed = JSON.parse(lines[0].trimEnd()) as Record<string, unknown>;
+        const parsed = JSON.parse(lines[0].trimEnd()) as Record<
+          string,
+          unknown
+        >;
         expect(parsed.level).toBe('debug');
         expect(parsed.severity).toBe('debug');
       },
@@ -78,7 +87,10 @@ export const formatsSuite: Suite = {
         const s = L.scope('json-scope-test');
         const lines = await adapter.capture(() => s.info('scoped msg'));
         expect(lines).toHaveLength(1);
-        const parsed = JSON.parse(lines[0].trimEnd()) as Record<string, unknown>;
+        const parsed = JSON.parse(lines[0].trimEnd()) as Record<
+          string,
+          unknown
+        >;
         expect(parsed.scope).toBe('json-scope-test');
         expect(parsed.severity).toBe('info');
         expect(parsed.msg).toBe('scoped msg');
@@ -92,7 +104,9 @@ export const formatsSuite: Suite = {
         const line = lines[0].trimEnd();
         // Verify field order by checking index positions in the raw JSON string
         expect(line.indexOf('"time"')).toBeLessThan(line.indexOf('"level"'));
-        expect(line.indexOf('"level"')).toBeLessThan(line.indexOf('"severity"'));
+        expect(line.indexOf('"level"')).toBeLessThan(
+          line.indexOf('"severity"'),
+        );
         expect(line.indexOf('"severity"')).toBeLessThan(line.indexOf('"msg"'));
       },
     },

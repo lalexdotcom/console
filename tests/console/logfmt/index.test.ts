@@ -1,6 +1,6 @@
 import { afterEach } from '@rstest/core';
 import { releaseWorker } from '../../../src/worker/index';
-import { formatsSuite } from '../../common/suites/formats.suite';
+import { formatsSuite } from '../formats.suite';
 import { levelsSuite } from '../../common/suites/levels.suite';
 import { mixinsSuite } from '../../common/suites/mixins.suite';
 import { optionsSuite } from '../../common/suites/options.suite';

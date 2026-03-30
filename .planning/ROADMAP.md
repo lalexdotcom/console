@@ -280,8 +280,13 @@ Plans:
   3. `tests/browser/` contains `adapter.ts` and `index.test.ts`
   4. Non-shared tests (`worker-protocol`, `registry`, `worker-e2e`, `spinner-tty`, `console.test.ts`) remain in their existing directories with no behavioural changes
   5. `rstest.config.ts` globs address the new directory layout; `pnpm test` passes with all tests green
-**Plans**: TBD
-**UI hint**: no
+**Plans:** 4 plans
+
+Plans:
+- [ ] 13-P01-PLAN.md — Add captureAsync to capture.helper.ts; create tests/browser/adapter.ts + index.test.ts (STRUCT-03)
+- [ ] 13-P02-PLAN.md — Create tests/console/json/ and tests/console/logfmt/ (adapter.ts + index.test.ts each) (STRUCT-01)
+- [ ] 13-P03-PLAN.md — Create tests/console/pretty/ and tests/tty/ (adapter.ts + index.test.ts each) (STRUCT-01, STRUCT-02)
+- [ ] 13-P04-PLAN.md — Delete 15 obsolete files (D-01, D-02, D-05); update rstest.config.ts node-console include (STRUCT-04, STRUCT-05)
 
 ### Phase 14: QA + Release
 **Goal**: All quality gates pass, no behavioural regression is silent, and the milestone is tagged with a release candidate version

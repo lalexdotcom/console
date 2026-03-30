@@ -1,4 +1,11 @@
-import { afterEach, beforeEach, describe, expect, rs, test } from '@rstest/core';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  rs,
+  test,
+} from '@rstest/core';
 import { L } from '../../../src';
 import { BROWSER_SPINNER_INTERVAL } from '../../../src/logger/mixins/spinner/browser/const';
 import { SPINNER_INTERVAL_JITTER } from '../../../src/logger/mixins/spinner/const';
@@ -7,7 +14,8 @@ import { SPINNER_INTERVAL_JITTER } from '../../../src/logger/mixins/spinner/cons
 // No process.stdout in browser — use rs.spyOn for all capture (D-07 strict).
 
 // Minimum time to guarantee at least one browser spinner tick fires.
-const BROWSER_TICK_ADVANCE = BROWSER_SPINNER_INTERVAL + SPINNER_INTERVAL_JITTER + 10;
+const BROWSER_TICK_ADVANCE =
+  BROWSER_SPINNER_INTERVAL + SPINNER_INTERVAL_JITTER + 10;
 
 // ── CORE-07: %c CSS format strings ────────────────────────────────────────────
 
@@ -47,15 +55,16 @@ describe('browser %c CSS format strings (CORE-07)', () => {
     expect((logSpy.mock.calls[0][0] as string).includes('%c')).toBe(true);
   });
 
-  test.each(['success', 'notice', 'info'] as const)(
-    '%s level: console.log first arg contains %c CSS format string',
-    (level) => {
-      logSpy.mockClear();
-      (L as unknown as Record<string, (msg: string) => void>)[level]('test');
-      expect(logSpy.mock.calls.length).toBeGreaterThanOrEqual(1);
-      expect((logSpy.mock.calls[0][0] as string).includes('%c')).toBe(true);
-    },
-  );
+  test.each([
+    'success',
+    'notice',
+    'info',
+  ] as const)('%s level: console.log first arg contains %c CSS format string', (level) => {
+    logSpy.mockClear();
+    (L as unknown as Record<string, (msg: string) => void>)[level]('test');
+    expect(logSpy.mock.calls.length).toBeGreaterThanOrEqual(1);
+    expect((logSpy.mock.calls[0][0] as string).includes('%c')).toBe(true);
+  });
 });
 
 // ── CORE-08: groupCollapsed/groupEnd for TRACE_LEVELS ────────────────────────
@@ -66,7 +75,9 @@ describe('TRACE_LEVELS use groupCollapsed/groupEnd (CORE-08)', () => {
   let errorSpy: ReturnType<typeof rs.spyOn>;
 
   beforeEach(() => {
-    groupCollapsedSpy = rs.spyOn(console, 'groupCollapsed').mockImplementation(() => {});
+    groupCollapsedSpy = rs
+      .spyOn(console, 'groupCollapsed')
+      .mockImplementation(() => {});
     groupEndSpy = rs.spyOn(console, 'groupEnd').mockImplementation(() => {});
     errorSpy = rs.spyOn(console, 'error').mockImplementation(() => {});
   });
@@ -87,7 +98,9 @@ describe('TRACE_LEVELS use groupCollapsed/groupEnd (CORE-08)', () => {
 
   test('groupCollapsed first arg also contains %c CSS format string', () => {
     L.error('oops');
-    expect((groupCollapsedSpy.mock.calls[0][0] as string).includes('%c')).toBe(true);
+    expect((groupCollapsedSpy.mock.calls[0][0] as string).includes('%c')).toBe(
+      true,
+    );
   });
 
   test('warn level uses groupCollapsed and groupEnd', () => {
@@ -96,16 +109,19 @@ describe('TRACE_LEVELS use groupCollapsed/groupEnd (CORE-08)', () => {
     expect(groupEndSpy.mock.calls.length).toBeGreaterThanOrEqual(1);
   });
 
-  test.each(['emerg', 'alert', 'crit', 'error', 'warn'] as const)(
-    '%s level (TRACE_LEVELS) emits groupCollapsed + groupEnd sequence',
-    (level) => {
-      groupCollapsedSpy.mockClear();
-      groupEndSpy.mockClear();
-      (L as unknown as Record<string, (msg: string) => void>)[level]('test');
-      expect(groupCollapsedSpy.mock.calls.length).toBeGreaterThanOrEqual(1);
-      expect(groupEndSpy.mock.calls.length).toBeGreaterThanOrEqual(1);
-    },
-  );
+  test.each([
+    'emerg',
+    'alert',
+    'crit',
+    'error',
+    'warn',
+  ] as const)('%s level (TRACE_LEVELS) emits groupCollapsed + groupEnd sequence', (level) => {
+    groupCollapsedSpy.mockClear();
+    groupEndSpy.mockClear();
+    (L as unknown as Record<string, (msg: string) => void>)[level]('test');
+    expect(groupCollapsedSpy.mock.calls.length).toBeGreaterThanOrEqual(1);
+    expect(groupEndSpy.mock.calls.length).toBeGreaterThanOrEqual(1);
+  });
 
   test('non-TRACE level (info) does NOT use groupCollapsed', () => {
     const lSpy = rs.spyOn(console, 'log').mockImplementation(() => {});

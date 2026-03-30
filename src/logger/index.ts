@@ -594,7 +594,7 @@ function createCoreLogger(state: LoggerState) {
   // Allows the worker script to dispatch a log line while bypassing the
   // worker-side stack introspection in favour of a call-site string
   // pre-captured in the main process.
-  base['__logFromMainProcess'] = (
+  base.__logFromMainProcess = (
     level: LogLevel,
     caller: string | undefined,
     args: unknown[],

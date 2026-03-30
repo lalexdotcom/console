@@ -6,7 +6,10 @@ import type { inspect } from 'node:util';
 // `export * from '../../src/utils/env'` — because that path is itself aliased back to
 // this file, creating a circular module reference that causes all exports to be undefined.
 
-const processEnv = typeof process !== 'undefined' ? (process.env ?? {}) : {} as Record<string, string | undefined>;
+const processEnv =
+  typeof process !== 'undefined'
+    ? (process.env ?? {})
+    : ({} as Record<string, string | undefined>);
 
 export const isNode =
   typeof process !== 'undefined' &&

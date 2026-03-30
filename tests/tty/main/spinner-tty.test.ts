@@ -1,6 +1,9 @@
 import { stripVTControlCharacters } from 'node:util';
 import { afterEach, describe, expect, rs, test } from '@rstest/core';
-import { type TTYSpinnerState, ttyRenderer } from '../../../src/logger/mixins/spinner/tty/renderer';
+import {
+  type TTYSpinnerState,
+  ttyRenderer,
+} from '../../../src/logger/mixins/spinner/tty/renderer';
 import { captureAll } from '../../common/capture.helper';
 
 // reset.ts is registered globally via rstest.config.ts setupFiles — no import needed.
@@ -97,4 +100,3 @@ describe('TTY spinner — cursor management, tick output and log queue (SPIN-07)
     expect(clean.some((l) => l.includes('task B'))).toBe(true);
   });
 });
-

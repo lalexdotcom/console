@@ -1,6 +1,5 @@
 import type { InspectOptions } from 'node:util';
 import type { LogLevel } from '../levels';
-import { LEVEL_METHODS, LogLevels } from '../levels';
 import { isBrowser, isNode } from '../utils/env';
 
 export type { LogLevel } from '../levels';

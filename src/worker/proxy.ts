@@ -270,7 +270,7 @@ const _isNode =
 
 const _isNodeTTY =
   _isNode &&
-  process.env['LLOGER_FORCE_CONSOLE'] !== 'true' &&
+  process.env.LLOGER_FORCE_CONSOLE !== 'true' &&
   !!process.stdout?.isTTY;
 
 // ── Silence main-thread logger via globalThis duck-typing ────────────────────
@@ -525,7 +525,7 @@ function createWorkerScopeProxy(
     base[level] = fn;
   }
 
-  base['log'] = (level: LogLevel, ...args: LogParameters) => {
+  base.log = (level: LogLevel, ...args: LogParameters) => {
     if (scopeSeverity !== undefined && LEVEL_METHODS[level] > scopeSeverity)
       return;
     const callerInfo = _captureStack ? getCallerInfoAt(4) : undefined;
@@ -643,10 +643,10 @@ function makeExecFn(spinFn: LogMethod['spin']): LogMethod['exec'] {
  *   the RootLogger type contract requires the method to exist.
  */
 function stubUnusedMethods(base: Record<string, unknown>): void {
-  base['once'] = () => base;
-  base['limit'] = () => base;
-  base['options'] = () => base;
-  base['__logFromMainProcess'] = () => {};
+  base.once = () => base;
+  base.limit = () => base;
+  base.options = () => base;
+  base.__logFromMainProcess = () => {};
 }
 
 // ── createWorkerProxy ─────────────────────────────────────────────────────────
@@ -759,7 +759,7 @@ function createWorkerProxy(): RootLogger {
   }
 
   // ── raw log dispatch ─────────────────────────────────────────────────────────
-  base['log'] = (level: LogLevel, ...args: LogParameters) => {
+  base.log = (level: LogLevel, ...args: LogParameters) => {
     const callerInfo = _captureStack ? getCallerInfoAt(4) : undefined;
     const caller = callerInfo ? formatCallerString(callerInfo) : undefined;
     const traceCaller = TRACE_LEVELS.has(level)
@@ -776,7 +776,7 @@ function createWorkerProxy(): RootLogger {
   };
 
   // ── scope() ──────────────────────────────────────────────────────────────────
-  base['scope'] = (
+  base.scope = (
     scopeName: string,
     scopeOptions: Partial<LoggerOptions> = {},
   ): ScopeLogger => {
@@ -837,8 +837,8 @@ function createWorkerProxy(): RootLogger {
   });
 
   // bypass/restore have no meaning on the proxy — all output is produced inside the fork/Worker.
-  base['bypass'] = () => {};
-  base['restore'] = () => {};
+  base.bypass = () => {};
+  base.restore = () => {};
 
   /**
    * Monkey-patches the global console methods to route through the worker.
@@ -846,7 +846,7 @@ function createWorkerProxy(): RootLogger {
    * console.warn → 'warn', console.error → 'crit'.
    * Call unpatch() to restore the originals.
    */
-  base['patch'] = () => {
+  base.patch = () => {
     const infoFn = (...args: unknown[]) =>
       send({
         type: 'log',
@@ -880,7 +880,7 @@ function createWorkerProxy(): RootLogger {
   };
 
   /** Restores the console methods that were replaced by patch(). */
-  base['unpatch'] = () => {
+  base.unpatch = () => {
     for (const k of Object.keys(
       __originalConsoleMethods,
     ) as (keyof typeof __originalConsoleMethods)[]) {

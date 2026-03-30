@@ -242,7 +242,7 @@ Plans:
 
 - [x] **Phase 11: Suite Infrastructure** — Define `Suite`/`TestCase` interfaces and implement the generic `runSuite()` runner with centralised `beforeEach` and automatic parity (completed 2026-03-27)
 - [x] **Phase 12: Suite Migration** — Migrate all 7 shared suites to declarative format, remove `parity.suite.ts`, extract `normalise()` helper (completed 2026-03-27)
-- [ ] **Phase 13: Directory Restructure** — Create `tests/console/{json,logfmt,pretty}/`, `tests/tty/`, `tests/browser/`; move adapters; update rstest globs
+- [x] **Phase 13: Directory Restructure** — Create `tests/console/{json,logfmt,pretty}/`, `tests/tty/`, `tests/browser/`; move adapters; update rstest globs (completed 2026-03-30)
 - [ ] **Phase 14: QA + Release** — Verify behavioural coverage, `tsc --noEmit` and Biome clean, bump version to `3.0.2-rc.0`
 
 ### Phase 11: Suite Infrastructure
@@ -280,13 +280,13 @@ Plans:
   3. `tests/browser/` contains `adapter.ts` and `index.test.ts`
   4. Non-shared tests (`worker-protocol`, `registry`, `worker-e2e`, `spinner-tty`, `console.test.ts`) remain in their existing directories with no behavioural changes
   5. `rstest.config.ts` globs address the new directory layout; `pnpm test` passes with all tests green
-**Plans:** 4 plans
+**Plans:** 4/4 plans complete
 
 Plans:
-- [ ] 13-P01-PLAN.md — Add captureAsync to capture.helper.ts; create tests/browser/adapter.ts + index.test.ts (STRUCT-03)
-- [ ] 13-P02-PLAN.md — Create tests/console/json/ and tests/console/logfmt/ (adapter.ts + index.test.ts each) (STRUCT-01)
-- [ ] 13-P03-PLAN.md — Create tests/console/pretty/ and tests/tty/ (adapter.ts + index.test.ts each) (STRUCT-01, STRUCT-02)
-- [ ] 13-P04-PLAN.md — Delete 15 obsolete files (D-01, D-02, D-05); update rstest.config.ts node-console include (STRUCT-04, STRUCT-05)
+- [x] 13-P01-PLAN.md — Add captureAsync to capture.helper.ts; create tests/browser/adapter.ts + index.test.ts (STRUCT-03)
+- [x] 13-P02-PLAN.md — Create tests/console/json/ and tests/console/logfmt/ (adapter.ts + index.test.ts each) (STRUCT-01)
+- [x] 13-P03-PLAN.md — Create tests/console/pretty/ and tests/tty/ (adapter.ts + index.test.ts each) (STRUCT-01, STRUCT-02)
+- [x] 13-P04-PLAN.md — Delete 15 obsolete files (D-01, D-02, D-05); update rstest.config.ts node-console include (STRUCT-04, STRUCT-05)
 
 ### Phase 14: QA + Release
 **Goal**: All quality gates pass, no behavioural regression is silent, and the milestone is tagged with a release candidate version
@@ -310,7 +310,7 @@ Phases execute in numeric order: 11 → 12 → 13 → 14
 |-------|----------------|--------|----------|
 | 11. Suite Infrastructure | 1/1 | Complete    | 2026-03-27 |
 | 12. Suite Migration | 0/0 | Complete    | 2026-03-27 |
-| 13. Directory Restructure | 0/0 | Not started | - |
+| 13. Directory Restructure | 4/4 | Complete   | 2026-03-30 |
 | 14. QA + Release | 0/0 | Not started | - |
 
 ---

@@ -6,9 +6,9 @@ import {
   rs,
   test,
 } from '@rstest/core';
-import { L } from '../../../src';
-import { BROWSER_SPINNER_INTERVAL } from '../../../src/logger/mixins/spinner/browser/const';
-import { SPINNER_INTERVAL_JITTER } from '../../../src/logger/mixins/spinner/const';
+import { L } from '../../src';
+import { BROWSER_SPINNER_INTERVAL } from '../../src/logger/mixins/spinner/browser/const';
+import { SPINNER_INTERVAL_JITTER } from '../../src/logger/mixins/spinner/const';
 
 // reset.ts is registered globally — no import needed.
 // No process.stdout in browser — use rs.spyOn for all capture (D-07 strict).

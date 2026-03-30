@@ -3,8 +3,8 @@ import { afterEach, describe, expect, rs, test } from '@rstest/core';
 import {
   type TTYSpinnerState,
   ttyRenderer,
-} from '../../../src/logger/mixins/spinner/tty/renderer';
-import { captureAll } from '../../common/capture.helper';
+} from '../../src/logger/mixins/spinner/tty/renderer';
+import { captureAll } from '../common/capture.helper';
 
 // reset.ts is registered globally via rstest.config.ts setupFiles — no import needed.
 

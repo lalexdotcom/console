@@ -36,7 +36,9 @@ export function runSuite(
 
     for (const tc of suite.tests) {
       test(tc.name, async () => {
-        await tc.run(mainAdapter);
+        const entries = await mainAdapter.capture(() => tc.run(mainAdapter));
+        tc.check(entries);
+
         if (tc.parity !== false && workerAdapter) {
           // Reset registry and re-run setup before the parity run so that state
           // mutations from the main run (e.g. L.level, once()/limit() counters)
@@ -44,7 +46,8 @@ export function runSuite(
           resetRegistry();
           await workerAdapter.setup();
           if (suite.setup) await suite.setup(workerAdapter);
-          await tc.run(workerAdapter);
+          const entriesW = await workerAdapter.capture(() => tc.run(workerAdapter));
+          tc.check(entriesW);
         }
       });
     }

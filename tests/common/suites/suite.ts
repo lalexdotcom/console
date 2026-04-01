@@ -1,4 +1,5 @@
 import type { TestAdapter } from '../adapter';
+import type { LogOutput } from '../output';
 
 /**
  * A function that exercises one behaviour against the provided adapter.
@@ -12,12 +13,14 @@ export type RunTestFunction = (adapter: TestAdapter) => void | Promise<void>;
  * @param name   - Shown as the test() label inside describe().
  * @param parity - When true (default), runSuite() re-runs this case against the
  *                 workerAdapter if one was provided. Set to false to opt out.
- * @param run    - Implementation — receives the adapter under test.
+ * @param run    - Stimulus only — fires log calls via the adapter under test.
+ * @param check  - Assertions on the parsed output produced by run().
  */
 export interface TestCase {
   name: string;
   parity?: boolean;
   run: RunTestFunction;
+  check(entries: LogOutput[]): void;
 }
 
 /**

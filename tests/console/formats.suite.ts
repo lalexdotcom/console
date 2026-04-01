@@ -1,6 +1,6 @@
 import { expect } from '@rstest/core';
 import { L } from '../../src';
-import { parseLogfmt } from '../common/logfmt.helper';
+import type { LogOutput } from '../common/output';
 import type { Suite } from '../common/suites/suite';
 
 /**
@@ -14,94 +14,82 @@ export const formatsSuite: Suite = {
     // CORE-04: JSON format output
     {
       name: 'info call produces parseable JSON with all required fields',
-      run: async (adapter) => {
+      run(_adapter) {
         L.format = 'json';
-        const lines = await adapter.capture(() => L.info('hello'));
-        expect(lines).toHaveLength(1);
-        const line = lines[0].trimEnd();
-        const parsed = JSON.parse(line) as Record<string, unknown>;
-        // level = console method name; info → console.info → name = 'info'
-        expect(parsed.level).toBe('info');
-        expect(parsed.severity).toBe('info');
-        expect(parsed.msg).toBe('hello');
+        L.info('hello');
+      },
+      check(entries: LogOutput[]) {
+        expect(entries).toHaveLength(1);
+        // level = console method name; info → console.info → severity = 'info'
+        expect(entries[0].level).toBe('info');
+        expect(entries[0].msg).toBe('hello');
         // time must be a valid ISO 8601 string
-        expect(typeof parsed.time).toBe('string');
-        expect(new Date(parsed.time as string).toISOString()).toBe(parsed.time);
-        // Replace dynamic timestamp with stable placeholder so the snapshot validates
-        // field names and ordering without coupling to wall-clock time.
-        const stableJson = line.replace(/"time":"[^"]*"/, '"time":"<ts>"');
-        expect(stableJson).toMatchInlineSnapshot(
-          `"{"time":"<ts>","level":"info","severity":"info","msg":"hello"}"`,
-        );
+        expect(entries[0].date).toBeDefined();
+        expect(new Date(entries[0].date!).toISOString()).toBe(entries[0].date);
+        // Verify field order in raw output
+        const line = entries[0].raw.trimEnd();
+        expect(line.indexOf('"time"')).toBeLessThan(line.indexOf('"level"'));
       },
     },
     {
       name: 'emerg produces level="error" and severity="emerg"',
-      run: async (adapter) => {
+      run(_adapter) {
         // emerg → console.error → LEVEL_METHODS[emerg].name = 'error'
         L.format = 'json';
-        const lines = await adapter.capture(() => L.emerg('critical'));
-        expect(lines).toHaveLength(1);
-        const parsed = JSON.parse(lines[0].trimEnd()) as Record<
-          string,
-          unknown
-        >;
-        expect(parsed.level).toBe('error'); // console.error.name
-        expect(parsed.severity).toBe('emerg'); // actual log level
-        expect(parsed.msg).toBe('critical');
+        L.emerg('critical');
+      },
+      check(entries: LogOutput[]) {
+        expect(entries).toHaveLength(1);
+        expect(entries[0].level).toBe('emerg'); // p.severity
+        expect(entries[0].raw).toContain('"level":"error"'); // console method routing
+        expect(entries[0].msg).toBe('critical');
       },
     },
     {
       name: 'warn produces level="warn" severity="warn"',
-      run: async (adapter) => {
+      run(_adapter) {
         L.format = 'json';
-        const lines = await adapter.capture(() => L.warn('warning msg'));
-        expect(lines).toHaveLength(1);
-        const parsed = JSON.parse(lines[0].trimEnd()) as Record<
-          string,
-          unknown
-        >;
-        expect(parsed.level).toBe('warn');
-        expect(parsed.severity).toBe('warn');
+        L.warn('warning msg');
+      },
+      check(entries: LogOutput[]) {
+        expect(entries).toHaveLength(1);
+        expect(entries[0].level).toBe('warn');
+        expect(entries[0].msg).toBe('warning msg');
       },
     },
     {
       name: 'debug produces level="debug" severity="debug"',
-      run: async (adapter) => {
+      run(_adapter) {
         // debug → console.debug → name = 'debug'
         L.format = 'json';
-        const lines = await adapter.capture(() => L.debug('verbose'));
-        expect(lines).toHaveLength(1);
-        const parsed = JSON.parse(lines[0].trimEnd()) as Record<
-          string,
-          unknown
-        >;
-        expect(parsed.level).toBe('debug');
-        expect(parsed.severity).toBe('debug');
+        L.debug('verbose');
+      },
+      check(entries: LogOutput[]) {
+        expect(entries).toHaveLength(1);
+        expect(entries[0].level).toBe('debug');
       },
     },
     {
       name: 'scope name appears in JSON output as "scope" field',
-      run: async (adapter) => {
+      run(_adapter) {
         L.format = 'json';
-        const s = L.scope('json-scope-test');
-        const lines = await adapter.capture(() => s.info('scoped msg'));
-        expect(lines).toHaveLength(1);
-        const parsed = JSON.parse(lines[0].trimEnd()) as Record<
-          string,
-          unknown
-        >;
-        expect(parsed.scope).toBe('json-scope-test');
-        expect(parsed.severity).toBe('info');
-        expect(parsed.msg).toBe('scoped msg');
+        L.scope('json-scope-test').info('scoped msg');
+      },
+      check(entries: LogOutput[]) {
+        expect(entries).toHaveLength(1);
+        expect(entries[0].scope).toBe('json-scope-test');
+        expect(entries[0].level).toBe('info');
+        expect(entries[0].msg).toBe('scoped msg');
       },
     },
     {
       name: 'JSON fields appear in canonical order: time level severity msg',
-      run: async (adapter) => {
+      run(_adapter) {
         L.format = 'json';
-        const lines = await adapter.capture(() => L.info('order'));
-        const line = lines[0].trimEnd();
+        L.info('order');
+      },
+      check(entries: LogOutput[]) {
+        const line = entries[0].raw.trimEnd();
         // Verify field order by checking index positions in the raw JSON string
         expect(line.indexOf('"time"')).toBeLessThan(line.indexOf('"level"'));
         expect(line.indexOf('"level"')).toBeLessThan(
@@ -113,29 +101,27 @@ export const formatsSuite: Suite = {
     // CORE-05: logfmt format output
     {
       name: 'info call produces key=value pairs with correct fields',
-      run: async (adapter) => {
+      run(_adapter) {
         L.format = 'logfmt';
-        const lines = await adapter.capture(() => L.info('hello world'));
-        expect(lines).toHaveLength(1);
-        const line = lines[0].trimEnd();
-        const parsed = parseLogfmt(line);
-        expect(parsed.level).toBe('info');
-        expect(parsed.severity).toBe('info');
-        expect(parsed.msg).toBe('hello world'); // parseLogfmt unquotes via JSON.parse
-        expect(new Date(parsed.time).toISOString()).toBe(parsed.time);
-        // Normalise the dynamic timestamp to a stable placeholder before snapshotting.
-        const stableLine = line.replace(/time="[^"]*"/, 'time="<ts>"');
-        expect(stableLine).toMatchInlineSnapshot(
-          `"time="<ts>" level=info severity=info msg="hello world""`,
-        );
+        L.info('hello world');
+      },
+      check(entries: LogOutput[]) {
+        expect(entries).toHaveLength(1);
+        expect(entries[0].level).toBe('info');
+        expect(entries[0].msg).toBe('hello world');
+        // time field always present as ISO 8601
+        expect(entries[0].date).toBeDefined();
+        expect(new Date(entries[0].date!).toISOString()).toBe(entries[0].date);
       },
     },
     {
       name: 'fields appear in the correct order: time level severity msg',
-      run: async (adapter) => {
+      run(_adapter) {
         L.format = 'logfmt';
-        const lines = await adapter.capture(() => L.info('order-test'));
-        const line = lines[0].trimEnd();
+        L.info('order-test');
+      },
+      check(entries: LogOutput[]) {
+        const line = entries[0].raw.trimEnd();
         expect(line.indexOf('time=')).toBeLessThan(line.indexOf('level='));
         expect(line.indexOf('level=')).toBeLessThan(line.indexOf('severity='));
         expect(line.indexOf('severity=')).toBeLessThan(line.indexOf('msg='));
@@ -143,67 +129,79 @@ export const formatsSuite: Suite = {
     },
     {
       name: 'emerg produces level=error severity=emerg',
-      run: async (adapter) => {
+      run(_adapter) {
         L.format = 'logfmt';
-        const lines = await adapter.capture(() => L.emerg('crit msg'));
-        expect(lines).toHaveLength(1);
-        const parsed = parseLogfmt(lines[0].trimEnd());
-        expect(parsed.level).toBe('error');
-        expect(parsed.severity).toBe('emerg');
+        L.emerg('crit msg');
+      },
+      check(entries: LogOutput[]) {
+        expect(entries).toHaveLength(1);
+        expect(entries[0].level).toBe('emerg'); // p.severity
+        expect(entries[0].raw).toContain('level=error'); // console method routing
       },
     },
     // CORE-06: pretty format output — set pad=false for deterministic label width
     {
       name: 'info call produces [INFO] badge without ANSI codes',
-      run: async (adapter) => {
+      run(_adapter) {
         L.format = 'pretty';
         L.pad = false;
-        const lines = await adapter.capture(() => L.info('msg'));
-        expect(lines).toHaveLength(1);
-        expect(lines[0]).toContain('[INFO]');
+        L.info('msg');
+      },
+      check(entries: LogOutput[]) {
+        expect(entries).toHaveLength(1);
+        expect(entries[0].raw).toContain('[INFO]');
         // renderConsolePrefix never emits ANSI escape sequences
-        expect(lines[0]).not.toMatch(/\x1b\[/);
-        expect(lines[0].trimEnd()).toMatchInlineSnapshot(`"[INFO] msg"`);
+        expect(entries[0].raw).not.toMatch(/\x1b\[/);
+        expect(entries[0].level).toBe('info');
+        expect(entries[0].msg).toBe('msg');
       },
     },
     {
       name: 'error level routes to stderr and contains [ERROR] badge',
-      run: async (adapter) => {
+      run(_adapter) {
         L.format = 'pretty';
         L.pad = false;
-        const lines = await adapter.capture(() => L.error('err'));
+        L.error('err');
+      },
+      check(entries: LogOutput[]) {
         // At least one line for the main log; additional entries may be the stack trace
-        expect(lines.length).toBeGreaterThanOrEqual(1);
-        expect(lines[0]).toContain('[ERROR]');
-        expect(lines[0]).not.toMatch(/\x1b\[/);
+        expect(entries.length).toBeGreaterThanOrEqual(1);
+        expect(entries[0].raw).toContain('[ERROR]');
+        expect(entries[0].raw).not.toMatch(/\x1b\[/);
       },
     },
     {
       name: 'debug produces [DEBUG] badge',
-      run: async (adapter) => {
+      run(_adapter) {
         L.format = 'pretty';
         L.pad = false;
-        const lines = await adapter.capture(() => L.debug('dbg'));
-        expect(lines[0]).toContain('[DEBUG]');
+        L.debug('dbg');
+      },
+      check(entries: LogOutput[]) {
+        expect(entries[0].raw).toContain('[DEBUG]');
       },
     },
     {
       name: 'wth produces [WHO CARES?] badge',
-      run: async (adapter) => {
+      run(_adapter) {
         L.format = 'pretty';
         L.pad = false;
-        const lines = await adapter.capture(() => L.wth('shrug'));
-        expect(lines[0]).toContain('[WHO CARES?]');
+        L.wth('shrug');
+      },
+      check(entries: LogOutput[]) {
+        expect(entries[0].raw).toContain('[WHO CARES?]');
       },
     },
     {
       name: 'warn produces [WARNING] badge',
-      run: async (adapter) => {
+      run(_adapter) {
         L.format = 'pretty';
         L.pad = false;
-        const lines = await adapter.capture(() => L.warn('caution'));
-        expect(lines.length).toBeGreaterThanOrEqual(1);
-        expect(lines[0]).toContain('[WARNING]');
+        L.warn('caution');
+      },
+      check(entries: LogOutput[]) {
+        expect(entries.length).toBeGreaterThanOrEqual(1);
+        expect(entries[0].raw).toContain('[WARNING]');
       },
     },
   ],

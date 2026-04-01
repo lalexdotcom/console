@@ -3,7 +3,7 @@ gsd_state_version: 1.0
 milestone: v3.0.2
 milestone_name: Test Architecture Refactor
 status: Phase 15 complete — test-structure-cleanup done
-stopped_at: Phase 16 (suite-adapter-refactor) ready for planning — /gsd-plan-phase 16
+stopped_at: Phase 16 (suite-adapter-refactor) planned — /gsd-execute-phase 16
 last_updated: "2026-04-01T07:53:26.367Z"
 last_activity: 2026-04-01
 progress:

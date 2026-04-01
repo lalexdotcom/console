@@ -328,10 +328,15 @@ Plans:
 **Goal:** Introduce a parse layer in the test infrastructure — `TestAdapter.capture()` returns `LogOutput[]` instead of `string[]`; `TestAdapter.parse(line)` extracts structured fields; `TestCase.check(entries)` replaces inline assertions; all 7 suites and all concrete adapters migrated
 **Requirements**: INFRA-02, INFRA-03
 **Depends on:** Phase 15
-**Plans:** 0 plans
+**Plans:** 6 plans
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 16 to break down)
+- [ ] 16-01-foundation-PLAN.md — Create LogOutput type, update TestAdapter (parse, capture→LogOutput[], drop logger), update TestCase (add check), rewrite runner (capture-then-check)
+- [ ] 16-02-node-adapters-PLAN.md — Add parse() + updated capture() to json, logfmt, pretty adapters
+- [ ] 16-03-tty-browser-adapters-PLAN.md — Add parse() + updated capture() to TTY and browser adapters
+- [ ] 16-04-simple-suites-PLAN.md — Migrate levels, scopes, options suites to run()/check() pattern
+- [ ] 16-05-medium-suites-PLAN.md — Migrate mixins, prefix, formats suites (inline parsers → LogOutput fields)
+- [ ] 16-06-spinners-suite-PLAN.md — Migrate spinners suite (fake timers, multi-capture merge, icon → spinnerState)
 
 ---
 

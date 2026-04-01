@@ -1,12 +1,8 @@
 import { L } from '../../../src';
-import type { RootLogger } from '../../../src/types';
 import { releaseWorker, Logger as WL } from '../../../src/worker/index';
 import type { TestAdapter } from '../../common/adapter';
+import type { LogOutput } from '../../common/output';
 import { captureAsync } from '../../common/capture.helper';
-
-// Type-level check: WL must satisfy RootLogger — compile error if API surface diverges.
-const _typeCheck: RootLogger = WL as unknown as RootLogger;
-void _typeCheck;
 
 /**
  * Main console adapter for json format.
@@ -17,9 +13,28 @@ export const mainAdapter: TestAdapter = {
   setup() {
     L.format = 'json';
   },
-  capture: captureAsync,
-  get logger(): RootLogger {
-    return L;
+  parse(line: string): LogOutput | null {
+    try {
+      const p = JSON.parse(line) as Record<string, unknown>;
+      if (typeof p.severity !== 'string') return null;
+      return {
+        raw: line,
+        level: p.severity,
+        scope: typeof p.scope === 'string' ? p.scope : undefined,
+        msg: typeof p.msg === 'string' ? p.msg : undefined,
+        date: typeof p.time === 'string' ? p.time : undefined,
+        caller: typeof p.caller === 'string' ? p.caller : undefined,
+        progress: typeof p.progress === 'number' ? p.progress : undefined,
+      };
+    } catch {
+      return null;
+    }
+  },
+  async capture(fn: () => void | Promise<void>): Promise<LogOutput[]> {
+    const rawLines = await captureAsync(fn);
+    return rawLines
+      .map((line) => this.parse(line))
+      .filter((e): e is LogOutput => e !== null);
   },
 };
 
@@ -35,8 +50,27 @@ export const workerAdapter: TestAdapter = {
     releaseWorker(); // kill fork, activate WL→L fallback
     WL.format = 'json'; // after fallback active: directly sets L.format on main thread
   },
-  capture: captureAsync,
-  get logger(): RootLogger {
-    return WL as unknown as RootLogger;
+  parse(line: string): LogOutput | null {
+    try {
+      const p = JSON.parse(line) as Record<string, unknown>;
+      if (typeof p.severity !== 'string') return null;
+      return {
+        raw: line,
+        level: p.severity,
+        scope: typeof p.scope === 'string' ? p.scope : undefined,
+        msg: typeof p.msg === 'string' ? p.msg : undefined,
+        date: typeof p.time === 'string' ? p.time : undefined,
+        caller: typeof p.caller === 'string' ? p.caller : undefined,
+        progress: typeof p.progress === 'number' ? p.progress : undefined,
+      };
+    } catch {
+      return null;
+    }
+  },
+  async capture(fn: () => void | Promise<void>): Promise<LogOutput[]> {
+    const rawLines = await captureAsync(fn);
+    return rawLines
+      .map((line) => this.parse(line))
+      .filter((e): e is LogOutput => e !== null);
   },
 };

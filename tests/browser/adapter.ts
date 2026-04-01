@@ -20,33 +20,60 @@ const BADGE_TO_LEVEL: Record<string, string> = {
 /**
  * Parses one browser %c format-string line into a LogOutput.
  * c[0] is the format string: "%c[INFO]%c hello" or "%c-%c" (running spinner).
- * Returns null for empty or whitespace-only lines.
+ * Returns null for empty or whitespace-only lines and for stack trace entries.
+ *
+ * Two badge formats are handled:
+ *   - with brackets (color=false):  "[   INFO    <scope>]  - msg"
+ *   - without brackets (color=true): "   INFO    <scope>  - msg" (after %c strip)
  */
 function parseBrowserLine(line: string): LogOutput | null {
   if (!line || line.trim().length === 0) return null;
+  // Stack trace lines start with optional whitespace + 'at '
+  if (/^\s*at /.test(line)) return null;
 
   // Strip %c markers to get readable text
   const text = line.replace(/%c/g, '').trim();
   if (text.length === 0) return null;
 
-  // Spinner icon: '-' (running), '✔' (success), '✖' (fail)
+  // Badge with brackets: [BADGE] or [BADGE <scope>], followed by optional spinner icon
+  const bracketBadgeMatch = text.match(/^\[([A-Z ?]+?)(?:\s*<([^>]+)>)?\]\s*(.*)/);
+  if (bracketBadgeMatch) {
+    const remainder = bracketBadgeMatch[3].trim();
+    const bareIconMatch = remainder.match(/^([✔✖\-])\s*(.*)/);
+    if (bareIconMatch && bareIconMatch[1].length <= 2) {
+      const icon = bareIconMatch[1];
+      const spinnerState: LogOutput['spinnerState'] =
+        icon === '✔' ? 'success' : icon === '✖' ? 'fail' : 'running';
+      return { raw: line, icon, spinnerState, scope: bracketBadgeMatch[2], msg: bareIconMatch[2].trim() };
+    }
+    return { raw: line, level: BADGE_TO_LEVEL[bracketBadgeMatch[1].trim()], scope: bracketBadgeMatch[2], msg: remainder };
+  }
+
+  // Badge WITHOUT brackets (color=true CSS format): "   BADGE   <scope>  [-/✔/✖] msg"
+  // renderBrowserPrefix emits %cBADGE_TEXT%c (no brackets) when color=true.
+  const noBracketBadgeMatch = text.match(/^\s*([A-Z][A-Z\s?]*)(?:\s*<([^>]+)>)?\s+(.*)/);
+  if (noBracketBadgeMatch) {
+    const badgeKey = noBracketBadgeMatch[1].trim();
+    if (BADGE_TO_LEVEL[badgeKey] !== undefined) {
+      const remainder = noBracketBadgeMatch[3].trim();
+      const bareIconMatch = remainder.match(/^([✔✖\-])\s*(.*)/);
+      if (bareIconMatch && bareIconMatch[1].length <= 2) {
+        const icon = bareIconMatch[1];
+        const spinnerState: LogOutput['spinnerState'] =
+          icon === '✔' ? 'success' : icon === '✖' ? 'fail' : 'running';
+        return { raw: line, icon, spinnerState, scope: noBracketBadgeMatch[2], msg: bareIconMatch[2].trim() };
+      }
+      return { raw: line, level: BADGE_TO_LEVEL[badgeKey], scope: noBracketBadgeMatch[2], msg: remainder };
+    }
+  }
+
+  // Standalone spinner icon (no leading badge): '-' (running), '✔' (success), '✖' (fail)
   const spinnerMatch = text.match(/^([✔✖\-])\s*(.*)/);
   if (spinnerMatch && spinnerMatch[1].length <= 2) {
     const icon = spinnerMatch[1];
     const spinnerState: LogOutput['spinnerState'] =
       icon === '✔' ? 'success' : icon === '✖' ? 'fail' : 'running';
     return { raw: line, icon, spinnerState, msg: spinnerMatch[2].trim() };
-  }
-
-  // Level badge: [BADGE] or [BADGE <scope>]
-  const badgeMatch = text.match(/^\[([A-Z ?]+?)(?:\s*<([^>]+)>)?\]\s*(.*)/);
-  if (badgeMatch) {
-    return {
-      raw: line,
-      level: BADGE_TO_LEVEL[badgeMatch[1].trim()],
-      scope: badgeMatch[2],
-      msg: badgeMatch[3].trim(),
-    };
   }
 
   return { raw: line };

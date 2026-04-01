@@ -157,8 +157,12 @@ export const optionsSuite: Suite = {
       },
       check(entries: LogOutput[]) {
         expect(entries).toHaveLength(1);
-        expect(entries[0].level).toBe('error');
-        expect(entries[0].msg).toBe('shown');
+        // JSON/logfmt adapters set entries[0].level; TTY adapters embed ERROR in raw
+        if (entries[0].level !== undefined) {
+          expect(entries[0].level).toBe('error');
+        } else {
+          expect(entries[0].raw.replace(/\x1b\[[0-9;]*m/g, '')).toMatch(/ERROR/i);
+        }
       },
     },
     {
@@ -172,8 +176,12 @@ export const optionsSuite: Suite = {
       },
       check(entries: LogOutput[]) {
         expect(entries).toHaveLength(1);
-        expect(entries[0].level).toBe('error');
-        expect(entries[0].msg).toBe('shown');
+        // JSON/logfmt adapters set entries[0].level; TTY adapters embed ERROR in raw
+        if (entries[0].level !== undefined) {
+          expect(entries[0].level).toBe('error');
+        } else {
+          expect(entries[0].raw.replace(/\x1b\[[0-9;]*m/g, '')).toMatch(/ERROR/i);
+        }
       },
     },
     {

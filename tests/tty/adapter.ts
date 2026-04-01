@@ -1,60 +1,9 @@
 import { L } from '../../src';
 import { releaseWorker, Logger as WL } from '../../src/worker/index';
 import type { TestAdapter } from '../common/adapter';
-import type { LogOutput } from '../common/output';
 import { captureAsync } from '../common/capture.helper';
-
-function stripAnsi(s: string): string {
-  return s.replace(/\x1b\[[0-9;]*m/g, '');
-}
-
-const BADGE_TO_LEVEL: Record<string, string> = {
-  EMERGENCY: 'emerg',
-  ALERT: 'alert',
-  CRITICAL: 'crit',
-  ERROR: 'error',
-  WARNING: 'warn',
-  NOTICE: 'notice',
-  SUCCESS: 'success',
-  INFO: 'info',
-  VERBOSE: 'verb',
-  DEBUG: 'debug',
-  'WHO CARES?': 'wth',
-};
-
-/**
- * Parses one TTY pretty-format line (with ANSI escapes) into a LogOutput.
- * Returns null for blank lines and stack trace lines.
- */
-function parsePrettyLine(line: string): LogOutput | null {
-  const stripped = stripAnsi(line);
-  if (stripped.trim().length === 0) return null;
-  if (/^\s+at /.test(stripped)) return null;
-
-  // Spinner icon bracket: [ ⋯ ] / [ ✔ ] / [ ✖ ]
-  const iconMatch = stripped.match(/^\[\s*([^\[\]\s]{1,3})\s*\]\s*(.*)/);
-  if (iconMatch) {
-    const icon = iconMatch[1];
-    const spinnerState: LogOutput['spinnerState'] =
-      icon === '✔' ? 'success' : icon === '✖' ? 'fail' : 'running';
-    return { raw: line, icon, spinnerState, msg: iconMatch[2].trim() };
-  }
-
-  // Level badge: [BADGE] or [BADGE <scope>]
-  const badgeMatch = stripped.match(
-    /^\[([A-Z ?]+?)(?:\s*<([^>]+)>)?\]\s*(.*)/,
-  );
-  if (badgeMatch) {
-    return {
-      raw: line,
-      level: BADGE_TO_LEVEL[badgeMatch[1].trim()],
-      scope: badgeMatch[2],
-      msg: badgeMatch[3].trim(),
-    };
-  }
-
-  return { raw: line };
-}
+import { parseAnyLine } from '../common/helpers/parse-line';
+import type { LogOutput } from '../common/output';
 
 /**
  * Node-TTY main adapter — real TTY routing active via resolve.alias in rstest.config.ts.
@@ -68,11 +17,11 @@ export const ttyAdapter: TestAdapter = {
     // Force pretty format — TTY mode renders ANSI-prefixed human-readable output.
     L.format = 'pretty';
   },
-  parse: parsePrettyLine,
+  parse: parseAnyLine,
   async capture(fn: () => void | Promise<void>): Promise<LogOutput[]> {
     const rawLines = await captureAsync(fn);
     return rawLines
-      .map((line) => parsePrettyLine(line))
+      .map((line) => parseAnyLine(line))
       .filter((e): e is LogOutput => e !== null);
   },
 };
@@ -88,11 +37,11 @@ export const ttyWorkerAdapter: TestAdapter = {
     releaseWorker(); // kill fork, activate WL→L fallback
     WL.format = 'pretty'; // after fallback active: directly sets L.format on main thread
   },
-  parse: parsePrettyLine,
+  parse: parseAnyLine,
   async capture(fn: () => void | Promise<void>): Promise<LogOutput[]> {
     const rawLines = await captureAsync(fn);
     return rawLines
-      .map((line) => parsePrettyLine(line))
+      .map((line) => parseAnyLine(line))
       .filter((e): e is LogOutput => e !== null);
   },
 };

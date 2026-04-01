@@ -250,8 +250,14 @@ export const prefixSuite: Suite = {
       check(entries: LogOutput[]) {
         if (entries.length === 0) return;
         expect(entries).toHaveLength(1);
-        // caller format: 'filename.ts:lineNumber:columnNumber'
-        expect(entries[0].caller).toMatch(/\w+\.ts:\d+:\d+/);
+        // entries[0].caller is set by JSON adapters; for other adapters inspect raw
+        const raw = entries[0].raw.trimEnd();
+        const caller =
+          entries[0].caller ??
+          (raw.startsWith('{')
+            ? (JSON.parse(raw) as Record<string, unknown>).caller
+            : undefined);
+        expect(String(caller)).toMatch(/\w+\.ts:\d+:\d+/);
       },
     },
     {
@@ -265,7 +271,14 @@ export const prefixSuite: Suite = {
       },
       check(entries: LogOutput[]) {
         if (entries.length === 0) return;
-        expect(entries[0].caller).toBeUndefined();
+        // entries[0].caller is set by JSON adapters; for other adapters inspect raw
+        const raw = entries[0].raw.trimEnd();
+        const caller =
+          entries[0].caller ??
+          (raw.startsWith('{')
+            ? (JSON.parse(raw) as Record<string, unknown>).caller
+            : undefined);
+        expect(caller).toBeUndefined();
       },
     },
     {
@@ -280,7 +293,13 @@ export const prefixSuite: Suite = {
       check(entries: LogOutput[]) {
         if (entries.length === 0) return;
         // TRACE_LEVELS add caller structuredOnly — visible in JSON
-        expect(typeof entries[0].caller).toBe('string');
+        const raw = entries[0].raw.trimEnd();
+        const caller =
+          entries[0].caller ??
+          (raw.startsWith('{')
+            ? (JSON.parse(raw) as Record<string, unknown>).caller
+            : undefined);
+        expect(typeof caller).toBe('string');
       },
     },
     // PREFIX-04: scope prefix
@@ -308,7 +327,14 @@ export const prefixSuite: Suite = {
       },
       check(entries: LogOutput[]) {
         if (entries.length === 0) return;
-        expect(entries[0].scope).toBe('json-scope');
+        // entries[0].scope is set by JSON adapters; for other adapters inspect raw
+        const raw = entries[0].raw.trimEnd();
+        const scope =
+          entries[0].scope ??
+          (raw.startsWith('{')
+            ? (JSON.parse(raw) as Record<string, unknown>).scope
+            : undefined);
+        expect(scope).toBe('json-scope');
       },
     },
     {
@@ -324,7 +350,14 @@ export const prefixSuite: Suite = {
       check(entries: LogOutput[]) {
         if (entries.length === 0) return;
         expect(entries[0].raw).not.toContain('<');
-        expect(entries[1].scope).toBeUndefined();
+        // entries[1].scope is set by JSON adapters; for other adapters inspect raw
+        const raw1 = entries[1].raw.trimEnd();
+        const scope1 =
+          entries[1].scope ??
+          (raw1.startsWith('{')
+            ? (JSON.parse(raw1) as Record<string, unknown>).scope
+            : undefined);
+        expect(scope1).toBeUndefined();
       },
     },
   ],

@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.0.2
 milestone_name: Test Architecture Refactor
 status: Phase 15 complete — test-structure-cleanup done
-stopped_at: Phase 15 complete — P01 (formats.suite.ts → console), P02 (flatten browser/main + tty/main)
-last_updated: "2026-03-30T10:19:44.628Z"
-last_activity: 2026-03-30
+stopped_at: Phase 16 (suite-adapter-refactor) ready for planning — /gsd-plan-phase 16
+last_updated: "2026-04-01T07:53:26.367Z"
+last_activity: 2026-04-01
 progress:
-  total_phases: 15
+  total_phases: 16
   completed_phases: 15
-  total_plans: 43
-  completed_plans: 40
+  total_plans: 45
+  completed_plans: 43
 ---
 
 # Project State
@@ -20,12 +20,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-27)
 
 **Core value:** Reliable, structured logging that adapts its output format to the runtime environment — browser devtools, Node TTY, or CI — without any configuration from the consumer.
-**Current focus:** Phase 14 — qa-release
+**Current focus:** Phase 15 — test-structure-cleanup
 
 ## Current Position
 
-Phase: 14 (qa-release) — EXECUTING
-Plan: 1 of 3
+Phase: 15 (test-structure-cleanup) — EXECUTING
+Plan: 1 of 2
 
 ## Performance Metrics
 
@@ -97,7 +97,7 @@ None yet.
 
 ## Session Continuity
 
-Last activity: 2026-03-30
+Last activity: 2026-04-01
 Last session: 2026-03-27T12:00:00.000Z
 Stopped at: Roadmap created for v3.0.2 (Phases 11–14)
 Resume file: — (no phase started yet)

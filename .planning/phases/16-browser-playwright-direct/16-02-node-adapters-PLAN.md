@@ -12,6 +12,7 @@ files_modified:
 autonomous: true
 requirements:
   - INFRA-02
+  - INFRA-03
 must_haves:
   truths:
     - "json adapter parse() returns LogOutput with level=severity (not the channel level field), msg, scope, date, caller, progress"

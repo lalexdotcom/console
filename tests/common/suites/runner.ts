@@ -1,5 +1,6 @@
-import { beforeEach, describe, test } from '@rstest/core';
+import { beforeEach, describe, expect, test } from '@rstest/core';
 import type { TestAdapter } from '../adapter';
+import type { LogOutput } from '../output';
 import { resetRegistry } from '../reset.helper';
 import type { Suite } from './suite';
 
@@ -48,6 +49,27 @@ export function runSuite(
           if (suite.setup) await suite.setup(workerAdapter);
           const entriesW = await workerAdapter.capture(() => tc.run(workerAdapter));
           tc.check(entriesW);
+          // Verify parity: structured content must be identical between main and worker runs.
+          // Exclusions:
+          //   - raw/date: format text and timestamps are run-specific
+          //   - elapsed-time suffixes "(+NNNms)" in msg: measured independently per run
+          //   - datetime brackets "[YYYY-MM-DD ...]" in msg: emitted when date=true, ms differ
+          //   - running spinner frames: tick count is timing-dependent; only terminal
+          //     entries (success/fail/stop) need to match for spinners
+          const normMsg = (s?: string) =>
+            s
+              ?.replace(/\(\+\d+ms\)/g, '(+Xms)')
+              .replace(/\[\d{4}-\d{2}-\d{2}[^\]]*\]/g, '[DATE]');
+          const hasSpinner = entries.some((e) => e.spinnerState !== undefined);
+          const strip = ({ raw: _r, date: _d, ...rest }: LogOutput) => ({
+            ...rest,
+            msg: normMsg(rest.msg),
+          });
+          const compact = (arr: LogOutput[]) =>
+            hasSpinner
+              ? arr.filter((e) => e.spinnerState !== 'running').map(strip)
+              : arr.map(strip);
+          expect(compact(entriesW)).toEqual(compact(entries));
         }
       });
     }

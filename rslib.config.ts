@@ -23,12 +23,21 @@ export default defineConfig({
   lib: [
     // Main entry — @lalex/console
     {
+      bundle: false,
       format: 'esm',
       syntax: ['node 18'],
       dts: true,
+      source: {
+        // Glob all source files except dev playground scripts.
+        // bundle:false scans the full source tree; the glob negation prevents
+        // .dev.ts files from being discovered (source.exclude only affects
+        // loaders, not file discovery in bundleless mode).
+        entry: { index: ['src/**', '!src/**/*.dev.ts'] },
+      },
     },
     // Worker proxy entry — @lalex/console/worker
     {
+      bundle: false,
       format: 'esm',
       syntax: ['node 18'],
       dts: true,
@@ -52,16 +61,21 @@ export default defineConfig({
         distPath: { root: './dist/worker' },
       },
     },
-      // Browser-safe entry — consumed via the "browser" exports condition.
-      // Targets es2020 modern browsers; no node: imports survive in this bundle.
-      // dts: false — browser entry shares type declarations with lib[0].
-      {
-        format: 'esm',
-        syntax: 'es2020',
-        dts: false,
-        output: {
-          distPath: { root: './dist/browser' },
-        },
+    // Browser-safe entry — consumed via the "browser" exports condition.
+    // Targets es2020 modern browsers; no node: imports survive in this bundle.
+    // dts: false — browser entry shares type declarations with lib[0].
+    {
+      bundle: false,
+      format: 'esm',
+      syntax: 'es2020',
+      dts: false,
+      source: {
+        // Same glob exclusion as the main entry — exclude dev playground scripts.
+        entry: { index: ['src/**', '!src/**/*.dev.ts'] },
       },
-    ],
-  });
+      output: {
+        distPath: { root: './dist/browser' },
+      },
+    },
+  ],
+});

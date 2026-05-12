@@ -28,6 +28,7 @@ export default defineConfig({
       syntax: ['node 18'],
       dts: true,
       source: {
+        tsconfigPath: './tsconfig.build.json',
         // Glob all source files except dev playground scripts.
         // bundle:false scans the full source tree; the glob negation prevents
         // .dev.ts files from being discovered (source.exclude only affects
@@ -42,6 +43,7 @@ export default defineConfig({
       syntax: ['node 18'],
       dts: true,
       source: {
+        tsconfigPath: './tsconfig.build.json',
         entry: { index: './src/worker/index.ts' },
       },
       output: {

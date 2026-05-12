@@ -8,8 +8,6 @@ import { spinnersSuite } from '../common/suites/spinners.suite';
 import { browserAdapter } from './adapter';
 
 // Per D-04: browser adapter only — no browser worker adapter exists.
-// formats.suite excluded: browser output is always CSS %c format strings;
-// JSON.parse / parseLogfmt in formats suite would throw on '%c...' output.
 runSuite(levelsSuite, browserAdapter);
 runSuite(scopesSuite, browserAdapter);
 runSuite(optionsSuite, browserAdapter);

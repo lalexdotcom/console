@@ -3,8 +3,8 @@ import { L } from '../../../src';
 import { BROWSER_SPINNER_INTERVAL } from '../../../src/logger/mixins/spinner/browser/const';
 import { CONSOLE_SPINNER_INTERVAL } from '../../../src/logger/mixins/spinner/console/const';
 import { SPINNER_INTERVAL_JITTER } from '../../../src/logger/mixins/spinner/const';
-import type { LogOutput } from '../output';
 import type { TestAdapter } from '../adapter';
+import type { LogOutput } from '../output';
 import type { Suite } from './suite';
 
 /**

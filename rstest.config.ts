@@ -30,7 +30,11 @@ export default defineConfig({
     {
       name: 'node-console',
       extends: withRslibConfig(),
-      include: ['tests/console/**/*.test.ts', 'tests/node/**/*.test.ts', 'tests/common/**/*.test.ts'],
+      include: [
+        'tests/console/**/*.test.ts',
+        'tests/node/**/*.test.ts',
+        'tests/common/**/*.test.ts',
+      ],
       setupFiles: ['./tests/common/reset.helper.ts'],
       // Disable rstest's built-in console intercept so it doesn't conflict with the
       // logger's own patch()/unpatch() console replacement.
@@ -45,8 +49,10 @@ export default defineConfig({
       // source.alias is NOT in RstestConfig.source — only resolve.alias works here.
       resolve: {
         alias: {
-          [path.resolve(import.meta.dirname, 'src/utils/env')]:
-            path.resolve(import.meta.dirname, 'tests/tty/env.ts'),
+          [path.resolve(import.meta.dirname, 'src/utils/env')]: path.resolve(
+            import.meta.dirname,
+            'tests/tty/env.ts',
+          ),
         },
       },
       include: ['tests/tty/**/*.test.ts', 'tests/common/**/*.test.ts'],

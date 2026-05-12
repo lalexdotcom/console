@@ -1,5 +1,5 @@
-import type { LogOutput } from '../output';
 import { parseLogfmt } from '../logfmt.helper';
+import type { LogOutput } from '../output';
 
 /** Maps pretty-format badge text to the LogOutput level string. */
 const BADGE_TO_LEVEL: Record<string, string> = {

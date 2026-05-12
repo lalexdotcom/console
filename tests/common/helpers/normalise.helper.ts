@@ -30,7 +30,5 @@ export function normalise(s: string): string {
  * @returns Filtered and normalised lines.
  */
 export function normaliseLines(lines: string[]): string[] {
-  return lines
-    .filter((l) => !/^\s+at\s+/.test(l))
-    .map(normalise);
+  return lines.filter((l) => !/^\s+at\s+/.test(l)).map(normalise);
 }

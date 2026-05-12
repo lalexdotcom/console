@@ -1,6 +1,5 @@
 import { afterEach } from '@rstest/core';
 import { releaseWorker } from '../../../src/worker/index';
-import { formatsSuite } from '../formats.suite';
 import { levelsSuite } from '../../common/suites/levels.suite';
 import { mixinsSuite } from '../../common/suites/mixins.suite';
 import { optionsSuite } from '../../common/suites/options.suite';
@@ -8,6 +7,7 @@ import { prefixSuite } from '../../common/suites/prefix.suite';
 import { runSuite } from '../../common/suites/runner';
 import { scopesSuite } from '../../common/suites/scopes.suite';
 import { spinnersSuite } from '../../common/suites/spinners.suite';
+import { formatsSuite } from '../formats.suite';
 import { mainAdapter, workerAdapter } from './adapter';
 
 // Per D-03: all 7 suites run against both mainAdapter (direct stream capture) and
